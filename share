@@ -1,0 +1,23 @@
+
+// This feature is available only in secure contexts (HTTPS), in some or all supporting browsers.
+// Chrome for Android
+
+
+<button type="button" id="button">Share</button>
+
+<script>
+
+var shareButton=document.getElementById("button");
+
+
+shareButton.addEventListener("click", async () => {
+  try {
+    await navigator.share({ title: "Example Page", url: "" });
+    console.log("Data was shared successfully");
+  } catch (err) {
+    console.error("Share failed:", err.message);
+  }
+});
+
+</script>
+
