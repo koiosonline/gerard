@@ -14,8 +14,9 @@
         }   
 var shareButton=document.getElementById("button");
 shareButton.addEventListener("click", async () => {
+    log("Starting to share data");
   try {
-    await navigator.share({ title: "Example Page", url: "" });
+    await navigator.share({ title: "Example Page", text: "This is a test"  });
     log("Data was shared successfully");
   } catch (err) {
     log("Share failed:", err.message);
