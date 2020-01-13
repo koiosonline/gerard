@@ -1,23 +1,30 @@
-
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+ <body>
+        <h1>Share</h1>
+      !--
 // This feature is available only in secure contexts (HTTPS), in some or all supporting browsers.
 // Chrome for Android
-
-
-<button type="button" id="button">Share</button>
-
-<script>
-
+-->>
+        <pre id="log" style="width:100%;height:200px"></pre>
+      
+      <button type="button" id="button">Share</button>
+      
+        <script type="text/javascript">
+        function log(logstr) {   
+            document.getElementById("log").innerHTML +=logstr+"\n";
+        }   
 var shareButton=document.getElementById("button");
-
-
 shareButton.addEventListener("click", async () => {
   try {
     await navigator.share({ title: "Example Page", url: "" });
-    console.log("Data was shared successfully");
+    log("Data was shared successfully");
   } catch (err) {
-    console.error("Share failed:", err.message);
+    log("Share failed:", err.message);
   }
 });
-
-</script>
-
+        </script>        
+    </body>
+</html>
