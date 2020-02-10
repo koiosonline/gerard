@@ -21,7 +21,7 @@ async function asyncloaded() {
         //console.log(document.getElementById("location-bar"));
         document.getElementById("location-bar").style.display = "none"; // hide
         document.getElementById("sub-select").style.display = "none"; // hide
-        
+        document.getElementById("details").style.display = "none"; // hide
         
         
         const ttop=window.parent.document.getElementById("top")
