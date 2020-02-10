@@ -26,7 +26,7 @@ async function asyncloaded() {
         
         const ttop=window.parent.document.getElementById("top")
         const course=window.parent.document.getElementById("course")
-        const course_level=window.parent.document.getElementById("course-level")
+        const course_level=window.parent.document.getElementById("level")
         const chapter=window.parent.document.getElementById("chapter")
         const lesson=window.parent.document.getElementById("lesson")
         console.log("parent info");        

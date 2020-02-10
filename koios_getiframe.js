@@ -7,11 +7,16 @@
         const scriptDomid=document.currentScript;
         const urlObject = new URL(scriptDomid.src);
         const id = urlObject.searchParams.get('id')
+
         const iframe = document.createElement("iframe"); // create marker element     
         iframe.width="100%";
         iframe.height="100%";
+       
         const idel=document.getElementById(id);
+        console.log(idel);
         if (idel) { // only if the field is present
+        console.log(`id=${id} href=${idel.href}`); 
+
             iframe.src=idel.href;
             const txt=document.createElement("div");txt.innerHTML=`Id=${id} url=${idel.href}`;scriptDomid.parentNode.appendChild(txt);
             scriptDomid.parentNode.appendChild(iframe);
