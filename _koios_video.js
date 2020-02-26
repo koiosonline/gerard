@@ -1,4 +1,8 @@
-/*
+/* General comments
+https://gpersoon.com/koios/test/koios_video.js
+
+// note: when connected via USB & full screen: playing video is flickering
+//https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
 // <script src='https://raw.githubusercontent.com/web3examples/lib/master/koios_video.js'></script>  
 // <script src='https://web3examples.com/lib/koios_video.js'></script>  
 // <script src='https://gpersoon.com/koios/koios_video.js'></script>  
@@ -45,11 +49,53 @@ player.setOption('captions', 'track', {});
 
 
 
-*/
-   
- 
- 
- 
+*/  
+
+{ // Global variables
+var position;
+var logpos;
+var logtext=0;
+var logipfs;
+var player=0;
+var video=0;
+var slide;
+var ToggleCueVisibilityStatus=true;
+var currenttrack=0;
+var currentlang=0;
+var subtitles; // global storage of subtitles
+var currentSubtitle=0;
+var previous_span=0;
+var previous_color=0;
+var langbtns; // array of all language buttons;
+var langbtns_index=0;
+var SecondsToSubtitle=[];
+var setofsheets;
+var globalyoutubeid; // global for onYouTubeIframeAPIReady
+var voices = [];
+var synth = window.speechSynthesis;
+var currentVoice=0;
+var fspeechon=0;
+var ffirst=1;
+var previous_colour=""
+var previous_row=-1;
+var table
+var tablediv
+var fTriedFullScreen=false;
+var fFullScreen=false;
+var fSoundOn=true;
+var defaultvolume=100;
+var vidproginput=0;
+var vidprogress=0;
+var slider=0; // global
+var NotesArea;
+var parser = new DOMParser(); 
+var font=0;
+var slideimage;
+var slides= [];
+var preferredslide=0;
+var SlideIndicatorTemplate;
+var SlideIndicatorParent;
+}    
 function videoerror(event){ 
   let error = event;
     if (event.path && event.path[0]) {     // Chrome v60
@@ -60,21 +106,17 @@ function videoerror(event){
     }
     alert(`Video error: ${error.message}`);     // Here comes the error message
 }
-var position;
-var logpos;
-var logtext=0;
-var logipfs;
-
 async function CreateHeader(windowid) {
     var domid=document.getElementById(windowid); 
-    var arrchildren=domid.children;    
-        for (var i=0;i<arrchildren.length;i++) 
-            domid.removeChild(arrchildren[i]);
-        
-            arrchildren=domid.children;    
-        for (var i=0;i<arrchildren.length;i++) 
-            domid.removeChild(arrchildren[i]);
-        
+    if (domid) {
+        var arrchildren=domid.children;    
+            for (var i=0;i<arrchildren.length;i++) 
+                domid.removeChild(arrchildren[i]);
+            
+                arrchildren=domid.children;    
+            for (var i=0;i<arrchildren.length;i++) 
+                domid.removeChild(arrchildren[i]);
+    }   
         //console.log(windowid);
 //console.log(domid);        
     return domid;
@@ -115,12 +157,6 @@ async function CreateHeader(windowid) {
     return blockcontent;
 */
 }
-
-
-
-
-
-
 async function SetupLogWindow(windowid) {  
     logtext=document.createElement("pre"); // already create to be able to log
     logtext.style.width = "100%";
@@ -131,7 +167,8 @@ async function SetupLogWindow(windowid) {
     logpos=document.createElement("div");
     logipfs=document.createElement("div");
     
-    position=await CreateHeader(windowid);
+  
+    position=document.getElementById(windowid); 
     position.appendChild(logtext);    
     position.appendChild(logpos);
     position.appendChild(logipfs);
@@ -147,16 +184,12 @@ function log(s) {
     if (logtext)
         logtext.innerHTML +=s+"\r";
 }
-
 function GetDuration() {
     if (video) return video.duration;
     if (player && player.getDuration) return  player.getDuration();
     return 0;
-}
-
-    
+}  
 async function VideoLocation() { 
- console.log("In videlocation");
     var CurrentPos=0;
     var Duration=GetDuration();
     var PlaybackRate=1;
@@ -176,35 +209,32 @@ async function VideoLocation() {
             PlaybackRate=player.getPlaybackRate()
         }
     }
+    //console.log(`In VideoLocation pos=${CurrentPos}`);
+    SetVideoProgressBar(parseFloat (CurrentPos / Duration ));
     
-    SetVideoProgressBar(CurrentPos / Duration);
-    
-    logpos.innerText=`Position: ${CurrentPos.toFixed(1)}`;      
-    logpos.innerText+=` Played: ${ReallyPlayed.toFixed(0)}`;
-    logpos.innerText+=` (of ${Duration.toFixed(0)} seconds)`;
-    logpos.innerText+=` speed=${PlaybackRate.toFixed(1)}`;
-    logpos.innerText+=` lang=${currentlang}`;
-    
+    if (logpos) {
+        logpos.innerText=`Position: ${CurrentPos.toFixed(1)}`;      
+        logpos.innerText+=` Played: ${ReallyPlayed.toFixed(0)}`;
+        logpos.innerText+=` (of ${Duration.toFixed(0)} seconds)`;
+        logpos.innerText+=` speed=${PlaybackRate.toFixed(1)}`;
+        logpos.innerText+=` lang=${currentlang}`;
+    }
     
     function check  (x) { 
        return parseFloat(x.start) > parseFloat(CurrentPos);
     } 
     if (currentSubtitle) {
-        var y= currentSubtitle.findIndex(check )  ; 
-        logpos.innerText+=` subtitle#=${y>0?y-1:""}`;
+        var y= currentSubtitle.findIndex(check ); 
+        if (logpos)
+            logpos.innerText+=` subtitle#=${y>0?y-1:""}`;
         HighlightTransscript(`sub-${currentlang}-${y-1}`);
     }
-  logpos.innerText+=` volume=${GetVolume()}`;
-  logpos.innerText+=` speech=${fspeechon}`;
-  logpos.innerText+=` subtitle=${ToggleCueVisibilityStatus}`;
-    
+    if (logpos) {
+          logpos.innerText+=` volume=${GetVolume()}`;
+          logpos.innerText+=` speech=${fspeechon}`;
+          logpos.innerText+=` subtitle=${ToggleCueVisibilityStatus}`;
+    }
 }  
-
-var player=0;
-var video=0;
-var slide;
-
-var ToggleCueVisibilityStatus=true;
 /*
 function StyleCues() {
     let s = document.createElement("style");
@@ -214,13 +244,10 @@ function StyleCues() {
     CueVisible(ToggleCueVisibilityStatus);
 }
 */ 
-
-
 function SetPlayerSubtitle(lang) {
    if (player &&  player.setOption) 
         player.setOption('captions', 'track', lang==""?{}:{'languageCode': lang}); 
 }
-
 function CueVisible(on) {
     // document.getElementById("cuestyle").innerHTML=on?"::cue {visibility: visible;}" : "::cue {visibility: hidden;}";
     if (video)
@@ -232,11 +259,6 @@ function ToggleCueVisibility() {
    ToggleCueVisibilityStatus = !ToggleCueVisibilityStatus;
    CueVisible(ToggleCueVisibilityStatus);
 } 
-var currenttrack=0;
-var currentlang=0;
-var subtitles; // global storage of subtitles
-var currentSubtitle=0;
-
 function selectLanguage(lang_code) {    
     if (video) { // only if we control the video object
         let ttList=video.textTracks;
@@ -272,9 +294,6 @@ function selectLanguage(lang_code) {
     }
     SetSpeechLang(lang_code);    
 } 
-
-var previous_span=0;
-var previous_color=0;
 function HighlightTransscript(id) {
     //console.log(`HighlightTransscript ${id}`);
     var sub_span=document.getElementById(id);    
@@ -287,28 +306,27 @@ function HighlightTransscript(id) {
         sub_span.style.color = 'green'; 
         previous_span = sub_span;
         
-        console.log(sub_span.innerHTML);
+        //console.log(sub_span.innerHTML);
         StartSpeak(sub_span.innerHTML);
     }
     
     
    
 }
-
-
- 
-
 function SubTitleClicked(event) { 
+console.log("SubTitleClicked");
     var x=event.target.id.split("-");
     var newpos=currentSubtitle[Number(x[2])].start;
     SetVideoSeconds(newpos);
 }    
-
-var langbtns; // array of all language buttons;
-var langbtns_index=0;
-
-function AddSubtitleLang(lang_translated, lang_code,subtitle,translocation) { 
-    log(`Adding language ${lang_code}`);
+function AddSubtitleLang(lang_translated, lang_code,subtitle,translocation,setofsheets) { 
+    if (lang_code == "vor") // special case: for sheets
+       return;
+    if (lang_code !== "nl") // testing for nl
+       return;
+    console.log(`Adding language ${lang_code}`);       
+       
+       
     
     var currentlangbtn=langbtns[langbtns_index++];
     currentlangbtn.id="lang_"+lang_code; // assign id's
@@ -318,8 +336,9 @@ function AddSubtitleLang(lang_translated, lang_code,subtitle,translocation) {
     
     
     LinkButton("lang_"+lang_code,x => selectLanguage(lang_code));
-    var languagespan=document.createElement("span");
+    var languagespan=document.createElement("div");
     languagespan.style.display = "none";
+    //languagespan.style.overflowY = "scroll";
     languagespan.id="languagespan_"+lang_code;
     translocation.appendChild(languagespan);
     
@@ -333,14 +352,42 @@ function AddSubtitleLang(lang_translated, lang_code,subtitle,translocation) {
             } 
         }); 
     }
+    var slidenr=0;
+    var slideinfo;
+    if (setofsheets ) {// not allways present    
+        console.log(setofsheets.lang_code );
+        for (var i=0;i<setofsheets.subtitle.length;i++) {
+            slideinfo = setofsheets.subtitle[i];
+            console.log(`Start: ${Math.round(parseFloat(slideinfo.start))} ${slideinfo.text}<br>`);
+        }
+        
+    }
     for (var j=0;j < subtitle.length;j++) {
         if (video) {
             var cue = new VTTCue(subtitle[j].start, parseFloat(subtitle[j].start)+parseFloat(subtitle[j].dur), subtitle[j].text);
             cue.id=`sub-${lang_code}-${j}`;
             track.addCue(cue);
         }
+        if (setofsheets) { 
+            if (slidenr < setofsheets.subtitle.length) {
+                slideinfo = setofsheets.subtitle[slidenr];   
+                if (parseFloat(slideinfo.start) >= (j> 0?parseFloat(subtitle[j-1].start):0) && (parseFloat(slideinfo.start) <= parseFloat(subtitle[j].start))) { // should be here
+                    var spanslide=document.createElement("span");
+                    var nums = slideinfo.text.replace(/[^0-9]/g,'');
+                    var num = parseInt(nums);
+                    spanslide.innerHTML=`Slide: ${Math.round(parseFloat(slideinfo.start))} ${slideinfo.text} j=${j} ${Math.round(parseFloat(subtitle[j].start))} ${slides[num]}<br>`;
+                    
+                    
+                    
+                    languagespan.appendChild(spanslide);
+                    slidenr++;
+                }
+                
+            }
+        }
+        
         var span=document.createElement("span");
-        let txtstr=subtitle[j].text;
+    let txtstr=`Start: ${Math.round(parseFloat(subtitle[j].start))} ${subtitle[j].text}<br>`;
         txtstr = txtstr.replace(/\.[\.]+/, ''); // replace multiple dots with empty string
         txtstr = txtstr.replace(/\.[\.]+/, ''); // repeat for the situation where ... is added twice
         span.innerHTML=txtstr+" ";
@@ -349,14 +396,43 @@ function AddSubtitleLang(lang_translated, lang_code,subtitle,translocation) {
         span.addEventListener("click",SubTitleClicked);
     }
 }  
+function SubtitleToSeconds(subtitles) {
+    var Seconds=[];
+     console.log('In SubtitleToSeconds');
 
-
+    for (var i=0;i<subtitles.length;i++) {        
+        Seconds=[];
+        var subtitle = subtitles[i].subtitle;
+        //console.log(subtitles[i].lang_code);
+        //if (subtitles[i].lang_code !== "vor") continue; // testing
+        //console.log(subtitle);
+        
+        
+       // console.log(Seconds);
+         for (var j=0;j < subtitle.length;j++) {
+             var subline=subtitle[j];
+             
+             var s=parseInt(subline.start);
+             var e=parseInt(parseFloat(subline.start)+parseFloat(subline.dur));
+             //console.log(`${s} ${e} ${subline.text} `);
+             for (var k=s; k< e;k++)
+                 Seconds[k]=j;
+         }
+       //  console.log(Seconds);
+    }
+    
+}         
 async function SetupSubtitlesStruct(windowid,_subtitles,lang) {
     subtitles = _subtitles; // store in global var.
-    var transcripts=await CreateHeader(windowid);   
-    var innertrans=document.createElement("div");
-    transcripts.appendChild(innertrans);
-    innertrans.style.fontSize="14px";
+    
+    SubtitleToSeconds(subtitles)
+    
+    
+    var transcripts=document.getElementById(windowid); 
+    
+    //var innertrans=document.createElement("div");
+    //transcripts.appendChild(innertrans);
+    //innertrans.style.fontSize="14px";
     
     langbtns=document.getElementsByClassName("langbtn")
     for (var i=0;i<langbtns.length;i++) {
@@ -364,8 +440,16 @@ async function SetupSubtitlesStruct(windowid,_subtitles,lang) {
         langbtns[i].style.display = "none"; // hide all language buttons
     }
     
+    for (var i=0;i<subtitles.length;i++) {
+       // console.log(subtitles[i].lang_code );
+        if (subtitles[i].lang_code == "vor") // sheets
+            setofsheets=subtitles[i];
+    }
+    if (setofsheets)
+       SetupSlideIndicators();
+    
     for (var i=0;i<subtitles.length;i++) 
-        AddSubtitleLang(subtitles[i].lang_translated, subtitles[i].lang_code, subtitles[i].subtitle,innertrans);
+        AddSubtitleLang(subtitles[i].lang_translated, subtitles[i].lang_code, subtitles[i].subtitle,transcripts,setofsheets);
     CueVisible(ToggleCueVisibilityStatus);
     
     selectLanguage(lang);
@@ -383,8 +467,6 @@ async function SetupSubtitlesStruct(windowid,_subtitles,lang) {
     }
     LinkButton("transcripttoclipboard",getVisibleTranscriptandCopyToClipboard);     
 }
-
-
 async function SetupSubtitles(windowid,surl,lang) {
     log(`Get subtitles from ${surl}`);
     console.log(surl);
@@ -396,53 +478,47 @@ async function SetupSubtitles(windowid,surl,lang) {
 
     SetupSubtitlesStruct(windowid,subtitles,lang);
 }
-
-
-
-
-async function SetupPDFWindow(windowid,pdfurl) {
-   
-    var sf=await CreateHeader(windowid); 
-    
-    
-    function CleanOldChildren() {
-        var windowidchildren=sf.children;
-        if (windowidchildren)
-            for (var i=0;i<windowidchildren.length;i++)
-                sf.removeChild(windowidchildren[i])            
-    }
-   
-    async function SetupPDFWindowGoogle() {  
+async function SetupPDFWindow(windowid,pdfurl) { 
+    var sf=document.getElementById(windowid);
+    //console.log(sf);
+     
+    async function SetupPDFWindowGoogle() {  // laadt soms niet, zeker als er al een tweede windows openstaat
         console.log("In SetupPDFWindowGoogle");
-        CleanOldChildren();
-        
         var ifrm=document.createElement("iframe");
+        var fLoaded=false;
         ifrm.style.width = "100%";
-        ifrm.style.height = "90%";   
+        ifrm.style.height = "100%";   
         sf.appendChild(ifrm);
-        ifrm.setAttribute("src", `https://docs.google.com/viewerng/viewer?url=${pdfurl}&embedded=true`);    
+        var url=`https://docs.google.com/viewerng/viewer?url=${pdfurl}&embedded=true`;
+        ifrm.src=url;        
+        ifrm.addEventListener('load', e => { fLoaded=true } );
+        
+        for (var i=0;i<5;i++) { // try 5 times
+            await sleep (5000);
+            if (!fLoaded) {
+                console.log(`Retry loading ${url}`);
+                ifrm.src=null;
+                ifrm.src=url;
+            }
+        } 
     }
     async function SetupPDFWindowChrome() {
         console.log("In SetupPDFWindowChrome");
-        CleanOldChildren();
-
         var slide=document.createElement("embed");  
         slide.type="application/pdf"     
         slide.style.width="100%";
-        slide.style.height="90%";
+        slide.style.height="100%";
         sf.appendChild(slide);
         slide.src=pdfurl+"#page=1&view=Fit&scrollbar=0";
     } 
 
-  LinkButton("pdfchrome",SetupPDFWindowChrome);
-  LinkButton("pdfgoogle",SetupPDFWindowGoogle);
+  //LinkButton("pdfchrome",SetupPDFWindowChrome);
+  //LinkButton("pdfgoogle",SetupPDFWindowGoogle);
   //LinkButton("pptx
   //LinkButton("tbd
-   SetupPDFWindowChrome();
+   //SetupPDFWindowChrome();
+   SetupPDFWindowGoogle();
 }    
-
-
-
 function LoadHlsVideo(video,node,hash) {
     Hls.DefaultConfig.loader = HlsjsIpfsLoader
     Hls.DefaultConfig.debug = false
@@ -455,8 +531,14 @@ function LoadHlsVideo(video,node,hash) {
         hls.on(Hls.Events.MANIFEST_PARSED, () => log("Video ready to play"))
     }
 }
-
- function onYouTubeIframeAPIReady() {
+async function onStateChange(event) {
+     switch (event.data) {
+         case 1: startVideo();break;
+         case 0:                     // ended      
+         case 2: stopVideo();break;  // pause
+     }
+}    
+async function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
             playerVars: { 
                 noCookie: true,  // testje
@@ -470,11 +552,11 @@ function LoadHlsVideo(video,node,hash) {
             },     
             height: '100%',
             width: '100%',
-            videoId: youtubeid,
-            //events: {
-            //  'onReady': onPlayerReady,
-            //  'onStateChange': onPlayerStateChange
-            // }          
+            videoId: globalyoutubeid,
+            events: {
+                'onReady': SetupSlideIndicators(),
+                'onStateChange': onStateChange                     
+            }          
         });
         
       //  player.getIframe().style.zIndex="-1"; // behind "blockconent" ==> easier to make drag work
@@ -482,20 +564,21 @@ function LoadHlsVideo(video,node,hash) {
 
 //player.getIframe().parentNode.style.zIndex="-1";
 
-        console.log("player iframe=");
-        console.log(player.getIframe());
+    //    console.log("player iframe=");
+    //    console.log(player.getIframe());
 
 }  
-    
-
 async function tcallback() {
-  // disable  setTimeout( tcallback, 1000); // 400
-    VideoLocation();
-}    
     
-      
-async function SetupVideoWindowYouTube(windowid,youtubeid) {  
-    var vp=await CreateHeader(windowid);
+   // console.log("In tcallback");
+    VideoLocation();
+   if (!IsVideoPaused())
+        setTimeout( tcallback, 1000); // 400
+}    
+async function SetupVideoWindowYouTube(windowid,youtubeid) {
+console.log(`In SetupVideoWindowYouTube ${youtubeid}`);
+    globalyoutubeid=youtubeid;
+    var vp=document.getElementById(windowid);
     const videodiv=document.createElement("div"); // will be replaced with <iframe>
     videodiv.id="player";
     
@@ -505,11 +588,8 @@ async function SetupVideoWindowYouTube(windowid,youtubeid) {
 
     tcallback()
 }    
-
-
-async function SetupVideoWindowIPFS(windowid,hash) {   
-    var node= await SetupIPFS();
-    var vp=await CreateHeader(windowid);
+async function SetupVideoWindowIPFS(ipfs,windowid,hash) {       
+    var vp=document.getElementById(windowid);
     video=document.createElement("video");
     video.controls=false;
     video.style.height="100%";
@@ -519,35 +599,17 @@ async function SetupVideoWindowIPFS(windowid,hash) {
     video.addEventListener('timeupdate', (event) => {  // about 4x/second
       VideoLocation();
     });    
-    LoadHlsVideo(video,node,hash);
+    LoadHlsVideo(video,ipfs,hash);
     var surl=document.getElementById("subtitle-collection").innerHTML;    
     SetupSubtitles("transcripts",surl,"nl");
 }
-
-
-//var newline=document.createElement("br");
-//document.body.appendChild(newline);
-var voices = [];
-var synth = window.speechSynthesis;
-
-
-
-
-var currentVoice=0;
-
-
-      function DisplayCurrentFunctionName(args) {
+function DisplayCurrentFunctionName(args) {
             var ownName = args.callee.toString();
             ownName = ownName.substr('function '.length);        // trim off "function "
             ownName = ownName.substr(0, ownName.indexOf('('));        // trim off everything after the function name
             console.log(`In function ${ownName}`);
             log(`In function ${ownName}`);
         }
-
-  //LinkButton("lang_"+lang_code,x => selectLanguage(lang_code));
-  //target.removeEventListener(type, listener[, options]);
-  
-  
 function SetSpeechLang (lang) {
     console.log("In SetSpeechLang");
     DisplayCurrentFunctionName(arguments);
@@ -576,8 +638,6 @@ function SetSpeechLang (lang) {
     console.log(currentVoice);
     */
 }    
-
-
 function StartSpeak(text) {
     StopSpeak(); // stop preview texts
     if (fspeechon) {
@@ -593,62 +653,45 @@ function StopSpeak() {
         synth.cancel();
    //  responsiveVoice.cancel()
 }
-async function populateVoiceList() {
-    console.log("In populateVoiceList");
-    voices = synth.getVoices();
- //   console.log(voices);
-//    sleep(1000)
-    //voices = synth.getVoices();
-    //console.log(voices);
+function populateVoiceList() {
+    console.log("In populateVoiceList callback");
+    voices = synth.getVoices();    
+    spsynthbtns=document.getElementsByClassName("spsynthbtn") // link voices to buttons, cycle trough all buttons to hide them
+    for (var i=0;i<spsynthbtns.length;i++) {
+        var buttonid="spsynth-"+i;
+         if (voices[i]) {
+            spsynthbtns[i].id=buttonid; // assign id's
+            var name = voices[i].name;
+            name = name.replace(/Google/g, "");
+            name = name.replace(/Microsoft /g, "");
+            name = name.replace(/Desktop /g, "");
+            name = name.replace(/English /g, "");
+            spsynthbtns[i].innerHTML=name;
+            LinkButton(buttonid,SelectSpeachSynth);
+         }
+        spsynthbtns[i].style.display = "none"; // hide all spsynth buttons
+    }    
 }
-
 function SelectSpeachSynth(event) {
-     DisplayCurrentFunctionName(arguments);
-     
+     DisplayCurrentFunctionName(arguments);     
      var id=event.id.split("-")[1];
      console.log(id); 
      currentVoice=voices[id];
      console.log(`Selected voice ${currentVoice.name}`);
      EnableSpeech(true);
 }    
-
 function InitSpeak() { // called once
-console.log("In InitSpeak");
-  populateVoiceList();
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = populateVoiceList;
-  }
-  // responsiveVoice.setDefaultVoice("Dutch Female");
-  
-  
-      spsynthbtns=document.getElementsByClassName("spsynthbtn")
-    for (var i=0;i<spsynthbtns.length;i++) {
-        var buttonid="spsynth-"+i;
-
-         if (voices[i]) {
-            spsynthbtns[i].id=buttonid; // assign id's
-            var name = voices[i].name;
-            name = name.replace(/Google /g, "");
-            name = name.replace(/Microsoft /g, "");
-            name = name.replace(/Desktop /g, "");
-            
-            spsynthbtns[i].innerHTML=name;
-            LinkButton(buttonid,SelectSpeachSynth);
-         }
-        spsynthbtns[i].style.display = "none"; // hide all spsynth buttons
-    }
-  
+    console.log("In InitSpeak");
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+     }
+    // responsiveVoice.setDefaultVoice("Dutch Female");
 }
-
-var fspeechon=0;
-var ffirst=1;
-
 function EnableSpeech(on) {
     StopSpeak();
     fspeechon=on;
     EnableSound(!fspeechon); // disable video sound when speech is on
 }
-
 async function ToggleSpeech(){
     if (ffirst) {
         console.log("First ToggleSpeech");
@@ -658,13 +701,6 @@ async function ToggleSpeech(){
     EnableSpeech(fspeechon);
     
 }    
-    
-
-var previous_colour=""
-var previous_row=-1;
-var table
-var tablediv
-//var alldata=""
 function SwapObjects(obj1,obj2) {
     var temp = document.createElement("div"); // create marker element     
     console.log('swapping');
@@ -676,12 +712,6 @@ function SwapObjects(obj1,obj2) {
     temp.parentNode.removeChild(temp); // remove temporary marker node
     // temp should be carbage collected
 }    
-
-
-   
-
-
-
 function swapElements(obj1, obj2) {  // not used now
     var temp = document.createElement("div"); // create marker element     
     var c1 = obj1.childNodes;    
@@ -692,7 +722,6 @@ function swapElements(obj1, obj2) {  // not used now
     
     
 }
-
 function CreateButton(name,funct,place) {
     console.log(`CreateButton ${name}`);
     var buttonback=document.createElement("button");
@@ -703,11 +732,6 @@ function CreateButton(name,funct,place) {
     buttonback.addEventListener("click", funct);
     place.appendChild(buttonback);
 }      
-// note: when connected via USB & full screen: playing video is flickering
-var fTriedFullScreen=false;
-
-var fFullScreen=false;
-
 function SetFullScreen(fSetFullScreen) {
     console.log("Making fullscreen");
     let elem = document.body; // let elem = document.documentElement;
@@ -719,12 +743,15 @@ function SetFullScreen(fSetFullScreen) {
        document.exitFullscreen(); 
    fFullScreen = fSetFullScreen;
 }    
-
 function ToggleFullScreen() {
     SetFullScreen(!fFullScreen);
 }    
-
-
+function HideButton(nameButton,fHide) {
+    var button=document.getElementById(nameButton);
+    if (button) {  
+        button.style.display=fHide?"none":"flex"; // flex is used to center the icons in the button
+    }
+}    
 function LinkButton(nameButton,funct) {  
     //console.log(`Linking button ${nameButton}`);
     
@@ -750,19 +777,11 @@ function LinkButton(nameButton,funct) {
         button.style.color=orgcolor;   
     }
 }
-
-
-
-
-var defaultvolume=100;
-
-
 function GetVolume() {
     if (video) return video.volume;
     if (player && player.getVolume) return player.getVolume();
     return 0;
 }    
-
 function SetVolume(newvol) {
     console.log(`In SetVolume newvol=${newvol}`);
     if (video) {
@@ -784,8 +803,6 @@ function CreateSoundSlider() {
     divsoundslider.appendChild(input);
     SetVolume(defaultvolume);
 }   
-
-
 function EnableSound(fOn) {
     fSoundOn = fOn;// store state
        if (video)
@@ -798,9 +815,6 @@ function EnableSound(fOn) {
             player.mute();
     
 }    
-
-fSoundOn=true;
-
 function ToggleSound() {
    fSoundOn = !fSoundOn;
    EnableSound(fSoundOn);
@@ -808,120 +822,249 @@ function ToggleSound() {
     
    document.getElementById("sound").style.color=fSoundOn?"red":"white"
 }
-//https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
-
-
-function SetVideoSeconds(seconds) {
+async function SetVideoSeconds(seconds) {
     if (video) {
         video.currentTime=seconds;
-        video.play();
+        //video.play();
     }
     if (player)
         player.seekTo(seconds, true);
     
         //console.log(`New position=${video.currentTime}`);
+    //startVideo(); // be sure to start again ==> not starting, to irritating
+        
 }
+async function SetVideoProgressBar(perc) {
+    // console.log(`SetVideoProgressBar ${perc}`); 
+    if (slider)    
+        slider.style.width =  (perc*100)+"%";   
 
-function SetVideoProgress(newper) {
-    console.log(`In SetVideoProgress ${newper}`);
-     SetVideoSeconds(parseFloat (GetDuration()*newper / 100));
 }
-var vidproginput=0;
+async function CreateVideoSlider() {
+    var sep=document.getElementById("videodrag"); 
+    var sepparent=document.getElementById("mainscreen");
+    slider=document.getElementById("videodrag").parentElement; 
+    SetVideoProgressBar(0);
+    var fMouse;
 
-function CreateVideoSlider() {
+    
+    function GetPositionAndSetSize(ev) {
+        var parentrect=sep.parentElement.parentElement.getBoundingClientRect();   
+        
+        var pos=-1; // no position
+        var percv=-1;
+        var perch=-1;
+        { // horizontal
+            if (ev.touches && ev.touches[0] && ev.touches[0].clientX) pos=ev.touches[0].clientX;
+            if (ev.clientX) pos=ev.clientX; 
+            if (pos >= 0) {
+                percv = (pos - parentrect.left) / parentrect.width             
+                var left=`${percv*2}fr`;     if ( percv<=   0.01) percv=0;
+                var right=`${(1-percv)*2}fr`;  if ( percv>= (1-0.01)) percv=1;
+//console.log(  percv);    
+
+SetVideoProgressBar(percv);
+SetVideoSeconds(parseFloat (GetDuration()*percv ));
+             
+            }
+        }         
+
+    }
+    
+    
+    function SetzIndexChildren(domid,zindex) {  
+//console.log(domid);    
+        var arrchildren=domid.children;    
+        for (var i=0;i<arrchildren.length;i++) 
+            arrchildren[i].style.zIndex=zindex;
+    }
+    
+    async function VideoSliderStart(ev) {
+        fDragging=true;
+        
+        console.log(`Start dragging CreateVideoSlider fMouse:${fMouse}`);
+        
+        SetzIndexChildren(sepparent,"-1"); // set all childeren to lower z-index, so the mouse works well        
+        GetPositionAndSetSize(ev);
+        
+        sepparent.addEventListener("dragover",  VideoSliderDrag);           
+        sepparent.addEventListener("drop", VideoSliderStop);            
+        sepparent.addEventListener("dragend", VideoSliderStop);  
+        sepparent.addEventListener("dragleave", VideoSliderStop);  
+        sepparent.addEventListener("dragexit", VideoSliderStop);  
+                   
+        if (fMouse) {
+            sepparent.addEventListener("mousemove",  VideoSliderDrag);
+            sepparent.addEventListener("mouseup",    VideoSliderStop);  
+       //     sepparent.addEventListener("mouseleave", VideoSliderStop);          
+        } else {
+            sepparent.addEventListener("touchmove",  VideoSliderDrag);
+            sepparent.addEventListener("touchend",   VideoSliderStop);
+            sepparent.addEventListener("touchcancel",VideoSliderStop);
+        }
+    }    
+        
+    async function VideoSliderDrag(ev) {     
+        if (!fMouse)ev.preventDefault()    
+        GetPositionAndSetSize(ev);
+    }    
+    
+    async function VideoSliderStop(ev) {
+        console.log("Stop dragging");
+        SetzIndexChildren(sepparent,""); // back to normal
+
+        sepparent.removeEventListener("dragover",   VideoSliderDrag);           
+        sepparent.removeEventListener("drop",       VideoSliderStop);            
+        sepparent.removeEventListener("dragend",    VideoSliderStop);  
+        sepparent.removeEventListener("dragleave",  VideoSliderStop);  
+        sepparent.removeEventListener("dragexit",   VideoSliderStop);          
+        if (fMouse) {
+            sepparent.removeEventListener("mousemove",  VideoSliderDrag);   
+            sepparent.removeEventListener("mouseup",    VideoSliderStop);  
+            sepparent.removeEventListener("mouseleave", VideoSliderStop);
+        } else {
+            sepparent.removeEventListener("touchmove",  VideoSliderDrag);
+            sepparent.removeEventListener("touchend",   VideoSliderStop);
+            sepparent.removeEventListener("touchcancel",VideoSliderStop);
+        }
+    }      
+    sep.addEventListener('mousedown',  ev=>{ fMouse=true; VideoSliderStart(ev);} );
+    sep.addEventListener('touchstart', ev=>{ fMouse=false;VideoSliderStart(ev);} , {passive:true} );     
+  //  sep.addEventListener('dragstart', ev=>{ fMouse=true; VideoSliderStart(ev);} );
+    
+}
+/*
+
+
     
     let s = document.createElement("style");
     s.type = "text/css";
+    
+    //background: #d3d3d3;
+    //  border-radius: 5px;  
+    // opacity: 0.7;
+    
+    // <!-- top: -9pxoverlay with green horizontal bar -->
     s.innerHTML=`
-    .slider {
+    .videoslider {
   -webkit-appearance: none;
   width: 100%;
-  height: 5px;
-  border-radius: 5px;  
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: 2s; // .2s;
-  transition:  2s; // opacity 0.2s
+  height: 0px;
+  border-width:0px;
+  outline: none;  
+  background: blue; 
+  -webkit-transition: 2s; 
+  transition:  2s;   
 }
 
-.slider::-webkit-slider-thumb {
+.videoslider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
+  
   width: 10px;
-  height: 10px;
+  height: 10px;  
   border-radius: 50%; 
-  background: #13c4a3; // #4CAF50;
+  background: 9CC4BD; 
   cursor: pointer;
   transition:  2s;
   -webkit-transition: 2s;
 }
 
-.slider::-moz-range-thumb {
+.videoslider::-moz-range-thumb {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #13c4a3; // #4CAF50;
+  background: MidnightBlue; 
   cursor: pointer;
 }
+
+.videoprogress {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+   appearance: none;
+  border: none;
+  background-color: transparent;
+} 
+
+
+.videoprogress::-webkit-progress-bar {
+  background-color: transparent;
+}
+
+.videoprogress::-webkit-progress-value {
+  background-color: #9CC4BD ;
+   
+}  
+
 `
-    document.body.appendChild(s);
-    
-    let divvideoslider=document.getElementById("videoslider"); 
+// https://convertingcolors.com/hex-color-13C4A3.html
+
+    async function EventNewPos(obj) {
+        let newval=obj.target.value;
+        // console.log(`Dragged to value: ${newval}`);
+        SetVideoProgressBar(newval);
+        SetVideoSeconds(parseFloat (GetDuration()*newval / 100));
+    }
+
+    document.body.appendChild(s); 
+    let divvideoslider=document.getElementById("separator_horizonal");     
     vidproginput=document.createElement("input");
+    vidproginput.style.position="relative";
+    vidproginput.style.top="-10px";
     vidproginput.type="range"
     vidproginput.min="0"
     vidproginput.value="0";
     vidproginput.max="100"
-    vidproginput.step="1"
-    
-    vidproginput.classList.add("slider");
-    
-    vidproginput.addEventListener("change", obj => SetVideoProgress(obj.target.value))
+    vidproginput.step="1"    
+    vidproginput.classList.add("videoslider");    
+    vidproginput.addEventListener("input", EventNewPos);
     divvideoslider.appendChild(vidproginput);
-}   
+    
+    vidprogress=document.createElement("progress");
+    vidprogress.min="0";
+    vidprogress.style.position="relative";
+    vidprogress.style.top="-24px";
+    vidprogress.style.height="100%";
+    vidprogress.style.width="100%";   
+    vidprogress.style.backgroundColor="transparent";
+    vidprogress.value="0";
+    vidprogress.max="100"
+    vidprogress.classList.add("videoprogress");   
 
-function SetVideoProgressBar(perc) {
-    //console.log(`SetVideoProgressBar ${perc}`);
-    vidproginput.value=perc*100;
-}
+    divvideoslider.appendChild(vidprogress); 
+    vidproginput.style.zIndex=4;    
+    
+}  
 
 
-
+*/
 function IsVideoPaused(){
-    var fpaused;
+    var fpaused=true;
     if (video)  fpaused=video.paused
-    if (player) { 
-        console.log(`getPlayerState ${player.getPlayerState()}`);
-        fpaused=( player.getPlayerState() == 2); // 2 – paused 
-    }
-    console.log(`In IsVideoPaused paused=${fpaused}`);
+    if (player && player.getPlayerState) 
+        fpaused=( player.getPlayerState() !== 1); // 1 – playing 
     return fpaused;
 }
-var orgcolor=0;
-function UpdateVideoIndicator(fpaused) { 
-    if (!orgcolor)
-        orgcolor=document.getElementById("pause").style.color;
-    
-    if (fpaused) {
-       document.getElementById("pause").style.color="DeepSkyBlue";
-    } else {
-       document.getElementById("pause").style.color=orgcolor;
-    } 
+async function UpdateVideoIndicator(fpaused) { 
+    HideButton("start",!fpaused);
+    HideButton("pause",fpaused);
 }
-function startVideo() {
-    console.log("In startVideo");
-            console.log(player.getDebugText());
-        console.log(player.getVideoData());
+async function startVideo() {
+   // console.log("In startVideo");
+   //         console.log(player.getDebugText());
+   //     console.log(player.getVideoData());
     
     if (video) {
         video.play();
         video.autoplay=true; // so after location change the video continues to play
     }
-    if (player) {    
-        player.playVideo();
+    if (player) {  
+        if (IsVideoPaused()) // maybe already started via youtube interface
+            player.playVideo();
     }
     UpdateVideoIndicator(false);
+
+    tcallback(); // callbacks for the progress
 }
 function stopVideo() {
     console.log("In stopVideo");
@@ -929,6 +1072,8 @@ function stopVideo() {
     if (player) player.pauseVideo();
     UpdateVideoIndicator(true);
     StopSpeak();
+
+
 }
 function TogglePauseVideo() {
     console.log("In TogglePauseVideo");
@@ -956,22 +1101,43 @@ async function writeToClipboard(text) {
         console.error(error);
     }
 }
-
-
-
+async function ShareNotes() {
+    var toShare=NotesArea.innerText    
+    let err;   
+    await navigator.share({ title: "Sharing notes", text: toShare }).catch( x=>err=x);
+    if (err) {
+        writeToClipboard(toShare); 
+        DisplayMessage(`Copied to clipboard: ${toShare.slice(0,50)}`);
+     }
+} 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function DisplayMessage(text) {    
+    var msg=document.getElementById("message");
+    console.log(msg);
+    msg.innerText=text;
+    msg.style.display="block";
+    await sleep(1000);
+    msg.style.display="none";    
+}
 async function SetupNotes(windowid) {
-    var NotesArea=await CreateHeader(windowid);
+    NotesArea=document.getElementById(windowid);
     NotesArea.contentEditable="true"; // make div editable
-    console.log("NotesArea");
-    console.log(NotesArea);
+     NotesArea.style.whiteSpace = "pre"; //werkt goed in combi met innerText
+   // console.log("NotesArea");
+   // console.log(NotesArea);
     //var NotesArea=document.getElementById('notesarea')    
     NotesArea.innerHTML=localStorage.getItem("notes");   
-    NotesArea.addEventListener('input', x => { localStorage.setItem("notes", x.target.innerHTML);console.log("input");console.log(x.target.innerHTML); }, true); // save the notes    
+    NotesArea.addEventListener('input', x => { localStorage.setItem("notes", x.target.innerText);console.log("input");console.log(x.target.innerText); }, true); // save the notes    
     //var email=document.getElementById('emailaddress')
     //email.value=localStorage.getItem("emailaddress");       
     //email.addEventListener('input', x => {localStorage.setItem("emailaddress", x.target.value);console.log(x);}, true); // save the emailaddress
-    LinkButton("sendemail",sendMail);
-    LinkButton("copytoclipboard",x => writeToClipboard(document.getElementById("notesarea").value)  ); 
+    //LinkButton("sendemail",sendMail);
+    //LinkButton("copytoclipboard",x => writeToClipboard(document.getElementById("notesarea").value)  ); 
+    
+    LinkButton("share",ShareNotes);
+    
    // console.log("SetupNotes");
    // console.log(NotesArea); 
     //NotesArea.style.height=notesform.getBoundingClientRect().height+"px"; // hack to make field larger
@@ -985,8 +1151,6 @@ function sendMail() {
      console.log(href);
     window.open(href,"_blank"); 
 }
-
-
 var loadScriptAsync = function(uri){
   return new Promise((resolve, reject) => {
     var tag = document.createElement('script');
@@ -999,36 +1163,32 @@ var loadScriptAsync = function(uri){
   //firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);  
   document.head.appendChild(tag);  
 });
-}  
-
-
-   
+}   
 async function SetupIPFS() {
     
-    await Promise.all( [
+    await Promise.all( [ // see https://www.npmjs.com/package/ipfs
        loadScriptAsync("https://unpkg.com/ipfs/dist/index.js"),
-       loadScriptAsync("https://unpkg.com/hlsjs-ipfs-loader@0.1.4/dist/index.js"),
-       loadScriptAsync("https://cdn.jsdelivr.net/npm/hls.js@latest"),
-       loadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.0.0/bignumber.min.js")
+       //loadScriptAsync("https://unpkg.com/hlsjs-ipfs-loader@0.1.4/dist/index.js"),  // not needed now
+       //loadScriptAsync("https://cdn.jsdelivr.net/npm/hls.js@latest"),
+       //loadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.0.0/bignumber.min.js")
        ]
    );
    log("Ipfs libraries loaded");
-    const node = await window.Ipfs.create();
+    const ipfs = await window.Ipfs.create();
    
-    const stream = node.stats.bwReadableStream({ poll: true })
+/*   get stream info, only for video
+    const stream = ipfs.stats.bwReadableStream({ poll: true })
     var prevtotin=0;
     stream.on('data', (data) => {
         var totin=data.totalIn.dividedBy(1000000).toFixed(1);
         if (totin !=prevtotin) {
-            logipfs.innerText=`IPFS Total in: ${totin} mb`;
+            console.log(`IPFS Total in: ${totin} mb`);
             prevtotin = totin;
         }          
     });
-    return node;
+*/    
+    return ipfs;
 }
-
-var parser = new DOMParser(); 
-
 async function GetYouTubeSubTitle(youtubeid,language) {
    var array = new Array();
    var url=`https://video.google.com/timedtext?v=${youtubeid}&lang=${language}`;
@@ -1048,8 +1208,6 @@ async function GetYouTubeSubTitle(youtubeid,language) {
    }
    return array;
 }
-   
-  
 async function GetYouTubeSubTitles(youtubeid) {
    var array = new Array();
    var url=`https://video.google.com/timedtext?type=list&v=${youtubeid}`;
@@ -1073,11 +1231,9 @@ async function GetYouTubeSubTitles(youtubeid) {
    }
    return array;
 }
-
-
 async function SetupChat(windowid,chatlink) {
     
-   var chatdom=await CreateHeader("chat");
+   var chatdom=document.getElementById(windowid);
    console.log("In setupchat");
    console.log(chatdom);
    
@@ -1101,71 +1257,61 @@ async function SetupChat(windowid,chatlink) {
 
 
 }    
-
 function TestCall() {
+    //player.setOption('captions', 'track', {'languageCode': 'es'});
+    //player.setOption('captions', 'track', {});
 
-    console.log("setoption");
-    
-    player.setOption('captions', 'track', {'languageCode': 'es'});
-    player.setOption('captions', 'track', {});
-
+    font++;
+    if (font > 3) font= -1;
+    console.log(`Setting font to: ${font}`);
+    player.setOption('captions', 'fontSize', font);
 }
- 
-async function Slider(id,fVertical) {  
-    var sep=document.getElementById(id); 
-    var sepparent=sep.parentElement;    
-    var fMouse;
-    var SetMiddle="1px";
-    //var grid=document.querySelector('.video-and-slidesouter');
-    
+async function SetupSliders() {
+    var sep=document.getElementById("move"); 
     var grid=document.getElementById("mainscreen");
+    var sepparent=document.getElementById("mainscreen");    
+    var fMouse;
+    var SetMiddleh=window.getComputedStyle(grid).getPropertyValue("grid-template-columns").split(" ")[1];       
+    var SetMiddlev=window.getComputedStyle(grid).getPropertyValue("grid-template-rows").split(" ")[1];
     
-    var style_loc_index="gridTemplate"+(fVertical?"Columns":"Rows");
-    var style_loc_string="grid-template-"+(fVertical?"columns":"rows");
-    var colstyle=window.getComputedStyle(grid).getPropertyValue(style_loc_string);
     
+      
+
     
-    
-    var res = colstyle.split(" ");
-    SetMiddle=res[1];
-    console.log(`SetMiddle=${SetMiddle}`);
-   
-    function SetSizes(size1) {   
-        if (size1 < 0) return; // no usefull value yet
-        var left=`${size1*2}fr`;     if ( size1<=   0.01) left="0px";
-        var right=`${(1-size1)*2}fr`;  if ( size1>= (1-0.01)) right="0px";
-        var value = `${left} ${SetMiddle} ${right}`;
-        
-       // console.log(`Old size: ${window.getComputedStyle(grid).getPropertyValue(style_loc_string)}`);        
-        grid.style[style_loc_index]=value;
-        //console.log(`Setting size: ${value}`);
-        //console.log(`New size: ${window.getComputedStyle(grid).getPropertyValue(style_loc_string)}`);        
-    }
-    
-    function GetPosition(ev) {
+    function GetPositionAndSetSize(ev) {
         var parentrect=sepparent.getBoundingClientRect();   
-        var domRect = sep.getBoundingClientRect();
-        var pos=0; // no position
-        var perc=-1;
-        if (fVertical) {
+        
+        var pos=-1; // no position
+        var percv=-1;
+        var perch=-1;
+        { // horizontal
             if (ev.touches && ev.touches[0] && ev.touches[0].clientX) pos=ev.touches[0].clientX;
-            else if (ev.clientX) pos=ev.clientX; 
-            else return -1;
-            perc = (pos - parentrect.left) / parentrect.width               
-        } else {
+            if (ev.clientX) pos=ev.clientX; 
+            if (pos >= 0) {
+                percv = (pos - parentrect.left) / parentrect.width             
+                var left=`${percv*2}fr`;     if ( percv<=   0.01) left="0px";
+                var right=`${(1-percv)*2}fr`;  if ( percv>= (1-0.01)) right="0px";
+                grid.style["gridTemplateColumns"] = `${left} ${SetMiddleh} ${right}`;
+            }
+        }         
+        {  // vertical
+            pos=-1;
             if (ev.touches && ev.touches[0] && ev.touches[0].clientY) pos=ev.touches[0].clientY;
-            else if (ev.clientY) pos=ev.clientY; 
-            else return -1;
-            perc = (pos - parentrect.top) / parentrect.height               
-        }    
-        return perc;         
+            if (ev.clientY) pos=ev.clientY; 
+            if (pos >= 0) {
+                perch = (pos - parentrect.top) / parentrect.height               
+                var left=`${perch*2}fr`;     if ( perch<=   0.01) left="0px";
+                var right=`${(1-perch)*2}fr`;  if ( perch>= (1-0.01)) right="0px";
+                var value = `${left} ${SetMiddlev} ${right}`;
+                grid.style["gridTemplateRows"]=value;
+            } 
+        }   
+//console.log(  percv,perch);      
     }
     
-    function setCursor(domel,fSet) {
-        domel.style.cursor = fSet? ( fVertical? "col-resize": "row-resize") : "default"     
-    }
     
-    function SetzIndexChildren(domid,zindex) {     
+    function SetzIndexChildren(domid,zindex) {  
+//console.log(domid);    
         var arrchildren=domid.children;    
         for (var i=0;i<arrchildren.length;i++) 
             arrchildren[i].style.zIndex=zindex;
@@ -1173,14 +1319,21 @@ async function Slider(id,fVertical) {
     
     async function SliderStart(ev) {
         fDragging=true;
-        setCursor(sepparent,true);
-        console.log("Start dragging");
+        
+        console.log(`Start dragging fMouse:${fMouse}`);
         SetzIndexChildren(sepparent,"-1"); // set all childeren to lower z-index, so the mouse works well        
-        SetSizes(GetPosition(ev));     
+        GetPositionAndSetSize(ev);
+        
+        sepparent.addEventListener("dragover",  SliderDrag);           
+        sepparent.addEventListener("drop", SliderStop);            
+        sepparent.addEventListener("dragend", SliderStop);  
+        sepparent.addEventListener("dragleave", SliderStop);  
+        sepparent.addEventListener("dragexit", SliderStop);  
+                   
         if (fMouse) {
-            sepparent.addEventListener("mousemove",  SliderDrag);   
+            sepparent.addEventListener("mousemove",  SliderDrag);
             sepparent.addEventListener("mouseup",    SliderStop);  
-            sepparent.addEventListener("mouseleave", SliderStop);
+       //     sepparent.addEventListener("mouseleave", SliderStop);          
         } else {
             sepparent.addEventListener("touchmove",  SliderDrag);
             sepparent.addEventListener("touchend",   SliderStop);
@@ -1190,13 +1343,18 @@ async function Slider(id,fVertical) {
         
     async function SliderDrag(ev) {     
         if (!fMouse)ev.preventDefault()    
-        SetSizes(GetPosition(ev));
+        GetPositionAndSetSize(ev);
     }    
     
     async function SliderStop(ev) {
         console.log("Stop dragging");
         SetzIndexChildren(sepparent,""); // back to normal
-        setCursor(sepparent,false);
+
+        sepparent.removeEventListener("dragover",   SliderDrag);           
+        sepparent.removeEventListener("drop",       SliderStop);            
+        sepparent.removeEventListener("dragend",    SliderStop);  
+        sepparent.removeEventListener("dragleave",  SliderStop);  
+        sepparent.removeEventListener("dragexit",   SliderStop);          
         if (fMouse) {
             sepparent.removeEventListener("mousemove",  SliderDrag);   
             sepparent.removeEventListener("mouseup",    SliderStop);  
@@ -1208,91 +1366,207 @@ async function Slider(id,fVertical) {
         }
     }      
     sep.addEventListener('mousedown',  ev=>{ fMouse=true; SliderStart(ev);} );
-    sep.addEventListener('touchstart', ev=>{ fMouse=false;SliderStart(ev);} ); 
-    setCursor(sep,true);    
+    sep.addEventListener('touchstart', ev=>{ fMouse=false;SliderStart(ev);} , {passive:true} );     
+    sep.addEventListener('dragstart', ev=>{ fMouse=true; SliderStart(ev);} );
+    
 }
-
-
-function SetupSliders() {
-    Slider("separator_vertical",true);
-    Slider("separator_horizonal",false);
-}    
-
-
-async function asyncloaded() {    
-    SetupLogWindow("log");
-    console.log("Start koios_video.js");
-    vid_url=document.getElementById("video").innerHTML;
-    document.getElementById("video").hidden=true;
+var url = window.location.pathname;
+var filename = url.substring(url.lastIndexOf('/')+1);
+console.log(filename);
+var currentlesson=-1;
+var lesson_items;
+function NavigateButton(nameButton,url) {
     
-    youtubeid=document.getElementById("youtubeid").innerHTML;
-    document.getElementById("youtubeid").hidden=true;
-  
-  document.getElementById("subtitle-collection").hidden=true;   
-
-    var chatlink=document.getElementById("chatlink").innerHTML;
-    document.getElementById("chatlink").hidden=true;
-
+    if (!url) 
+        HideButton(nameButton,true)
+    else {        
+        var button=document.getElementById(nameButton);
+        if (button) {
+            button.title=nameButton; // add hoover text            
+            var links=button.getElementsByTagName("a");
+            for (var i=0;i<links.length;i++)
+                 links[i].href=url;
+        }
+    }
+}
+async function NavigateLessons() {  
+    function FindChapter(chapter) {
+        //console.log(`Checking chapter items for ${chapter}`);
+        var chapter_items=document.getElementsByClassName("chapter_items");     
+        for (var i=0; i< chapter_items.length; i++) {
+            //console.log(chapter_items[i].getAttribute("chapter"));
+            //console.log(chapter);
+            if ( chapter_items[i].getAttribute("chapter")  == chapter) {
+                //console.log("Found");
+                //console.log(chapter_items[i]);
+                return chapter_items[i];
+            }
+        }   
+        return undefined;
+    }   
     
-    vid_url='QmXVnrbjf4xGGhUpAJp6LTj3fDoWo9VqtpepkWGPCWotq8';
-    log(`Video url=${vid_url}`);
+    function ProcessLessonAndFindCurrent(lesson_domid,filename) {
+        var lesson=lesson_domid.getAttribute("lesson");
+        var chapter=lesson_domid.getAttribute("chapter");
+        var chap=FindChapter(chapter);
+        if (chap)
+            chap.parentNode.parentNode.appendChild(lesson_domid.parentNode.parentNode);             
+        var youtubeid=lesson_domid.getAttribute("youtubeid");
+        //console.log(`Lesson: ${lesson} Chapter: ${chapter}  yt: ${youtubeid}`);       
+        var imgs=lesson_domid.parentNode.parentNode.getElementsByTagName("img");
+        //console.log(imgs);
+        if (imgs[0] && youtubeid)
+             imgs[0].src=`https://img.youtube.com/vi/${youtubeid}/default.jpg`
+        return (lesson == filename) 
+    }     
     
-    // SetupVideoWindowIPFS("videoplayer_outter",vid_url)
-    SetupVideoWindowYouTube("videoplayer_outter",youtubeid);
+    lesson_items=document.getElementsByClassName("lesson_items"); 
+    for (var i=0;i<lesson_items.length;i++) {
+        if (ProcessLessonAndFindCurrent(lesson_items[i],filename))
+            currentlesson=i;
+    }
     
-    GetYouTubeSubTitles(youtubeid).then(subtitles => SetupSubtitlesStruct("transcripts",subtitles,"nl"));
+    //console.log(`currentlesson ${currentlesson}`);
+    //console.log(lesson_items[currentlesson].parentNode.parentNode);
+        
+    if (currentlesson >= 0)   FindAllLinksWith(  lesson_items[currentlesson].getAttribute("lesson"),"red");
+    NavigateButton("back",    (currentlesson >= 1                     ? lesson_items[currentlesson-1].getAttribute("lesson") : undefined));
+    NavigateButton("forward", (currentlesson < lesson_items.length -1 ? lesson_items[currentlesson+1].getAttribute("lesson") : undefined));
    
+        
+    function FindAllLinksWith(filename,color) {
+        var links=document.getElementsByTagName("a");
+        for (var i=0;i<links.length;i++) {  
+             if (links[i].href.indexOf("#") < 0)  // ignore all internal links of webflow
+                 if (links[i].href.indexOf(filename) >=0) {
+                       //console.log(links[i]);
+                      links[i].style.color=color;
+                 }     
+        }
+    }    
     
-    var pdfurl=document.getElementById("pdf").innerHTML;
-    document.getElementById("pdf").hidden=true;   
-    console.log(`PDF url=${pdfurl}`);
+        
+}
+async function asyncloaded() {    
+    var youtubeid=document.getElementById("youtubeid").innerHTML;
+    console.log(`Found videoid ${youtubeid}`);
+    var chatlink="https://gitter.im/web3examples/test/~embed";
+    //document.getElementById("chatlink").innerHTML;
+    //document.getElementById("chatlink").hidden=true;    
+    vid_url='QmXVnrbjf4xGGhUpAJp6LTj3fDoWo9VqtpepkWGPCWotq8';
+    log(`Video url=${vid_url}`); 
+
+    var ipfspromise= SetupIPFS();
     
-    SetupPDFWindow("slidefield","https://ipfs.io/ipfs/QmawzPTovb1LUPGLd7LxKRpynzA6VsqnkCa16EZmkGvjGV"); // infura doens't work well here   
+    // SetupVideoWindowIPFS("videoplayer",vid_url)
+    SetupVideoWindowYouTube("videoplayer",youtubeid);    
+    GetYouTubeSubTitles(youtubeid).then(subtitles => SetupSubtitlesStruct("transcripts",subtitles,"nl"));      
+    var pdfurl="https://gateway.ipfs.io/ipfs/QmawzPTovb1LUPGLd7LxKRpynzA6VsqnkCa16EZmkGvjGV";
+    //document.getElementById("pdf").innerHTML;
+    //document.getElementById("pdf").hidden=true;   
+    console.log(`PDF url=${pdfurl}`);    
+    //SetupPDFWindow("slideplayer","https://ipfs.io/ipfs/QmawzPTovb1LUPGLd7LxKRpynzA6VsqnkCa16EZmkGvjGV"); // infura doens't work well here   
+    
+    
+    
+    
     SetupNotes("notes");
-    CreateHeader("content");
-    SetupChat("chat",chatlink);
+    //CreateHeader("content");
+    //SetupChat("chat",chatlink);
     LinkButton("start",startVideo);    
-    LinkButton("stop",stopVideo);
+    LinkButton("stop",stopVideo);    
     LinkButton("pause",TogglePauseVideo);
-    LinkButton("sound",ToggleSound);
+    HideButton("pause",true);
+    LinkButton("audio",ToggleSound);
     LinkButton("speech",ToggleSpeech);
-    LinkButton("subtitle",ToggleCueVisibility);
-    
-    LinkButton("fullscreen",ToggleFullScreen);
-    
-    CreateVideoSlider();   
-  //ff uit  CreateSoundSlider();
+    LinkButton("subtitle",ToggleCueVisibility);    
+    LinkButton("fullscreen",ToggleFullScreen);    
+    CreateVideoSlider();   //==> let op, verstoort scherm
+    // CreateSoundSlider();
     InitSpeak();
-    // CreateButton("test",TestCall,document.body);
-    //CreateButton("start",startVideo,document.body);
-    //CreateButton("stop",stopVideo,document.body);
-    //CreateButton("pause",TogglePauseVideo,document.body);
-    
-    
+    LinkButton("test",TestCall);
     // CreateButton("closekeyboard",x=>document.blur(),document.getElementById('notes'));
-    
-    //const metaDom=document.getElementsByTagName("meta");
     var metaDom = document.getElementsByName("viewport");
-    //console.log("getting meta tag");
-    metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom
-    
-   // <meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86">
-    
-    
+    metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
     var newmeta=document.createElement("meta");
     newmeta.name="viewport";
-    newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";
-    //newmeta.insertAdjacentElement("afterend", metaDom);
-    
-    console.log(metaDom);
-    console.log(newmeta);
-    
-    //document.head.appendChild(newmeta);
-    // android chrome override via: open the Accessibility section, and find the option labeled "Force enable zoom."
-    
+    newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";   
     SetupSliders();
-
+    NavigateLessons();
+    
+    PrepareSlideIndicators();
+    SetupSlideWindow("slideplayer");
+    GetAllSlides(ipfspromise,'QmbZx57KgrMj1GfDr1XE9WnFMjJTNJFWZxsgbogBNYhrMW'); 
     
 }
-window.addEventListener('load', asyncloaded);  
-console.log("start");
+console.log(`In ${window.location.href} starting script: ${document.currentScript.src}`);
+window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
+/*  https://gist.github.com/kvyb/3b370c40696ffc222563c8a70276af15
+//window.addEventListener('load', (event) => {
+//  console.log('page is fully loaded');
+   //console.log(Webflow);
+//}); */
+async function SetupSlideWindow(windowid,slidesurl) {
+    var slidewindow=document.getElementById(windowid);
+    slideimage=document.createElement("img");
+    slideimage.src=slidesurl;
+    slideimage.style.width = "100%";
+    slideimage.style.height = "100%"; 
+    slidewindow.appendChild(slideimage);
+    SetSlide(1);
+}
+async function SetSlide(n) {
+    preferredslide=n;
+    if (slides[n])
+        slideimage.src=slides[n];
+}    
+async function GetAllSlides(ipfspromise,cid) {
+    console.log("In GetAllSlides");
+    var ipfs = await ipfspromise;    
+    var list = document.getElementsByClassName("w-slide");
+    for await (const file of ipfs.ls(cid)) {
+        var res = file.path.split("/");
+        var nums = res[1].replace(/[^0-9]/g,'');
+        var num = parseInt(nums);
+        slides[num]=`http://ipfs.io/ipfs/${file.path}`;
+        if (preferredslide && slideimage && slides[preferredslide]) {
+            slideimage.src=slides[preferredslide]; // in case SetSlide is called before retieving the list is ready
+            preferredslide = 0;
+        }
+    }
+}
+function PrepareSlideIndicators() {
+    console.log("In GetSlideIndicators");
+    var list = document.getElementsByClassName("slideposition");
+    SlideIndicatorTemplate =  list[0];
+    SlideIndicatorParent=list[0].parentNode
+    list[0].remove();
+}
+function SetSlideIndicator(slidenr,xposperc,lengthperc) {
+    console.log(`In SetSlideIndicator ${xposperc} ${lengthperc}`);
+    var cln = SlideIndicatorTemplate.cloneNode(true);
+    SlideIndicatorParent.appendChild(cln);
+    cln.style.left= (xposperc*100)+"%";
+    cln.style.width= (lengthperc*100)+"%";
+    
+    cln.title=`Slide: ${slidenr}`;
+    
+}    
+function SetupSlideIndicators() {  // called when video is setup & when slides have been read
+console.log(`In SetupSlideIndicators`);
+  var dur=GetDuration();
+  if (dur && setofsheets) {
+      
+     console.log(`In SetupSlideIndicators dur=${dur}`);  
+     console.log(setofsheets);
+     for (var i=0;i<setofsheets.subtitle.length;i++) {
+         SetSlideIndicator(i,parseFloat(setofsheets.subtitle[i].start) / dur,parseFloat(setofsheets.subtitle[i].dur) / dur)
+     }   
+  }
+}
+
+
+
+
+
+
