@@ -1,3 +1,4 @@
+console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 import "https://apis.google.com/js/api.js";
 
 // See https://developers.google.com/youtube/v3/docs/playlists/list?apix=true

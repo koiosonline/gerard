@@ -1520,11 +1520,11 @@ async function GetAllSlides(ipfspromise,cid) {
     }
 }
 function PrepareSlideIndicators() {
-    console.log("In GetSlideIndicators");
+    console.log("In PrepareSlideIndicators");
     var list = document.getElementsByClassName("slideposition");
     SlideIndicatorTemplate =  list[0];
     SlideIndicatorParent=list[0].parentNode
-    list[0].remove();
+ //   list[0].remove();
 }
 function SetSlideIndicator(slidenr,xposperc,lengthperc) {
     console.log(`In SetSlideIndicator ${xposperc} ${lengthperc}`);

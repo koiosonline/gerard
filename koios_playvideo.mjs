@@ -1,3 +1,4 @@
+console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 import {loadScriptAsync} from './koios_util.mjs';
 
 export async function SetupVideoWindowYouTube(id,youtubeid,onStateChange) { 
