@@ -8,28 +8,28 @@ export async function SetupVideoWindowYouTube(id,onStateChange) {
         loadScriptAsync("https://www.youtube.com/iframe_api"); // load this way to prevent a cors message   
     });
     await new Promise(async function(resolve, reject) {
-       player = new YT.Player(id, {
+       player = new YT.Player(id, {      // store in a div below the grid, otherwise IOS/safari makes is full heigth
             playerVars: { 
                 noCookie: true,  // testje
                 modestbranding: true, 
-                controls: 0,
+                controls: "1", // misschien nodig voor niet fullscreen
                 autoplay: 0,
                 origin:"https://koios.online",
                 rel:0, 
                 cc_lang_pref:"nl",
                 cc_load_policy:1,
-                playsinline:1    // for IOS
+                playsinline:"1"    // for IOS
             },     
             height: '100%',
             width: '100%',
-            videoId: "unknown",
+            videoId: "z9nux3Kt7Tk", //"unknown",
             events: {
-                'onReady': resolve, // resolve the promise
+                'onReady': x=>{ console.log("onReady");resolve(); }, // resolve the promise
                 'onStateChange': onStateChange  // callback                   
             }          
         });  
     });
-   console.log("In SetupVideoWindowYouTube, video is loaded");
+   console.log("In SetupVideoWindowYouTube, video is loaded");  
    return player; 
 }
 
@@ -166,6 +166,8 @@ SetVideoSeconds
     // SetupVideoWindowIPFS("videoplayer",vid_url)
     
 */ 
+  
+  
   
   
     

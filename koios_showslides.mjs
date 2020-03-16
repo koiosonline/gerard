@@ -20,11 +20,11 @@ var SecondsArraySlides;
 
 var prevslide=0;
 
-export async function SetupSlideWindow(windowid,slidesurl) {
+export async function SetupSlideWindow(windowid) {
     console.log("In SetupSlideWindow");
     var slidewindow=document.getElementById(windowid);
     slideimage=document.createElement("img");
-    slideimage.src=slidesurl;
+    
     slideimage.style.width = "100%";
     slideimage.style.height = "100%"; 
     slidewindow.appendChild(slideimage);

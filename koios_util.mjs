@@ -63,9 +63,10 @@ export function HideButton(nameButton,fHide) {
     var domiddraggable=document.getElementById(draggable); 
     var domidmousearea=document.getElementById(mousearea); 
     var domiddragarea=document.getElementById(dragarea); 
-    var arearect=domiddragarea.getBoundingClientRect();   
+    
         
      async function SliderDrag(ev) {   
+        var arearect=domiddragarea.getBoundingClientRect();   // recalc every time
         ev.preventDefault()            
         var x=undefined;
         var y=undefined;
@@ -77,13 +78,19 @@ export function HideButton(nameButton,fHide) {
         if (x) percx = (x - arearect.left) / arearect.width             
         if (ev.touches && ev.touches[0] && ev.touches[0].clientY) y=ev.touches[0].clientY;
         if (ev.clientY) y=ev.clientY; 
-        if (y) percy = (y - arearect.top) / arearect.height       
+        if (y) percy = (y - arearect.top) / arearect.height     
         XYCB(percx,percy);
     }
     
     function SetzIndex(fChange) {  
         domiddraggable.style.zIndex = (fChange? "-1": "")
         domidmousearea.style.zIndex  = (fChange? "1": "")
+        
+        
+        var arrchildren=domidmousearea.children;    
+        for (var i=0;i<arrchildren.length;i++) 
+            arrchildren[i].style.zIndex=(fChange? "-2": "")      
+        
     }
     
     async function SliderStart(ev) {
@@ -120,6 +127,6 @@ export function HideButton(nameButton,fHide) {
     }   
     domiddraggable.addEventListener('mousedown',  SliderStart);
     domiddraggable.addEventListener('touchstart', SliderStart, {passive:true} );     
-    domiddraggable.addEventListener('dragstart',  SliderStart);    
+  //  domiddraggable.addEventListener('dragstart',  SliderStart);    
 }
 

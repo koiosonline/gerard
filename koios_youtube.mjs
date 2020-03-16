@@ -23,6 +23,7 @@ async function LoadGapi() {
 }
 
 export async function GetYouTubePlaylists() {
+    
     await LoadGapi();
     var list=await gapi.client.youtube.playlists.list({
       "part": "snippet", // contentDetails
@@ -38,17 +39,32 @@ export async function GetYouTubePlaylists() {
         result.thumbnail = list.result.items[i].snippet.thumbnails.default.url;
         resultlist.push(result)
     }
+    console.log("In GetYouTubePlaylists");
+    console.log(resultlist);
     return resultlist;
 }
 
 export async function GetYouTubePlayListItems() {  
+
+    const queryString = window.location.search;
+    console.log(`In GetYouTubePlayListItems queryString=${queryString}`);
+
+    const urlParams = new URLSearchParams(queryString);
+    console.log(urlParams);
+    
+    let playlistId = urlParams.get('playlistId') || "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef";
+    
+
+    console.log(`playlistId=${playlistId}`);
+
+
     var nextPageToken="";
     var resultlist=[]
     await LoadGapi();
     do {
         var list=await gapi.client.youtube.playlistItems.list({ 
           "part": "snippet", // contentDetails
-          "playlistId": "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef",
+          "playlistId": playlistId,
           "maxResults": 50,
           "pageToken" : nextPageToken
         });
@@ -98,4 +114,4 @@ export async function GetYouTubePlayListItems() {
     return resultlist;    
 }
 
-    
+

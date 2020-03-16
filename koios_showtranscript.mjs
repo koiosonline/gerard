@@ -14,6 +14,7 @@ var previous_color=0
 var PrepareLanguageButtonsTemplate;
 var PrepareLanguageButtonsParent;
 var SetVideoSeconds;
+var TranscriptShownCB;
 
 export function SelectLanguage(language) {
     SelectTranscriptLanguage(language);
@@ -34,8 +35,9 @@ function SelectTranscriptLanguage(language) {
 
 
 
-export function SetVideoSecondsCB(_SetVideoSeconds) {
+export function SetVideoTranscriptCallbacks(_SetVideoSeconds,_TranscriptShownCB) {
     SetVideoSeconds = _SetVideoSeconds;    
+    TranscriptShownCB = _TranscriptShownCB;
 }    
 
 function SubtitleToSeconds(subtitle) {
@@ -56,8 +58,11 @@ function AddTranscripts(domid, subtitle,language) {
         domid.removeChild(domid.lastChild); // first remove previous children    
       
     for (var j=0;j < subtitle.length;j++) {
+        
+        var spanprefix=document.createElement("span");spanprefix.innerHTML=`Start: ${Math.round(parseFloat(subtitle[j].start))} `;domid.appendChild(spanprefix);
+        
         var span=document.createElement("span");
-        let txtstr=`Start: ${Math.round(parseFloat(subtitle[j].start))} ${subtitle[j].text}<br>`;
+        let txtstr=subtitle[j].text;
         txtstr = txtstr.replace(/\.[\.]+/, ''); // replace multiple dots with empty string
         txtstr = txtstr.replace(/\.[\.]+/, ''); // repeat for the situation where ... is added twice
         span.innerHTML=txtstr+" ";
@@ -65,6 +70,8 @@ function AddTranscripts(domid, subtitle,language) {
         span.startsecond=parseInt(subtitle[j].start);
         domid.appendChild(span);
         span.addEventListener("click",SubTitleClicked);
+        
+        var spansuffix=document.createElement("span");spansuffix.innerHTML="<br>";domid.appendChild(spansuffix);        
     }
 }    
 
@@ -78,6 +85,7 @@ function HighlightTransscript(id) {
     if (sub_span) {
         sub_span.style.color = 'green'; 
         previous_span = sub_span;
+        TranscriptShownCB(sub_span.innerHTML);
     }  
 }
 export function UpdateTranscript(CurrentPos) {   // called frequently

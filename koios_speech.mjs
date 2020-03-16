@@ -3,11 +3,11 @@ import {LinkButton} from './koios_util.mjs';
 var voices = [];
 var synth = window.speechSynthesis;
 var currentVoice=0;
-var fspeechon=0;
+
 var spsynthbtns;
 var PrepareSpeechIconsTemplate;
 var PrepareSpeechIconsParent;
-
+var fspeechon=false;
 
 export function SetSpeechLang (lang) {
     console.log("In SetSpeechLang");
@@ -42,7 +42,7 @@ export function SetSpeechLang (lang) {
     console.log(currentVoice);
     */
     
-function StartSpeak(text) {
+export function StartSpeak(text) {
     StopSpeak(); // stop preview texts
     if (fspeechon) {
         var utterThis = new SpeechSynthesisUtterance(text);
@@ -52,7 +52,7 @@ function StartSpeak(text) {
       // responsiveVoice.speak(text) } 
     }  
 }
-function StopSpeak() {  
+export function StopSpeak() {  
     if (fspeechon)
         synth.cancel();
    //  responsiveVoice.cancel()
@@ -117,17 +117,12 @@ export function InitSpeak() { // called once
      }
     // responsiveVoice.setDefaultVoice("Dutch Female");
 }
-function EnableSpeech(on) {
+export function EnableSpeech(on) {
     StopSpeak();
     fspeechon=on;
-    EnableSound(!fspeechon); // disable video sound when speech is on
+
 }
-export async function ToggleSpeech(){
-    if (ffirst) {
-        console.log("First ToggleSpeech");
-        ffirst=false;
-    }
-    fspeechon = !fspeechon; 
-    EnableSpeech(fspeechon);
-    
-}    
+
+export function IsSpeechOn() {
+    return fspeechon;
+}
