@@ -97,8 +97,10 @@ function SlidesToSeconds(sheets) {
 }
 
 export function UpdateSlide(CurrentPos) {   // called frequently
-   var res=SecondsArraySlides[ parseInt(CurrentPos)]
-   SetSlide(res);
+   if (SecondsArraySlides) {
+      var res=SecondsArraySlides[ parseInt(CurrentPos)]
+      SetSlide(res);
+   } 
 }
 
 

@@ -1,7 +1,38 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
-import {loadScriptAsync} from './koios_util.mjs';
+import {LinkButton,loadScriptAsync} from './koios_util.mjs';
 
+
+
+export async function SetVideoTitle(title) {
+
+    document.getElementById("videotitle").innerHTML = title;
+
+}
+
+export async function ShowVideoTitle(fShow) {
+    document.getElementById("videotitle").style.display=fShow?"flex":"none"; // flex is used to center the text
+    
+}
+
+
+
+   
+   
 export async function SetupVideoWindowYouTube(id,onStateChange) { 
+    var font=0;
+    
+    function FontResize() {
+        //player.setOption('captions', 'track', {'languageCode': 'es'});
+        //player.setOption('captions', 'track', {});
+
+        font++;
+        if (font > 3) font= -1;
+        console.log(`Setting font to: ${font}`);
+        player.setOption('captions', 'fontSize', font);
+    }
+   
+
+
     var player;
     await new Promise(async function(resolve, reject) {        // promise to be able to wait until ready
         window.onYouTubeIframeAPIReady = resolve;              // resolve the promise when iframe is ready    
@@ -12,7 +43,7 @@ export async function SetupVideoWindowYouTube(id,onStateChange) {
             playerVars: { 
                 noCookie: true,  // testje
                 modestbranding: true, 
-                controls: "1", // misschien nodig voor niet fullscreen
+                controls: "0", // misschien nodig voor niet fullscreen
                 autoplay: 0,
                 origin:"https://koios.online",
                 rel:0, 
@@ -30,6 +61,13 @@ export async function SetupVideoWindowYouTube(id,onStateChange) {
         });  
     });
    console.log("In SetupVideoWindowYouTube, video is loaded");  
+   
+   
+   LinkButton("font_resize",FontResize);
+
+
+   
+   
    return player; 
 }
 

@@ -4,27 +4,36 @@ import {AddSlide} from './koios_showslides.mjs';
 export var slides= [];
 
 var preferredslide=0;
+
+var ipfspromise;
+
 async function SetupIPFS() {
     console.log("In SetupIPFS");
+    if (ipfspromise) 
+        return ipfspromise;
+    
     await Promise.all( [ // see https://www.npmjs.com/package/ipfs
        loadScriptAsync("https://unpkg.com/ipfs/dist/index.js"),
        ]
     );
    console.log("Ipfs libraries loaded");
-   const ipfs = await window.Ipfs.create();
-   return ipfs;
+   ipfspromise =  window.Ipfs.create(); //await??
+   return ipfspromise;
 }
 
-var ipfspromise= SetupIPFS();
+
    
 function GetOneSlide(file) {  
     var res = file.path.split("/");
     var nums = res[1].replace(/[^0-9]/g,'');
     var num = parseInt(nums);
-    slides[num]=`http://ipfs.io/ipfs/${file.path}`;
+    slides[num]=`https://ipfs.io/ipfs/${file.path}`;
 }        
    
 export async function GetAllSlides() {
+    var ipfspromise= SetupIPFS();
+
+
     console.log("In GetAllSlides");
     var cid='QmbZx57KgrMj1GfDr1XE9WnFMjJTNJFWZxsgbogBNYhrMW'; 
     var ipfs = await ipfspromise;  

@@ -1,7 +1,7 @@
 
 
 var logtext;
-export async function SetupLogWindow() {  
+export function SetupLogWindow() {  // not async to
     logtext=document.createElement("pre"); // already create to be able to log
     logtext.style.width = "100%";
     logtext.style.height = "100%";   
@@ -14,6 +14,7 @@ export async function SetupLogWindow() {
     console.log("Switching to HTML logging");
     console.log=log;
     console.error=log;
+    console.warn=log;
     
 }
 export function log(s) {

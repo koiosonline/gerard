@@ -103,6 +103,8 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration,LoadVideoCB) 
     var vidinfo={};
     vidinfo.videoid=videoid;
     vidinfo.duration=duration;
+    vidinfo.txt=txt;
+    vidinfo.description=description;
     
     onlyLessonsIndexList.push(vidinfo);
     var index=onlyLessonsIndexList.length-1;

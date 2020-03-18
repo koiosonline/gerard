@@ -1,7 +1,7 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
-import {SetupVideoWindowYouTube} from './koios_playvideo.mjs';
+import {SetupVideoWindowYouTube,SetVideoTitle,ShowVideoTitle} from './koios_playvideo.mjs';
 import {DisplayLessons, GetLessonInfo} from './koios_lessons.mjs';
 import {LinkButton,HideButton,DragItem} from './koios_util.mjs';
 import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
@@ -13,7 +13,7 @@ import {} from './koios_notes.mjs';
 import {SetupSliders} from './koios_screenlayout.mjs';
 import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koios_speech.mjs';
 import {SetupLogWindow} from './koios_log.mjs';
-
+import {SetupChat} from './koios_chat.mjs';
 
 /* General comments
 https://gpersoon.com/koios/test/koios_video.js
@@ -100,7 +100,7 @@ var vidprogress=0;
 var slider=0; // global
 
 
-var font=0;
+
 
 
 var playerpromise;
@@ -327,6 +327,8 @@ async function startVideo() {
    //         console.log(player.getDebugText());
    //     console.log(player.getVideoData());
     
+    ShowVideoTitle(false);
+    
     if (video) {
         video.play();
         video.autoplay=true; // so after location change the video continues to play
@@ -347,6 +349,7 @@ function TranscriptShownCB(txt) {
 
 function stopVideo() {
     console.log("In stopVideo");
+    ShowVideoTitle(true);
     if (video) video.pause();
     if (player) player.pauseVideo();
     UpdateVideoIndicator(true);
@@ -371,14 +374,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function DisplayMessage(text) {    
-    var msg=document.getElementById("message");
-    console.log(msg);
-    msg.innerText=text;
-    msg.style.display="block";
-    await sleep(1000);
-    msg.style.display="none";    
-}
 
 
 export async function ToggleSpeech(){
@@ -394,16 +389,7 @@ export async function ToggleSpeech(){
 
 
    
-function TestCall() {
-    //player.setOption('captions', 'track', {'languageCode': 'es'});
-    //player.setOption('captions', 'track', {});
 
-    font++;
-    if (font > 3) font= -1;
-    console.log(`Setting font to: ${font}`);
-    player.setOption('captions', 'fontSize', font);
-}
-   
   
 
 
@@ -424,12 +410,13 @@ function ToggleCueVisibility() {
 
 async function LoadVideo(vidinfo) {
     console.log(`Loading video ${vidinfo.videoid}`);
+    console.log(vidinfo);
     player=await playerpromise;
     if (player)
         player.cueVideoById(vidinfo.videoid,0); // start at beginning   
     
     console.log(`In Loadvideo`);
-    
+    SetVideoTitle(vidinfo.txt);
 
     ClearSlideIndicators();
     GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
@@ -443,17 +430,9 @@ async function LoadVideo(vidinfo) {
 
 
 async function asyncloaded() {    
-    console.log(`In asyncloaded of script: ${import.meta.url}`);
+    console.log(`In asyncloaded of script: ${import.meta.url}`);   
     
-    
-
-    
-    
-    
-    SetupLogWindow();
     var lessonspromise=DisplayLessons(LoadVideo);
-    
-       
     
     playerpromise =SetupVideoWindowYouTube("videoplayer",onStateChange);   
     LinkButton("start",startVideo);    
@@ -467,7 +446,12 @@ async function asyncloaded() {
     CreateVideoSlider(); 
     // CreateSoundSlider();
     InitSpeak();
-    LinkButton("test",TestCall);
+    
+    
+    var chatlink="https://gitter.im/web3examples/test/~embed";
+    
+      SetupChat("chat",chatlink);
+    
     // CreateButton("closekeyboard",x=>document.blur(),document.getElementById('notes'));
     var metaDom = document.getElementsByName("viewport");
     metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
@@ -488,6 +472,9 @@ console.log("Init 4");
 console.log("Init 5");
     console.log("Init ready");
 }
+
+
+SetupLogWindow();
 
 var url = window.location.pathname;
 var filename = url.substring(url.lastIndexOf('/')+1);

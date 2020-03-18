@@ -1,5 +1,6 @@
 import {LinkButton} from './koios_util.mjs';    
-    
+import {DisplayMessage} from './koios_messages.mjs';  
+
     var NotesArea;
     function getVisibleTranscriptandCopyToClipboard() {
         console.log("getVisibleTranscriptandCopyToClipboard");
@@ -49,19 +50,21 @@ async function writeToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
         var msg=`Copied to clipboard (${text.length} characters)`;
-        console.log(msg);        
+        console.log(msg);
+        DisplayMessage(msg);
     } catch (error) {
         console.error(error);
     }
 }
 async function ShareNotes() {
     var toShare=NotesArea.innerText    
-    let err;   
-    await navigator.share({ title: "Sharing notes", text: toShare }).catch( x=>err=x);
-    if (err) {
-        writeToClipboard(toShare); 
-        DisplayMessage(`Copied to clipboard: ${toShare.slice(0,50)}`);
-     }
+    let err;
+    if (navigator && navigator.share) {
+        await navigator.share({ title: "Sharing notes", text: toShare }).catch( x=>err=x);
+        if (err) writeToClipboard(toShare);
+    }
+     else 
+         writeToClipboard(toShare);     
 } 
 
 
