@@ -1,26 +1,16 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
-
 import "https://apis.google.com/js/api.js";
 //import "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"; // date time conversion
 
 
-import {loadScriptAsync} from './koios_util.mjs';
+import {loadScriptAsync,LoadGapi} from './koios_util.mjs';
 
 loadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js")
 
 
 // See https://developers.google.com/youtube/v3/docs/playlists/list?apix=true
-async function LoadGapi() {
-  console.log('gapi load start');
-  await new Promise(function(resolve, reject) {  gapi.load('client:auth2', resolve); });
-  gapi.client.setApiKey("AIzaSyAllplvEtr_kYl9Nm_SG23Y2wSwrqPfkN0");
-  await gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest");
-  console.log('gapi loaded');
-  
-  LoadGapi=function(){} // next time: do nothing
-}
 
 export async function GetYouTubePlaylists() {
     

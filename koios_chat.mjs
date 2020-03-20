@@ -1,4 +1,4 @@
-import {LinkButton} from './koios_util.mjs';    
+import {LinkButton,InsertIFrame} from './koios_util.mjs';    
 
 
     
@@ -7,32 +7,10 @@ import {LinkButton} from './koios_util.mjs';
       
 export async function SetupChat(windowid,chatlink) {
     
-   var chatdom=document.getElementById(windowid);
    console.log("In setupchat");
-   console.log(chatdom);
-   
-   
-   
-   var chat=document.createElement("iframe");
-    chat.src=chatlink;
-    chat.width="100%"
-    chat.height="100%"
-    chat.style.height="100%"
-    chat.style.minHeight="100%"
-    
-    
- 
-    chat.style.position="absolute";
-    chat.style.top="0";
-    chat.style.left="0";
+   InsertIFrame(windowid,chatlink);
 
-
-    
-    
-   // chat.style.outline="1px";
-   // chat.style.outlineStyle="solid";
-    chatdom.appendChild(chat);
-
+/* can't access iframe
     function getChatandCopyToClipboard() {
         console.log("getChatandCopyToClipboard");        
         var text=chat.textContent;
@@ -42,6 +20,6 @@ export async function SetupChat(windowid,chatlink) {
         writeToClipboard(text);    
     }
     LinkButton("sharechat",getChatandCopyToClipboard); 
-
+*/
 // <div class="iframe-holder"><iframe src="https://www.koios.online/course-overview" seamless frameborder="0"></iframe></div>
 } 

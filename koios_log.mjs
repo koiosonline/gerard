@@ -11,11 +11,12 @@ export function SetupLogWindow() {  // not async to
     var position=document.getElementById("log"); 
     position.appendChild(logtext);    
     log("Test logwindow")
+    /*
     console.log("Switching to HTML logging");
     console.log=log;
     console.error=log;
     console.warn=log;
-    
+    */
 }
 export function log(s) {
     //console.log(s);

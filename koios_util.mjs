@@ -1,5 +1,21 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
+
+import "https://apis.google.com/js/api.js";
+
+export async function LoadGapi() {
+  console.log('gapi load start');
+  await new Promise(function(resolve, reject) {  gapi.load('client:auth2', resolve); });
+  gapi.client.setApiKey("AIzaSyBPDSeL1rNL9ILyN2rX11FnHeBePld7HOQ");
+  await gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest");
+  await gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest");
+  console.log('gapi loaded');
+  
+  LoadGapi=function(){} // next time: do nothing
+}
+
+
+
 export var loadScriptAsync = function(uri){
   return new Promise((resolve, reject) => {
     var tag = document.createElement('script');
@@ -130,3 +146,22 @@ export function HideButton(nameButton,fHide) {
   //  domiddraggable.addEventListener('dragstart',  SliderStart);    
 }
 
+export function InsertIFrame(windowid,url) {
+   var domid=document.getElementById(windowid);   
+   console.log(domid);
+   var iframe=document.createElement("iframe");
+    iframe.src=url;
+    iframe.width="100%"
+    iframe.height="100%"
+    iframe.style.height="100%"
+    iframe.style.minHeight="100%" 
+    iframe.style.position="absolute";
+    iframe.style.top="0";
+    iframe.style.left="0";
+   // iframe.style.outline="1px";
+   // iframe.style.outlineStyle="solid";
+    domid.appendChild(iframe);
+    console.log("In InsertIFrame");
+    console.log(iframe);
+    return iframe;
+}

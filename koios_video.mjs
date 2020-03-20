@@ -1,19 +1,21 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
-import {SetupVideoWindowYouTube,SetVideoTitle,ShowVideoTitle} from './koios_playvideo.mjs';
-import {DisplayLessons, GetLessonInfo} from './koios_lessons.mjs';
-import {LinkButton,HideButton,DragItem} from './koios_util.mjs';
-import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
-import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
-import {} from './koios_getslides.mjs';
-import {FoundSlides,ClearSlideIndicators,UpdateSlide,SetupSlideWindow} from './koios_showslides.mjs';
-import {} from './koios_chat.mjs';
-import {} from './koios_notes.mjs';
-import {SetupSliders} from './koios_screenlayout.mjs';
-import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koios_speech.mjs';
-import {SetupLogWindow} from './koios_log.mjs';
-import {SetupChat} from './koios_chat.mjs';
+    import {SetupVideoWindowYouTube,SetVideoTitle,ShowVideoTitle} from './koios_playvideo.mjs';
+    import {DisplayLessons, GetLessonInfo} from './koios_lessons.mjs';
+    import {LinkButton,HideButton,DragItem} from './koios_util.mjs';
+    import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
+    import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
+    import {} from './koios_getslides.mjs';
+    import {FoundSlides,ClearSlideIndicators,UpdateSlide,SetupSlideWindow} from './koios_showslides.mjs';
+    import {} from './koios_chat.mjs';
+    import {} from './koios_notes.mjs';
+    import {SetupSliders} from './koios_screenlayout.mjs';
+    import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koios_speech.mjs';
+    import {SetupLogWindow} from './koios_log.mjs';
+    import {SetupChat} from './koios_chat.mjs';
+    import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
+
 
 /* General comments
 https://gpersoon.com/koios/test/koios_video.js
@@ -420,13 +422,8 @@ async function LoadVideo(vidinfo) {
 
     ClearSlideIndicators();
     GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
-    
-    
+    GetSetupLitAndAssInfo(vidinfo.txt);
 }
-
-
-
-   
 
 
 async function asyncloaded() {    
@@ -446,12 +443,9 @@ async function asyncloaded() {
     CreateVideoSlider(); 
     // CreateSoundSlider();
     InitSpeak();
-    
-    
-    var chatlink="https://gitter.im/web3examples/test/~embed";
-    
-      SetupChat("chat",chatlink);
-    
+    var chatlink="https://gitter.im/web3examples/test/~embed";    
+    SetupChat("chat",chatlink);
+    SetupLitAndAss();
     // CreateButton("closekeyboard",x=>document.blur(),document.getElementById('notes'));
     var metaDom = document.getElementsByName("viewport");
     metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
@@ -460,16 +454,11 @@ async function asyncloaded() {
     newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";   
     SetupSliders();
     //NavigateLessons();   
-   console.log("Init 1");    
     player=await playerpromise;    
-console.log("Init 2");
     SetVideoTranscriptCallbacks(SetVideoSeconds,TranscriptShownCB);
-console.log("Init 3");    
     SelectLanguage("nl");    
-console.log("Init 4");    
-    //console.log(player); 
     SetupSlideWindow("slideplayer");
-console.log("Init 5");
+    
     console.log("Init ready");
 }
 
