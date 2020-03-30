@@ -11,7 +11,7 @@ export async function SetupSliders() {
     
 
     function XYUpdate(percx,percy) {
-        console.log(percx,percy)
+        //console.log(percx,percy)
         const snap = 0.01;
         var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
         var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*2}fr`;
@@ -21,14 +21,14 @@ export async function SetupSliders() {
         var r=`${top} ${SetMiddlev1} ${SetMiddlev2} ${bot}`;
         grid.style["gridTemplateColumns"] = c;
         grid.style["gridTemplateRows"]    = r;
-        console.log(c)
-        console.log(r);
+       // console.log(c)
+       // console.log(r);
         
         
         
         var a=window.getComputedStyle(grid).getPropertyValue("grid-template-columns")
         var b=window.getComputedStyle(grid).getPropertyValue("grid-template-rows")
-        console.log(`${a} ///  ${b}`);
+        //console.log(`${a} ///  ${b}`);
         
         
     }      

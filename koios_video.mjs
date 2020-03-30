@@ -1,13 +1,13 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
-
+ // imports
     import {SetupVideoWindowYouTube,SetVideoTitle,ShowVideoTitle} from './koios_playvideo.mjs';
-    import {DisplayLessons, GetLessonInfo} from './koios_lessons.mjs';
-    import {LinkButton,HideButton,DragItem} from './koios_util.mjs';
+    import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koios_lessons.mjs';
+    import {LinkButton,HideButton,DragItem,publish,subscribe} from './koios_util.mjs';
     import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
     import {} from './koios_getslides.mjs';
-    import {FoundSlides,ClearSlideIndicators,UpdateSlide,SetupSlideWindow} from './koios_showslides.mjs';
+    import {FoundSlides,PrepareAndLoadSlides,UpdateSlide,SetupSlideWindow} from './koios_showslides.mjs';
     import {} from './koios_chat.mjs';
     import {} from './koios_notes.mjs';
     import {SetupSliders} from './koios_screenlayout.mjs';
@@ -15,103 +15,36 @@ console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
     import {SetupLogWindow} from './koios_log.mjs';
     import {SetupChat} from './koios_chat.mjs';
     import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
+    import {} from './koios_test.mjs';
+    import {Relax,InitPopup} from './koios_popup.mjs';
 
 
-/* General comments
-https://gpersoon.com/koios/test/koios_video.js
-
-// note: when connected via USB & full screen: playing video is flickering
-//https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
-// <script src='https://raw.githubusercontent.com/web3examples/lib/master/koios_video.js'></script>  
-// <script src='https://web3examples.com/lib/koios_video.js'></script>  
-// <script src='https://gpersoon.com/koios/koios_video.js'></script>  
-// https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
-// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
-// http://ronallo.com/demos/webvtt-cue-settings/
-// https://developer.mozilla.org/en-US/docs/Web/API/TextTrack 
-https://developers.google.com/youtube/iframe_api_reference
-https://developers.google.com/youtube/player_parameters
-https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25370  (does work)
-https://stackoverflow.com/questions/13735783/youtube-api-how-to-use-custom-controls-to-turn-captions-on-off-change-languag/38346968
-https://terrillthompson.com/648
-
-player.getOptions() => "captions"
-player.getOptions('captions')=>
-0: "reload"
-1: "fontSize"
-2: "track"
-3: "tracklist"
-4: "translationLanguages"
-5: "sampleSubtitle"
-
-player.getOption('captions', 'tracklist');
-0: {languageCode: "zh-CN", languageName: "Chinese (China)", displayName: "Chinese (China)", kind: "", name: null, …}
-1: {languageCode: "nl", languageName: "Dutch", displayName: "Dutch", kind: "", name: null, …}
-2: {languageCode: "en", languageName: "English", displayName: "English", kind: "", name: null, …}
-3: {languageCode: "fr-FR", languageName: "French (France)", displayName: "French (France)", kind: "", name: null, …}
-4: {languageCode: "de", languageName: "German", displayName: "German", kind: "", name: null, …}
-5: {languageCode: "ru", languageName: "Russian", displayName: "Russian", kind: "", name: null, …}
-6: {languageCode: "es", languageName: "Spanish", displayName: "Spanish", kind: "", name: null, …}
-
-player.getOption('captions', 'track');
-{languageCode: "nl", languageName: "Dutch", displayName: "Dutch", kind: "", name: null, …}
-
-layer.getOption('captions', 'translationLanguages')
-(104) [{…}, {…},
-
-player.setOption('captions', 'track', {'languageCode': 'nl'});
-player.setOption('captions', 'track', {});
-
-
-
- player.setOption("captions", "displaySettings", {"background": "#fff"}); // doesnt work
-
-
-
-*/  
-
+export var player=0;
+export var currentduration;
 { // Global variables
 var position;
 var logpos;
 var logtext=0;
 var logipfs;
-var player=0;
 
 var video=0;
 var slide;
-
 var ToggleCueVisibilityStatus=true;
-;
-
-
 var SecondsToSubtitle=[];
-
 var globalyoutubeid; // global for onYouTubeIframeAPIReady
-
-
 var previous_colour=""
 var previous_row=-1;
 var table
 var tablediv
 var fTriedFullScreen=false;
 var fFullScreen=false;
-
 var defaultvolume=100;
 var vidproginput=0;
 var vidprogress=0;
 var slider=0; // global
-
-
-
-
-
 var playerpromise;
 var fSoundOn;
-
 }    
-
-
-
 function GetDuration() {
     if (video) return video.duration;
     if (player && player.getDuration) return  player.getDuration();
@@ -135,33 +68,20 @@ async function VideoLocation() {
     UpdateSlide(CurrentPos);
     SetVideoProgressBar(parseFloat (CurrentPos / Duration ));   
 }  
- 
-
-async function onStateChange(event) {
-    console.log(`In onStateChange ${event.data}`);
-  
-     switch (event.data) {
-         case 1: startVideo();break;
-         case 0:                     // ended      
-         case 2: stopVideo();break;  // pause
-         case 5: 
-         
-     }
-}    // YT.PlayerState.PLAYING
-//-1 – unstarted
-//0 – ended
-//1 – playing
-//2 – paused
-//3 – buffering
-//5 – video cued
-    //;A("YT.PlayerState.UNSTARTED", -1);
-    //A("YT.PlayerState.ENDED", 0);
-    //A("YT.PlayerState.PLAYING", 1);
-    //A("YT.PlayerState.PAUSED", 2);
-    //A("YT.PlayerState.BUFFERING", 3);
-    //A("YT.PlayerState.CUED", 5);
 
 
+
+
+async function NextVideo() {
+    stopVideo();
+    
+    await Relax();
+    
+    if (CurrentLesson == LastLesson) 
+        publish ("lessonsend") 
+    else      
+        SelectLesson(CurrentLesson +1);
+}    
 
 
 async function tcallback() {
@@ -171,7 +91,6 @@ async function tcallback() {
    if (!IsVideoPaused())
         setTimeout( tcallback, 1000); // 400
 }    
-
 /*
 function DisplayCurrentFunctionName(args) {
             var ownName = args.callee.toString();
@@ -226,7 +145,6 @@ function SetFullScreen(fSetFullScreen) {
 function ToggleFullScreen() {
     SetFullScreen(!fFullScreen);
 }    
-
 function GetVolume() {
     if (video) return video.volume;
     if (player && player.getVolume) return player.getVolume();
@@ -253,7 +171,6 @@ function CreateSoundSlider() {
     divsoundslider.appendChild(input);
     SetVolume(defaultvolume);
 }   
- 
 function ToggleSound() {
    fSoundOn = !fSoundOn;
    EnableSound(fSoundOn);
@@ -261,8 +178,6 @@ function ToggleSound() {
     
    document.getElementById("audio").style.color=fSoundOn?"red":"white"
 }
-
-
 function EnableSound(fOn) {
     fSoundOn = fOn;// store state
        if (video)
@@ -275,10 +190,7 @@ function EnableSound(fOn) {
             player.mute();
     
 }   
-    
-
-
-async function SetVideoSeconds(seconds) {
+export async function SetVideoSeconds(seconds) {
     //console.log(`In SetVideoSeconds, moving to ${seconds}`);
 
     if (player)
@@ -298,8 +210,6 @@ async function SetVideoProgressBar(perc) {
         slider.style.width =  (perc*100)+"%";   
 
 }
-
-
 export async function CreateVideoSlider() {
     slider=document.getElementById("videodrag").parentElement; 
 
@@ -312,7 +222,6 @@ export async function CreateVideoSlider() {
     SetVideoProgressBar(0);
     DragItem("videodrag","videoprogressbar","mainscreen",XYUpdate);
 }
- 
 function IsVideoPaused(){
     var fpaused=true;
     if (video)  fpaused=video.paused
@@ -324,7 +233,7 @@ async function UpdateVideoIndicator(fpaused) {
     HideButton("start",!fpaused);
     HideButton("pause",fpaused);
 }
-async function startVideo() {
+export async function startVideo() {
    // console.log("In startVideo");
    //         console.log(player.getDebugText());
    //     console.log(player.getVideoData());
@@ -343,12 +252,10 @@ async function startVideo() {
 
     tcallback(); // callbacks for the progress
 }
-
 function TranscriptShownCB(txt) {
     console.log(`In TranscriptShownCB ${txt}`);
       StartSpeak(txt);
 }
-
 function stopVideo() {
     console.log("In stopVideo");
     ShowVideoTitle(true);
@@ -375,26 +282,11 @@ function TogglePauseVideo() {
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-
-
 export async function ToggleSpeech(){
-//    if (ffirst) {
-//        console.log("First ToggleSpeech");
-//        ffirst=false;
-    //}
     var fspeechon = !IsSpeechOn(); 
     EnableSpeech(fspeechon);
-    EnableSound(!fspeechon); // disable video sound when speech is on
-        
+    EnableSound(!fspeechon); // disable video sound when speech is on        
 } 
-
-
-   
-
-  
-
-
 function SetPlayerSubtitle(lang) {
    if (player &&  player.setOption) 
         player.setOption('captions', 'track', lang==""?{}:{'languageCode': lang}); 
@@ -403,35 +295,44 @@ function CueVisible(lang) { // if lang="" then cue invisible
     if (player)
         SetPlayerSubtitle(lang)
 }  
-
-
 function ToggleCueVisibility() { 
     ToggleCueVisibilityStatus = !ToggleCueVisibilityStatus;
     CueVisible(ToggleCueVisibilityStatus?currentlang:"");
 } 
 
-async function LoadVideo(vidinfo) {
-    console.log(`Loading video ${vidinfo.videoid}`);
-    console.log(vidinfo);
+
+
+subscribe('videostart',  x=> { startVideo(); } );
+subscribe('videocued',   x=> {} ); // do nothing, wait for user to start
+subscribe('videopause',  x=> { stopVideo(); } );
+subscribe('videostop',   x=> { stopVideo(); } );
+subscribe('videoend',    NextVideo);
+
+async function LoadVideo(vidinfo) { // call when first video is loaded or a diffent video is selected
+    
+    console.log(`Loading video ${vidinfo.videoid} ${vidinfo.txt}`);
+    //console.log(vidinfo);
     player=await playerpromise;
     if (player)
         player.cueVideoById(vidinfo.videoid,0); // start at beginning   
     
+    currentduration = vidinfo.duration
     console.log(`In Loadvideo`);
     SetVideoTitle(vidinfo.txt);
 
-    ClearSlideIndicators();
+    PrepareAndLoadSlides(vidinfo);
+    
     GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
     GetSetupLitAndAssInfo(vidinfo.txt);
+    
+    
 }
-
-
 async function asyncloaded() {    
     console.log(`In asyncloaded of script: ${import.meta.url}`);   
     
     var lessonspromise=DisplayLessons(LoadVideo);
     
-    playerpromise =SetupVideoWindowYouTube("videoplayer",onStateChange);   
+    playerpromise =SetupVideoWindowYouTube("videoplayer");   
     LinkButton("start",startVideo);    
     LinkButton("stop",stopVideo);    
     LinkButton("pause",TogglePauseVideo);
@@ -444,7 +345,7 @@ async function asyncloaded() {
     // CreateSoundSlider();
     InitSpeak();
     var chatlink="https://gitter.im/web3examples/test/~embed";    
-    SetupChat("chat",chatlink);
+    //SetupChat("chat",chatlink);
     SetupLitAndAss();
     // CreateButton("closekeyboard",x=>document.blur(),document.getElementById('notes'));
     var metaDom = document.getElementsByName("viewport");
@@ -454,6 +355,9 @@ async function asyncloaded() {
     newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";   
     SetupSliders();
     //NavigateLessons();   
+    
+    
+    InitPopup();
     player=await playerpromise;    
     SetVideoTranscriptCallbacks(SetVideoSeconds,TranscriptShownCB);
     SelectLanguage("nl");    
@@ -462,13 +366,10 @@ async function asyncloaded() {
     console.log("Init ready");
 }
 
-
 SetupLogWindow();
-
 var url = window.location.pathname;
 var filename = url.substring(url.lastIndexOf('/')+1);
 console.log(filename);
-
 //console.log(`In ${window.location.href} starting script: ${document.currentScript.src}`);
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
 /*  https://gist.github.com/kvyb/3b370c40696ffc222563c8a70276af15
@@ -476,5 +377,4 @@ window.addEventListener('DOMContentLoaded', asyncloaded);  // load
 //  console.log('page is fully loaded');
    //console.log(Webflow);
 //}); */
-
 

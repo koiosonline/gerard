@@ -59,9 +59,9 @@ export function StopSpeak() {
 }
 
 function populateVoiceList() {
-    console.log("In populateVoiceList callback");
+    //console.log("In populateVoiceList callback");
     voices = synth.getVoices();  
-    console.log(voices);
+    //console.log(voices);
     PrepareSpeechIcons()   
     for (var i=0;i<voices.length;i++) {
         var cln = PrepareSpeechIconsTemplate.cloneNode(true);

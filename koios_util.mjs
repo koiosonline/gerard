@@ -3,14 +3,18 @@ console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import "https://apis.google.com/js/api.js";
 
+
 export async function LoadGapi() {
-  console.log('gapi load start');
+  //console.log('gapi load start');
   await new Promise(function(resolve, reject) {  gapi.load('client:auth2', resolve); });
   gapi.client.setApiKey("AIzaSyBPDSeL1rNL9ILyN2rX11FnHeBePld7HOQ");
-  await gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest");
-  await gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest");
-  console.log('gapi loaded');
-  
+  await Promise.all( [ 
+        gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"),
+        gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"),
+        //   gapi.client.load("https://content.googleapis.com/discovery/v1/apis/slides/v1/rest");  doesn't work because of authorization issues
+       ]
+    );  
+  //console.log('gapi loaded');  
   LoadGapi=function(){} // next time: do nothing
 }
 
@@ -148,7 +152,7 @@ export function HideButton(nameButton,fHide) {
 
 export function InsertIFrame(windowid,url) {
    var domid=document.getElementById(windowid);   
-   console.log(domid);
+   //console.log(domid);
    var iframe=document.createElement("iframe");
     iframe.src=url;
     iframe.width="100%"
@@ -161,7 +165,31 @@ export function InsertIFrame(windowid,url) {
    // iframe.style.outline="1px";
    // iframe.style.outlineStyle="solid";
     domid.appendChild(iframe);
-    console.log("In InsertIFrame");
-    console.log(iframe);
+    //console.log("In InsertIFrame");
+    //console.log(iframe);
     return iframe;
 }
+
+
+// based on https://jsmanifest.com/the-publish-subscribe-pattern-in-javascript/
+
+
+const subscribers = {}
+
+export function publish(eventName, data) {
+    console.log(`publish ${eventName}`);
+    if (!Array.isArray(subscribers[eventName])) { return }
+    subscribers[eventName].forEach((callback) => {  callback(data)  })
+}
+
+export function subscribe(eventName, callback) {
+  if (!Array.isArray(subscribers[eventName])) {
+    subscribers[eventName] = []
+  }
+  subscribers[eventName].push(callback)
+  const index = subscribers[eventName].length - 1 
+  var f= function(){subscribers[eventName].splice(index, 1) }
+  return f;
+}
+  
+  

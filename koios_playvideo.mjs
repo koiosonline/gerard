@@ -1,6 +1,59 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
-import {LinkButton,loadScriptAsync} from './koios_util.mjs';
 
+
+/* General comments
+
+// note: when connected via USB & full screen: playing video is flickering
+//https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
+// <script src='https://raw.githubusercontent.com/web3examples/lib/master/koios_video.js'></script>  
+// <script src='https://web3examples.com/lib/koios_video.js'></script>  
+// <script src='https://gpersoon.com/koios/koios_video.js'></script>  
+// https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track
+// http://ronallo.com/demos/webvtt-cue-settings/
+// https://developer.mozilla.org/en-US/docs/Web/API/TextTrack 
+https://developers.google.com/youtube/iframe_api_reference
+https://developers.google.com/youtube/player_parameters
+https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25370  (does work)
+https://stackoverflow.com/questions/13735783/youtube-api-how-to-use-custom-controls-to-turn-captions-on-off-change-languag/38346968
+https://terrillthompson.com/648
+
+player.getOptions() => "captions"
+player.getOptions('captions')=>
+0: "reload"
+1: "fontSize"
+2: "track"
+3: "tracklist"
+4: "translationLanguages"
+5: "sampleSubtitle"
+
+player.getOption('captions', 'tracklist');
+0: {languageCode: "zh-CN", languageName: "Chinese (China)", displayName: "Chinese (China)", kind: "", name: null, …}
+1: {languageCode: "nl", languageName: "Dutch", displayName: "Dutch", kind: "", name: null, …}
+2: {languageCode: "en", languageName: "English", displayName: "English", kind: "", name: null, …}
+3: {languageCode: "fr-FR", languageName: "French (France)", displayName: "French (France)", kind: "", name: null, …}
+4: {languageCode: "de", languageName: "German", displayName: "German", kind: "", name: null, …}
+5: {languageCode: "ru", languageName: "Russian", displayName: "Russian", kind: "", name: null, …}
+6: {languageCode: "es", languageName: "Spanish", displayName: "Spanish", kind: "", name: null, …}
+
+player.getOption('captions', 'track');
+{languageCode: "nl", languageName: "Dutch", displayName: "Dutch", kind: "", name: null, …}
+
+layer.getOption('captions', 'translationLanguages')
+(104) [{…}, {…},
+
+player.setOption('captions', 'track', {'languageCode': 'nl'});
+player.setOption('captions', 'track', {});
+
+
+
+ player.setOption("captions", "displaySettings", {"background": "#fff"}); // doesnt work
+
+
+
+*/  
+
+import {LinkButton,loadScriptAsync,publish} from './koios_util.mjs';
 
 
 export async function SetVideoTitle(title) {
@@ -16,9 +69,34 @@ export async function ShowVideoTitle(fShow) {
 
 
 
+async function onStateChange(event) {
+    //console.log(`In onStateChange ${event.data}`);
+  
+     switch (event.data) {
+         case -1: publish ("videounstarted"); break;
+         case  0: publish ("videoend");       break;
+         case  1: publish ("videostart");     break;
+         case  2: publish ("videopause");     break;
+         case  3: publish ("videobuffering"); break;
+         case  5: publish ("videocued");      break;
+         
+     }
+}    // YT.PlayerState.PLAYING
+//-1 – unstarted
+//0 – ended
+//1 – playing
+//2 – paused
+//3 – buffering
+//5 – video cued
+    //;A("YT.PlayerState.UNSTARTED", -1);
+    //A("YT.PlayerState.ENDED", 0);
+    //A("YT.PlayerState.PLAYING", 1);
+    //A("YT.PlayerState.PAUSED", 2);
+    //A("YT.PlayerState.BUFFERING", 3);
+    //A("YT.PlayerState.CUED", 5);
    
    
-export async function SetupVideoWindowYouTube(id,onStateChange) { 
+export async function SetupVideoWindowYouTube(id) { 
     var font=0;
     
     function FontResize() {
@@ -53,7 +131,7 @@ export async function SetupVideoWindowYouTube(id,onStateChange) {
             },     
             height: '100%',
             width: '100%',
-            videoId: "z9nux3Kt7Tk", //"unknown",
+            videoId:  "unknown",// "z9nux3Kt7Tk",
             events: {
                 'onReady': x=>{ console.log("onReady");resolve(); }, // resolve the promise
                 'onStateChange': onStateChange  // callback                   

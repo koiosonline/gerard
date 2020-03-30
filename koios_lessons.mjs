@@ -8,7 +8,14 @@ var PrepareLessonsListTemplate;
 var PrepareLessonsListParent;  
 var PrepareChapterTemplate;   
 var PrepareChapterParent;  
-var CurrentLesson=0;
+export var CurrentLesson=0;
+export var LastLesson=0;
+
+
+var buttonBack;
+var buttonForward;
+
+var globalLoadVideoCB;
 var globalLessonslist; // format:
 // title   
 // chapter   (boolean)
@@ -56,7 +63,13 @@ class Video {
 
 var onlyLessonsIndexList=[]
 
+
+
+
+
 export async function DisplayLessons(LoadVideoCB) {
+    globalLoadVideoCB = LoadVideoCB;
+    PrepButtons();
     var x=await GetYouTubePlaylists()
     var items=await GetYouTubePlayListItems()
     
@@ -64,11 +77,11 @@ export async function DisplayLessons(LoadVideoCB) {
        if (items[i].chapter)
           AddChapter(items[i].title)
        else {
-          AddLessonsItem(items[i].title,items[i].thumbnail,items[i].description,items[i].videoid,items[i].duration,LoadVideoCB);
+          AddLessonsItem(items[i].title,items[i].thumbnail,items[i].description,items[i].videoid,items[i].duration);
        } 
     }    
     globalLessonslist = items;
-    return SelectLesson(3,LoadVideoCB) // select a lesson with slides
+    return SelectLesson(1) // select a lesson with slides
 }
 
 
@@ -97,7 +110,7 @@ function PrepareLessonsList() {
 }    
 
 
-function AddLessonsItem(txt,thumbnail,description,videoid,duration,LoadVideoCB) {
+function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     PrepareLessonsList();
     //console.log(`In AddLessonsItem ${txt} `);
     var vidinfo={};
@@ -106,9 +119,10 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration,LoadVideoCB) 
     vidinfo.txt=txt;
     vidinfo.description=description;
     
-    onlyLessonsIndexList.push(vidinfo);
-    var index=onlyLessonsIndexList.length-1;
+    onlyLessonsIndexList.push(vidinfo);    
+    LastLesson=onlyLessonsIndexList.length-1; // allways keep this var updated.
     
+    var index = LastLesson;
     var cln = PrepareLessonsListTemplate.cloneNode(true);
     PrepareLessonsListParent.appendChild(cln);
     cln.getElementsByTagName("div")[0].innerHTML=txt;
@@ -117,7 +131,7 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration,LoadVideoCB) 
     
     LinkButton(cln.id,x=> {
         console.log(`select lesson ${index}`);
-        SelectLesson(index,LoadVideoCB,duration)
+        SelectLesson(index)
     });
     
 } 
@@ -132,22 +146,17 @@ function AddChapter(txt) {
     cln.getElementsByTagName("div")[0].innerHTML=txt;
 } 
 
+  
 
+export async function SelectLesson(index) {   
 
+    console.log(`In SelectLesson index=${index}`);
+    if (index < 0)          index = 0;
+    if (index > LastLesson) index = LastLesson;
+    
+    HideButton(buttonBack,    index <= 0);
+    HideButton(buttonForward, index >= LastLesson );
 
- 
-var fPrepped=false;
-
-async function SelectLesson(index,LoadVideoCB) {   
-    function PrepButtons(buttonBack,buttonForward) {
-        if (!fPrepped) {
-            LinkButton(buttonBack   ,x=> SelectLesson(CurrentLesson-1,LoadVideoCB));
-            LinkButton(buttonForward,x=> SelectLesson(CurrentLesson+1,LoadVideoCB));
-            fPrepped=true;
-        }
-         HideButton(buttonBack,    CurrentLesson-1 < 0);
-         HideButton(buttonForward, CurrentLesson+1 >= onlyLessonsIndexList.length );
-    }    
     var prevdomid=document.getElementById(`lesson-${CurrentLesson}`);
     if (prevdomid) {        
        prevdomid.style.borderColor=""; // reset to original
@@ -156,24 +165,20 @@ async function SelectLesson(index,LoadVideoCB) {
     if (domid)
        domid.style.borderColor="red";
    CurrentLesson=index;   
-   PrepButtons("back","forward");
-   return LoadVideoCB(onlyLessonsIndexList[CurrentLesson]);   
+  
+   globalLoadVideoCB(onlyLessonsIndexList[CurrentLesson]);   
 }
 
 
-function MoveLesson(fNext) { // false is previous, true is next
-    startLesson += direction;
- 
-    if (startLesson < 0) return MoveLesson(0); // search first lesson
-    if (startLesson >= globalLessonslist.length) startLesson=globalLessonslist.length;
- 
-    while (globalLessonslist[startLesson].chapter) {
-        CurrentLesson += (direction==0?1:direction);
-        if (startLesson < 0) return -1;
-        if (startLesson >= globalLessonslist.length) return globalLessonslist.length;
-    } 
-    return startLesson; 
+function PrepButtons() {
+    buttonBack=LinkButton("back"   ,x=>SelectLesson(CurrentLesson -1));
+    buttonForward=LinkButton("forward",x=>SelectLesson(CurrentLesson +1));
+    PrepButtons=function(){} // next time do nothing
 }
+ 
+
+ 
+/* 
 
 
 export async function GetLessonInfo(lessonspromise,direction=0) { // -1 is previous, 0 is current, +1 is next
@@ -193,6 +198,7 @@ export async function GetLessonInfo(lessonspromise,direction=0) { // -1 is previ
     console.log(CurrentLesson);
     return res.videoid;
 }
+*/
 
 
     

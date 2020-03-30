@@ -25,7 +25,7 @@ export async function GetDrive(parentid) {
     //console.log(list.result.files[0]);
     const files = list.result.files;
     if (files.length) {
-      //console.log('Files:');
+      console.log('in GetDrive Files:');
       files.map((file) => {
         
         if (file.mimeType =="application/vnd.google-apps.folder") // then it's a folder
@@ -42,6 +42,10 @@ export async function GetDrive(parentid) {
 }
 
 GetDrive("1cUv5yOMxPnb9AAJCt22GD6jkev0IoWye");   // studenten materiaal
+
+
+
+
 //console.log(resultlist);
 
 var litdomid;
@@ -51,16 +55,16 @@ export function SetupLitAndAss() {
     
      litdomid = InsertURL("literature","");
      assdomid = InsertURL("quiz","");
-     console.log("In SetupLitAndAss");
-       console.log(litdomid);
-    console.log(assdomid);
+    // console.log("In SetupLitAndAss");
+    //   console.log(litdomid);
+    //console.log(assdomid);
 }    
 
 export async function GetSetupLitAndAssInfo(title) {
     
     title = title.replace("BC-", "");
     title = title.split(" ")[0];
-    console.log(`GetDriveInfo ${title}`);
+    //console.log(`GetDriveInfo ${title}`);
     
 
     function FindLiterature(line) { 
@@ -74,27 +78,29 @@ export async function GetSetupLitAndAssInfo(title) {
     
     var lit=resultlist.find(FindLiterature);     
     var ass=resultlist.find(FindAssessment);     
-    console.log(lit);
-    console.log(ass);
+    //console.log(lit);
+    //console.log(ass);
                                       // note embedding doesn't work
-    litdomid.href=lit.url;
-    litdomid.innerHTML = lit.name;    
-    assdomid.href=ass.url;
-    assdomid.innerHTML = ass.name;    
-    console.log(litdomid);
-    console.log(assdomid);
+    
+    litdomid.href=lit?lit.url:"";
+    litdomid.innerHTML = lit?lit.name:"";
+    
+    assdomid.href=ass?ass.url:"";
+    assdomid.innerHTML = ass?ass.name:"";
+   // console.log(litdomid);
+   // console.log(assdomid);
 }    
 
 
 function InsertURL(windowid,url) {
    var domid=document.getElementById(windowid);   
-   console.log(domid);
+   //console.log(domid);
    var a=document.createElement("a");
     a.href=url;
     a.innerHTML="link";
     a.target="_blank";
     domid.appendChild(a);
-    console.log("In InsertURL");
-    console.log(a);
+   // console.log("In InsertURL");
+   // console.log(a);
     return a;
 }

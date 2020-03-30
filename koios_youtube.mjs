@@ -1,7 +1,10 @@
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
-import "https://apis.google.com/js/api.js";
+
+import( "https://apis.google.com/js/api.js");
+
+
 //import "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"; // date time conversion
 
 
@@ -29,20 +32,21 @@ export async function GetYouTubePlaylists() {
         result.thumbnail = list.result.items[i].snippet.thumbnails.default.url;
         resultlist.push(result)
     }
-    console.log("In GetYouTubePlaylists");
-    console.log(resultlist);
+    //console.log("In GetYouTubePlaylists");
+    //console.log(resultlist);
     return resultlist;
 }
 
 export async function GetYouTubePlayListItems() {  
 
     const queryString = window.location.search;
-    console.log(`In GetYouTubePlayListItems queryString=${queryString}`);
+    //console.log(`In GetYouTubePlayListItems queryString=${queryString}`);
 
     const urlParams = new URLSearchParams(queryString);
-    console.log(urlParams);
+    //console.log(urlParams);
     
-    let playlistId = urlParams.get('playlistId') || "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef";
+    let playlistId = urlParams.get('playlistId') || "PL_tbH3aD86Kt7mITDw67sJMI6M0fRF2Zx";
+    // level 1 "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef";
     
 
     console.log(`playlistId=${playlistId}`);
@@ -59,8 +63,8 @@ export async function GetYouTubePlayListItems() {
           "pageToken" : nextPageToken
         });
         nextPageToken = list.result.nextPageToken;
-        console.log(list);
-        console.log(`GetYouTubePlayListItems: next ${list.result.items.length} records`);
+        //console.log(list);
+        //console.log(`GetYouTubePlayListItems: next ${list.result.items.length} records`);
         //console.log(nextPageToken);
         var idlist="";
         
@@ -91,7 +95,7 @@ export async function GetYouTubePlayListItems() {
             "id": idlist
         });
         
-        console.log(resultlistindex);
+        //console.log(resultlistindex);
         for (var i=0;i<list2.result.items.length;i++) {
             while (resultlist[resultlistindex].chapter) // skip the chapters
                 resultlistindex++;
@@ -100,7 +104,7 @@ export async function GetYouTubePlayListItems() {
             resultlistindex++
         }        
     } while (nextPageToken);
-    console.log(resultlist);
+    //console.log(resultlist);
     return resultlist;    
 }
 

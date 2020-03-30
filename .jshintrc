@@ -1,0 +1,14 @@
+{
+  "undef": true,
+  "unused": true,
+  "esversion":9,
+  "maxstatements":15, 
+  "maxparams":3, 
+  "maxdepth":3,
+  "maxcomplexity":5,
+  "globals": {
+    "console": true,
+    "document":true,
+    "windows":true
+  }
+}

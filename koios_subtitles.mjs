@@ -11,7 +11,7 @@ export async function GetSubTitlesAndSheets(vidinfo,SubtitleCB,SheetsCB) {
     async function GetYouTubeSubTitle(language) {
        var array = [];
        var url=`https://video.google.com/timedtext?v=${vidinfo.videoid}&lang=${language}`;
-       var data=await fetch(url).catch(console.log);
+       var data=await fetch(url).catch( console.log );
        var t=await data.text();   
        var captions  = parser.parseFromString(t, "text/html").getElementsByTagName('text');
        for (var i=0;i< captions.length;i++) {  
@@ -25,10 +25,7 @@ export async function GetSubTitlesAndSheets(vidinfo,SubtitleCB,SheetsCB) {
               text:         s
             });
        }
-       if (language == "vor") // sheets
-            SheetsCB(array,vidinfo.duration); 
-       else
-            SubtitleCB(array,language);
+       return array;
     }
         
  
@@ -39,8 +36,17 @@ export async function GetSubTitlesAndSheets(vidinfo,SubtitleCB,SheetsCB) {
    var data=await fetch(url).catch(console.log);
    var t=await data.text(); 
    var captions  = parser.parseFromString(t, "text/xml").getElementsByTagName('track');
-   for (var i=0;i< captions.length;i++)
-       GetYouTubeSubTitle(captions[i].getAttribute('lang_code'));
+   
+   
+   for (var i=0;i< captions.length;i++) {
+       var language = captions[i].getAttribute('lang_code')
+       if (language != "vor") { // resetved for slide info
+            var arraypromise = GetYouTubeSubTitle();
+            SubtitleCB(arraypromise,language);       
+       } 
+   }
+   var array = await GetYouTubeSubTitle("vor")  // try to get the slide info
+   SheetsCB(array,vidinfo);  // array could be undefined if nothing found
 }
 
 

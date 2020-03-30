@@ -89,8 +89,10 @@ function HighlightTransscript(id) {
     }  
 }
 export function UpdateTranscript(CurrentPos) {   // called frequently
-   var res=SecondsArray[currentlang][ parseInt(CurrentPos)]
-   HighlightTransscript(`sub-${currentlang}-${res}`);
+    if (SecondsArray.length > 0 &&  SecondsArray[currentlang]) {
+        var res=SecondsArray[currentlang][ parseInt(CurrentPos)]
+        HighlightTransscript(`sub-${currentlang}-${res}`);
+    }
 }   
 
 
@@ -138,7 +140,8 @@ function PrepLanguage(language) {
     return languagespan;
 }    
 
-export async function FoundTranscript(subtitle,language) {
+export async function FoundTranscript(arraypromise,language) {
+    var subtitle = await arraypromise;
     var domid=PrepLanguage(language);
     AddTranscripts(domid,subtitle,language);
     SecondsArray[language]=SubtitleToSeconds(subtitle);
