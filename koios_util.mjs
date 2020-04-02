@@ -92,7 +92,6 @@ export function HideButton(nameButton,fHide) {
         var y=undefined;
         var percx=-1;
         var percy=-1;
-
         if (ev.touches && ev.touches[0] && ev.touches[0].clientX) x=ev.touches[0].clientX;
         if (ev.clientX) x=ev.clientX; 
         if (x) percx = (x - arearect.left) / arearect.width             
@@ -100,6 +99,7 @@ export function HideButton(nameButton,fHide) {
         if (ev.clientY) y=ev.clientY; 
         if (y) percy = (y - arearect.top) / arearect.height     
         XYCB(percx,percy);
+        //console.log(`SliderDrag ${percx} ${percy}`);
     }
     
     function SetzIndex(fChange) {  
@@ -117,38 +117,55 @@ export function HideButton(nameButton,fHide) {
         console.log(`Start dragging`);        
         SetzIndex(true); // set all childeren to lower z-index, so the mouse works well        
         SliderDrag(ev);
+        
         domidmousearea.addEventListener("dragover",   SliderDrag);           
-        domidmousearea.addEventListener("drop",       SliderStop);            
-        domidmousearea.addEventListener("dragend",    SliderStop);  
-        domidmousearea.addEventListener("dragleave",  SliderStop);  
-        domidmousearea.addEventListener("dragexit",   SliderStop);  
         domidmousearea.addEventListener("mousemove",  SliderDrag);
-        domidmousearea.addEventListener("mouseup",    SliderStop);  
-        domidmousearea.addEventListener("mouseleave", SliderStop);          
         domidmousearea.addEventListener("touchmove",  SliderDrag);
-        domidmousearea.addEventListener("touchend",   SliderStop);
-        domidmousearea.addEventListener("touchcancel",SliderStop);        
+        
+        domidmousearea.addEventListener("mouseup",    ev=>{console.log("mouseup");SliderStop();});  
+        domidmousearea.addEventListener("touchend",   ev=>{console.log("touchend");SliderStop();});  
+        
+        
+/*        
+        domidmousearea.addEventListener("dragend",    ev=>{console.log("dragend");SliderStop();});  
+        domidmousearea.addEventListener("drop",       ev=>{console.log("drop");SliderStop();});  
+        domidmousearea.addEventListener("dragexit",   ev=>{console.log("dragexit");SliderStop();});  
+        domidmousearea.addEventListener("dragleave",  ev=>{console.log("dragleave");SliderStop();});  
+        domidmousearea.addEventListener("mouseleave", ev=>{console.log("mouseleave");SliderStop();});  
+        domidmousearea.addEventListener("touchcancel",ev=>{console.log("touchcancel");SliderStop();});  
+*/        
     }       
     
     async function SliderStop(ev) {
         console.log("Stop dragging");
         SetzIndex(false); // back to normal
         domidmousearea.removeEventListener("dragover",   SliderDrag);           
+        domidmousearea.removeEventListener("mousemove",  SliderDrag);           
+        domidmousearea.removeEventListener("touchmove",  SliderDrag);
+        
+        domidmousearea.removeEventListener("mouseup",    SliderStop);  
+        domidmousearea.removeEventListener("touchend",   SliderStop);
+
+/*        
         domidmousearea.removeEventListener("drop",       SliderStop);            
         domidmousearea.removeEventListener("dragend",    SliderStop);  
         domidmousearea.removeEventListener("dragleave",  SliderStop);  
         domidmousearea.removeEventListener("dragexit",   SliderStop);          
-        domidmousearea.removeEventListener("mousemove",  SliderDrag);   
-        domidmousearea.removeEventListener("mouseup",    SliderStop);  
         domidmousearea.removeEventListener("mouseleave", SliderStop);
-        domidmousearea.removeEventListener("touchmove",  SliderDrag);
-        domidmousearea.removeEventListener("touchend",   SliderStop);
         domidmousearea.removeEventListener("touchcancel",SliderStop);
+*/
+    console.log("Triggering resize");
+    window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again        
     }   
     domiddraggable.addEventListener('mousedown',  SliderStart);
-    domiddraggable.addEventListener('touchstart', SliderStart, {passive:true} );     
+    domiddraggable.addEventListener('touchstart', SliderStart);
   //  domiddraggable.addEventListener('dragstart',  SliderStart);    
+  
+  
 }
+
+// Developers can annotate touch and wheel listeners with {passive: true} to indicate that they will never invoke preventDefault.
+
 
 export function InsertIFrame(windowid,url) {
    var domid=document.getElementById(windowid);   
@@ -193,3 +210,62 @@ export function subscribe(eventName, callback) {
 }
   
   
+export function MonitorDomid(areaid,parentclass,childclass,triggerclass,cbChildChanged) {
+    
+    function cbMutation(mutationsList, observer) {
+        console.log("in cbMutation");
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes') { // console.log('The ' + mutation.attributeName + ' attribute was modified.');                
+                var target = mutation.target;
+                if (target.className.includes(triggerclass)) {
+                    var children=domid.getElementsByClassName(childclass);
+                    for (var i=0;i<children.length;i++) {
+                        if (children[i] == target)                       
+                            cbChildChanged(mutation.target,i);
+                    }
+                }
+            }
+        }
+    }    
+    const observer = new MutationObserver(cbMutation);
+    var domid=document.getElementById(areaid);
+    var nav=domid.getElementsByClassName(parentclass)
+    observer.observe(nav[0], { attributes: true, childList: true, subtree: true,attributeFilter:["class"] } ); // only trigger on class changes    
+}
+  
+export function MonitorVisible(areaid) {
+    //console.log("In MonitorVisible");
+    function cbMutation(mutationsList, observer) {
+        //console.log("in cbMutation MonitorVisible");
+        for(let mutation of mutationsList) {
+            //console.log(mutation);
+            if (mutation.type === 'attributes') { // console.log('The ' + mutation.attributeName + ' attribute was modified.');                                
+                var target = mutation.target;
+                publish(`${areaid}display${target.style.display}`);
+            }
+        }
+    }    
+    const observer = new MutationObserver(cbMutation);
+    var domid=document.getElementById(areaid);
+    observer.observe(domid, { attributes: true, childList: false, subtree: false,attributeFilter:["style"] } ); // only trigger on style changes    
+}  
+
+
+
+export function FindDotConnectToTab(areaid,classid) {
+    console.log("In FindDotConnectToTab");
+    var domid=document.getElementById(areaid);
+    var slides=domid.getElementsByClassName("w-slide");
+    var dots=domid.getElementsByClassName("w-slider-dot");
+    console.log(dots);
+    for (var i=0;i<slides.length;i++) {
+        var domidclass=slides[i].className;        
+        domidclass = domidclass.replace("w-slide", "").trim();
+        console.log(domidclass);
+        if (domidclass == classid)
+            return dots[i]
+    }    
+    return undefined;
+}   
+
+

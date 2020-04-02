@@ -3,7 +3,7 @@
 
 
 import {GetAllSlides,slides} from './koios_getslides.mjs';
-
+import {publish} from './koios_util.mjs';
 
 
 
@@ -44,11 +44,10 @@ function PrepareSlidesList() {
     } else
         console.error("real-slides not found");
 
-    for (var i=0;i<10;i++) {
-        var cln = PrepareSlidesListTemplate.cloneNode(true);
-        PrepareSlidesListParent.appendChild(cln);
-        
-    }
+    //for (var i=0;i<25;i++) {                                      // max 25 slides
+        //var cln = PrepareSlidesListTemplate.cloneNode(true);
+        //PrepareSlidesListParent.appendChild(cln);        
+    //}
    //list[0].getElementsByTagName("h2")[0].innerHTML=`No slide`;
     
     PrepareSlidesList = function(){} // next time do nothing
@@ -63,14 +62,20 @@ var slidenr=0;
 export async function AddSlide(num,url,title) {
     //console.log(`Add slide ${url}  ${title}`);
     //PrepareSlidesList()
-    var list = document.getElementsByClassName("real-slides")
-    var target=list[slidenr];
+    
+    var target = PrepareSlidesListTemplate.cloneNode(true);
+    PrepareSlidesListParent.appendChild(target);  
+    
+    
+//    var list = document.getElementsByClassName("real-slides")
+//    var target=list[slidenr];
     if (target) {
         target.getElementsByTagName("img")[0].src=url;
-        target.getElementsByTagName("h5")[0].innerHTML=`Slide #${num} ${title}`;
+        target.getElementsByTagName("h5")[0].innerHTML=title; // `Slide #${num} ${title}`;
         target.style.display="";
     }
     
+    /*
     var domid=document.getElementById("slideplayer");
     //console.log(domid);
     var dots=domid.getElementsByClassName("w-slider-dot")
@@ -78,27 +83,41 @@ export async function AddSlide(num,url,title) {
     
     dots[slidenr].style.display="";
     
-    
+*/    
    // console.log(dots);
     slidenr++;
 }
 
 function CleanSlides() {
-    var list = document.getElementsByClassName("real-slides")
-    var domid=document.getElementById("slideplayer");
-    var dots=domid.getElementsByClassName("w-slider-dot")
+  //  var list = document.getElementsByClassName("real-slides")
+  //  var domid=document.getElementById("slideplayer");
+    //var dots=domid.getElementsByClassName("w-slider-dot")
     
-    dots[0].id=`dot-${0}`;
+    //dots[0].id=`dot-${0}`;
     
-    for (var i=0;i<list.length;i++) { // start at 1, 0 again
+//    for (var i=0;i<list.length;i++) { // start at 1, 0 again
+    
+//list[i].remove()    
+    
+    /*
         var target=list[i];
         target.getElementsByTagName("img")[0].src="";
         target.getElementsByTagName("h5")[0].innerHTML=`Empty slide #${i+1}`;
         target.style.display="none";
         dots[i].style.display="none";
         dots[i].id="";
-    }
+    */
+    
+    //}
     slidenr=0;    // start at 1 => 0 again
+    
+    
+    
+    
+        while (PrepareSlidesListParent.firstChild)
+        PrepareSlidesListParent.removeChild(PrepareSlidesListParent.lastChild); // first remove previous children    
+   
+    
 }    
 
 var promiseGetAllSlides;
@@ -117,6 +136,8 @@ export async function FoundSlides(sheets,vidinfo) {
     var duration = vidinfo.duration;
  
   //  CleanSlides(); don't clean, now 2 ways to trigger
+  
+  /* ff uit
     if (sheets) {
         for (var i=0;i<sheets.length;i++) {
             var nums = sheets[i].text.replace(/[^0-9]/g,'');
@@ -126,6 +147,8 @@ export async function FoundSlides(sheets,vidinfo) {
         }          
         SecondsArraySlides=SlidesToSeconds(sheets);
     }
+*/    
+    
 }    
 
 
@@ -133,24 +156,25 @@ export async function FoundSlides(sheets,vidinfo) {
 export function PrepareAndLoadSlides(vidinfo) {
      CleanSlides(); 
      function FoundIndexJson(slideindex) {
-        //console.log(`In FoundIndexJson title=${vidinfo.txt}`);
-        
+        //console.log(`In FoundIndexJson title=${vidinfo.txt}`);        
         var getfirst=vidinfo.txt.split(" ")[0];
-        //console.log(getfirst);
-        
-        if (getfirst.includes("-"))
-            getfirst=getfirst.split("-")[1];
-         // console.log(getfirst);
-        
-        if (slideindex && slideindex.length > 0) {
-            for (var i=0;i<slideindex.length;i++) {
-                //console.log(`Compare ${slideindex[i].chapter} ${getfirst}`);
-                if (slideindex[i].chapter == getfirst) {
-                    //console.log(slideindex[i].slidenr);
-                    AddSlide(slideindex[i].slidenr,slides[slideindex[i].slidenr],`${slideindex[i].chapter} ${slideindex[i].title}`);
+        var slidecount=0;        
+        if (slideindex && slideindex.length > 0) 
+            for (var i=0;i<slideindex.length;i++) 
+                if (slideindex[i].chapter === getfirst) 
+                    slidecount++;
+        if (slidecount == 0) 
+            AddSlide(0,"","No slides for this video");
+        else {
+            var slidenr=1;
+            for (var i=0;i<slideindex.length;i++) 
+                if (slideindex[i].chapter === getfirst) {
+                    var title =`Slide ${slidenr++} of ${slidecount}: ${slideindex[i].chapter} ${slideindex[i].title}`;
+                    AddSlide(slideindex[i].slidenr,slides[slideindex[i].slidenr],title);
                 }
-            }
-        } else console.log("No slides for this video");
+        }
+        Webflow.require('slider').redraw(); // regenerate the dots    
+        publish ("slidesloaded");       
     }    
       
     promiseGetAllSlides= GetAllSlides(FoundIndexJson);

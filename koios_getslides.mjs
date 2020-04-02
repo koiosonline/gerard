@@ -36,19 +36,22 @@ export async function GetAllSlides(cbFoundIndexJson) {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString); 
 // deel 1  'QmbZx57KgrMj1GfDr1XE9WnFMjJTNJFWZxsgbogBNYhrMW';     
-    let cid = urlParams.get('slides') || 'QmVEyrkNVcFjbJGV4nuCfFLVqm9jrcnWdQRQ5uiop8Cvsa';
+    let cid = urlParams.get('slides') || 'QmQWr1Ljh9pDyt9a7oSiC7Lf4nwiFJq9ey47yCFE2aHu4X';
     console.log(`In GetAllSlides cid=${cid}`);
     
-    var indexjson=await fetch(`https://ipfs.io/ipfs/${cid}/index.json`);        
-    var slideindex=await indexjson.json();
-    console.log(slideindex);
+    var indexjson=await fetch(`https://ipfs.io/ipfs/${cid}`);   // /index.json
+    var slideindex = await indexjson.json();
+    //console.log(slideindex);
     
     slides=[]; // reset slides
     if (slideindex && slideindex.length > 0) 
-        for (var i=0;i<slideindex.length;i++) 
-            slides[i]=`https://ipfs.io/ipfs/${cid}/${i}.PNG`;
-    
+        for (var i=0;i<slideindex.length;i++) {
+         //console.log(   slideindex[i]);
+        
+            slides[slideindex[i].slidenr]=`https://ipfs.io/ipfs/${slideindex[i].png}`;
+        }
     cbFoundIndexJson(slideindex);
+    
 } 
     
 

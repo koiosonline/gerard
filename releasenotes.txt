@@ -1,0 +1,27 @@
+Version 0.71
+
+Functional updates:
+Initialisation screen added
+Video stops when popupscreen is selected (and starts when de-selected)
+
+Technical updates:
+Improved resizing of panes
+Updated structure of slides on IPFS
+Fixed slide size after resizeing panes
+
+In popup screen: 
+- fixed bottom row icons (e.g. selector)
+- fixed selection of relax screen when video ends
+- fixed left arrow 
+- fixed slide size (when window has been resized)
+
+Layout updates:
+New colourscheme
+Main naviation buttons to bottom
+========================================================
+Version 0.7 30-3-2020
+Functional updates:
+Slides connected to video based on first keyword of the slide title and video title
+
+Technical updates:
+Slides switched to PNG format (svg layout is sometimes distorted

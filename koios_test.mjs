@@ -1,5 +1,5 @@
 
-import {LinkButton,sleep,subscribe} from './koios_util.mjs';
+import {LinkButton,sleep,subscribe,FindDotConnectToTab} from './koios_util.mjs';
 import {player,currentduration,startVideo,SetVideoSeconds} from './koios_video.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
 
@@ -42,32 +42,34 @@ var s1,s2,s3,s4,s5,s6;
  
 async function Test() {
     if (fSwitchTestOn) {
-        s1=subscribe('videoend',    x=> { DisplayMessageContinous(`Video #${CurrentLesson} has ended`) } );
-        s2=subscribe('videostart',   async x=> { DisplayMessageContinous(`Video #${CurrentLesson} starting`)         
+        //s1=subscribe('videoend',    x=> { DisplayMessageContinous(`Video #${CurrentLesson} has ended`) } );
         
-        
-        //console.log(typeof(RelaxTime));
-            //orgRelaxTime = RelaxTime;
-          //  RelaxTime = 1000;
-            var  CurrentPos=Math.round(player.getCurrentTime());                
-            DisplayMessageContinous(`Video pos=${CurrentPos} duration is ${currentduration}`);
-            DisplayMessageContinous("Wait 3 seconds");                        await sleep(3000);
-            CurrentPos=Math.round(player.getCurrentTime()); // has been updated in the mean time
-            var step = Math.round(Math.max(currentduration /3,10)); // at least 10 seconds for short videos
-            DisplayMessageContinous(`Fast forward ${step} seconds`);                 SetVideoSeconds(CurrentPos+step);
+        s2=subscribe('videostart',   async x=> {
+            await sleep(3000);
+            var CurrentPos=Math.round(player.getCurrentTime()); // has been updated in the mean time
+            if (CurrentPos < currentduration-7) {
+                DisplayMessageContinous(`Fast forward`);
+                SetVideoSeconds(currentduration-5);
+            } 
+                
         } );               
-        s3=subscribe('videocued', x=> { DisplayMessageContinous(`Video #${CurrentLesson} starting`) } );
+        s3=subscribe('videocued', async x=> { 
+            DisplayMessageContinous(`Lesson #${CurrentLesson} of ${LastLesson+1}`);
+            await sleep(3000);
+            startVideo();
+        } );
+        
         s4=subscribe('lessonsend', x=> { DisplayMessageContinous(`Lessons ended`)                    } );
-        s5=subscribe('startrelax', x=> { DisplayMessageContinous(`Start relax`)                    } );
-        s6=subscribe('stoprelax', x=> { DisplayMessageContinous(`Stop relax`)                    } );
+        s5=subscribe('startrelax', x=> { DisplayMessageContinous(`Relax`)                    } );
+        //s6=subscribe('stoprelax', x=> { DisplayMessageContinous(`Stop relax`)                    } );
 
         SwitchDisplayMessageContinous(true);
         DisplayMessageContinous("Testing mode");
         console.log("In test");
-        DisplayMessageContinous(`At lesson #${CurrentLesson} of ${LastLesson+1}`);
-        DisplayMessageContinous("Double speed");                          player.setPlaybackRate(2);
-        DisplayMessageContinous("Go to beginning of video");              SetVideoSeconds(0);
-        DisplayMessageContinous("Start video");                           startVideo();
+        
+        player.setPlaybackRate(2);
+        //DisplayMessageContinous("Go to beginning of video");              SetVideoSeconds(0);
+        startVideo();
     }
     else {
         if (s1) s1();
@@ -83,3 +85,6 @@ async function Test() {
     }
     fSwitchTestOn = !fSwitchTestOn;
 }
+
+
+

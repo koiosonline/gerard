@@ -17,6 +17,7 @@ console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
     import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
     import {} from './koios_test.mjs';
     import {Relax,InitPopup} from './koios_popup.mjs';
+    import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koios_messages';
 
 
 export var player=0;
@@ -300,13 +301,33 @@ function ToggleCueVisibility() {
     CueVisible(ToggleCueVisibilityStatus?currentlang:"");
 } 
 
+var signs=0;
+async function PlayerLoaded() {
+    signs++;
+    if (signs ==2) {
+        
+        await DisplayMessageContinous("Player loaded, have fun today");
+        await sleep(3000);
+        SwitchDisplayMessageContinous(false)
+    }
+}    
 
 
-subscribe('videostart',  x=> { startVideo(); } );
-subscribe('videocued',   x=> {} ); // do nothing, wait for user to start
-subscribe('videopause',  x=> { stopVideo(); } );
-subscribe('videostop',   x=> { stopVideo(); } );
+subscribe('videostart',  startVideo);
+subscribe('videocued',   PlayerLoaded ); // do nothing, wait for user to start
+subscribe('videopause',  stopVideo);
+subscribe('videostop',   stopVideo);
 subscribe('videoend',    NextVideo);
+
+
+subscribe('slidesloaded',    PlayerLoaded);
+
+
+var fVideoRunning=false;
+
+subscribe('popupdisplayblock',x=> { fVideoRunning=!IsVideoPaused();stopVideo();} );
+subscribe('popupdisplaynone', x=> { if (fVideoRunning) startVideo(); } ); // if running before, start again
+
 
 async function LoadVideo(vidinfo) { // call when first video is loaded or a diffent video is selected
     
@@ -329,6 +350,10 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
 }
 async function asyncloaded() {    
     console.log(`In asyncloaded of script: ${import.meta.url}`);   
+    
+    SwitchDisplayMessageContinous(true)
+    
+    DisplayMessageContinous("Starting Koios online player");
     
     var lessonspromise=DisplayLessons(LoadVideo);
     
