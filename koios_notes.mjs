@@ -1,4 +1,4 @@
-import {LinkButton} from './koios_util.mjs';    
+import {LinkButton,LinkClickButton,subscribe} from './koios_util.mjs';    
 import {DisplayMessage} from './koios_messages.mjs';  
 
     var NotesArea;
@@ -35,7 +35,8 @@ async function SetupNotes(windowid) {
     //LinkButton("sendemail",sendMail);
     //LinkButton("copytoclipboard",x => writeToClipboard(document.getElementById("notesarea").value)  ); 
     
-    LinkButton("share",ShareNotes);
+    //LinkButton("share",ShareNotes);
+    LinkClickButton("share");subscribe("shareclick",ShareNotes);
     
    // console.log("SetupNotes");
    // console.log(NotesArea); 
@@ -57,6 +58,7 @@ async function writeToClipboard(text) {
     }
 }
 async function ShareNotes() {
+    console.log("In ShareNotes");
     var toShare=NotesArea.innerText    
     let err;
     if (navigator && navigator.share) {

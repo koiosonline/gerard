@@ -57,26 +57,84 @@ export function LinkButton(nameButton,funct) {
         //MakeFullScreen(); // do this for every button
         event.preventDefault();
         var orgcolor=button.style.color;
-        button.style.color="#13c4a3";
+        
+        var buttonchildren=button.getElementsByClassName("w-button")
+        for (const element of buttonchildren) 
+            element.style.color="white" //"#13c4a3";
         //console.log(button);
         await Promise.all( [
                 sleep(1000), // show color for at least 1 sec.
                 funct(button)
             ]
             );          
-        button.style.color=orgcolor;   
+  //      button.style.color=orgcolor;   
     }
 }
 
+function ShowButton(button,fFirst) {    
+
+console.log(`In ShowButton fFirst = ${fFirst}`);
+    //var altcolor="white";
+    var buttonchildren=button.getElementsByClassName("w-button")
+    
+    buttonchildren[0].style.display=fFirst?"block":"none"
+    buttonchildren[1].style.display=!fFirst?"block":"none"
+    
+    /*
+    for (const element of buttonchildren) {
+        if (!button.orgcolor)
+            button.orgcolor = window.getComputedStyle(element).getPropertyValue("color")
+        var orgcolor=button.orgcolor;
+        
+        
+        element.style.color=fAltColor ? altcolor : orgcolor;
+    }
+
+//    button.style.color=fAltColor ? altcolor : orgcolor;
+*/
+}    
 
 export function HideButton(nameButton,fHide) {
+    console.log(`In HideButton ${nameButton} fHide=${fHide}`);
+    
     var button=document.getElementById(nameButton);
     if (button) {  
         button.style.display=fHide?"none":"flex"; // flex is used to center the icons in the button
     }
 }    
 
+export function LinkClickButton(nameButton) {
+    var button=document.getElementById(nameButton);
+    if (button) {
+        ShowButton(button,true)
+        button.title=nameButton; // add hoover text
+        button.addEventListener("click", async x=>{ 
+            publish(`${nameButton}click`);
+            
+            ShowButton(button,false)
+            await sleep(500), // show color for 1 sec.
+            
+            ShowButton(button,true)
+        } );
+    }
+    return button;
+}
 
+export function LinkToggleButton(nameButton,fInitial) {
+    var fOn=fInitial;
+    
+    var button=document.getElementById(nameButton);
+    if (button) {
+        ShowButton(button,fOn)
+        button.title=nameButton; // add hoover text
+        button.addEventListener("click", x=>{
+            fOn = !fOn;
+            publish(`${nameButton}${fOn?"on":"off"}`);            
+            ShowButton(button,fOn)
+        });
+    }
+    return button;
+}
 
 
  export function DragItem(draggable,dragarea,mousearea,XYCB) {
@@ -195,6 +253,8 @@ const subscribers = {}
 
 export function publish(eventName, data) {
     console.log(`publish ${eventName}`);
+    //console.log(subscribers[eventName]);
+    
     if (!Array.isArray(subscribers[eventName])) { return }
     subscribers[eventName].forEach((callback) => {  callback(data)  })
 }

@@ -1,3 +1,15 @@
+
+Version 0.72
+Functional updates:
+
+Technical updates:
+Buttons configurable via webflow
+
+Layout updates:
+Initialisation screen contains logo
+Layout of courses updated
+Layout of lessons updated
+
 Version 0.71
 
 Functional updates:

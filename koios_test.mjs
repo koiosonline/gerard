@@ -1,5 +1,5 @@
 
-import {LinkButton,sleep,subscribe,FindDotConnectToTab} from './koios_util.mjs';
+import {LinkButton,sleep,subscribe,FindDotConnectToTab,LinkToggleButton} from './koios_util.mjs';
 import {player,currentduration,startVideo,SetVideoSeconds} from './koios_video.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
 
@@ -17,7 +17,9 @@ console.log(`fInTest=${fInTest}`);
 
 
 
-LinkButton("test",Test);
+//LinkButton("test",Test);
+
+  LinkToggleButton("test",false);subscribe("teston",Test);subscribe("testoff",Test);
 
 /*
 async function Test2() {

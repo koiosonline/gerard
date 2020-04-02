@@ -53,7 +53,7 @@ player.setOption('captions', 'track', {});
 
 */  
 
-import {LinkButton,loadScriptAsync,publish} from './koios_util.mjs';
+import {LinkButton,loadScriptAsync,publish,LinkClickButton,subscribe} from './koios_util.mjs';
 
 
 export async function SetVideoTitle(title) {
@@ -141,8 +141,8 @@ export async function SetupVideoWindowYouTube(id) {
    console.log("In SetupVideoWindowYouTube, video is loaded");  
    
    
-   LinkButton("font_resize",FontResize);
-
+  // LinkButton("font_resize",FontResize);
+ LinkClickButton("font_resize");subscribe("font_resizeclick",FontResize);
 
    
    
