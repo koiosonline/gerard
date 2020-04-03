@@ -125,8 +125,13 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     var index = LastLesson;
     var cln = PrepareLessonsListTemplate.cloneNode(true);
     PrepareLessonsListParent.appendChild(cln);
-    cln.getElementsByTagName("div")[0].innerHTML=txt;
-    cln.getElementsByTagName("img")[0].src=thumbnail;    
+    //cln.getElementsByTagName("div")[0].innerHTML=txt;
+    //cln.getElementsByTagName("img")[0].src=thumbnail;    
+    
+
+    cln.getElementsByClassName("lesson-name")[0].innerHTML=txt;
+    cln.getElementsByClassName("lesson-image")[0].src=thumbnail; 
+    
     cln.id=`lesson-${index}`;
     
     LinkButton(cln.id,x=> {
@@ -143,7 +148,9 @@ function AddChapter(txt) {
     //console.log(`In AddChapter ${txt} `);    
     var cln = PrepareChapterTemplate.cloneNode(true);
     PrepareChapterParent.appendChild(cln);
-    cln.getElementsByTagName("div")[0].innerHTML=txt;
+    //cln.getElementsByTagName("div")[0].innerHTML=txt;
+    
+    cln.getElementsByClassName("chapter-name")[0].innerHTML=txt;
 } 
 
   

@@ -304,12 +304,8 @@ function ToggleCueVisibility() {
 var signs=0;
 async function PlayerLoaded() {
     signs++;
-    if (signs ==2) {
-        
-        await DisplayMessageContinous("Player loaded, have fun today");
-        await sleep(3000);
-        SwitchDisplayMessageContinous(false)
-    }
+    if (signs ==2) 
+        publish("playerloaded");
 }    
 
 
@@ -350,10 +346,8 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
 }
 async function asyncloaded() {    
     console.log(`In asyncloaded of script: ${import.meta.url}`);   
-    
-    SwitchDisplayMessageContinous(true)
-    
-    DisplayMessageContinous("Starting Koios online player");
+    publish("playerstart");
+   
     
     var lessonspromise=DisplayLessons(LoadVideo);
     

@@ -1,4 +1,17 @@
 
+Version 0.73
+
+Functional updates:
+
+Technical updates:
+Lessons overview better configurable from webflow
+detection when away from applications and greeting when coming back
+detect when phone is shaking
+detect when phone is flat
+
+Layout updates:
+
+
 Version 0.72
 Functional updates:
 
