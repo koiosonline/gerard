@@ -1,3 +1,13 @@
+Version 0.74
+
+Functional updates:
+
+Technical updates:
+
+Layout updates:
+Shake phone to leave fullscreen mode
+Lay phone flat to see extra information (e.g. titles of video and sheets)
+
 
 Version 0.73
 

@@ -144,8 +144,13 @@ function SetFullScreen(fSetFullScreen) {
    fFullScreen = fSetFullScreen;
 }    
 function ToggleFullScreen() {
+   
     SetFullScreen(!fFullScreen);
 }    
+
+subscribe("shaking",x=>{if (fFullScreen) SetFullScreen(false)});
+
+
 function GetVolume() {
     if (video) return video.volume;
     if (player && player.getVolume) return player.getVolume();

@@ -1,5 +1,5 @@
 import {sleep,subscribe,publish} from './koios_util.mjs';  
-
+import {ShowTitles} from './koios_showslides.mjs';  
 
 export async function DisplayMessage(text) {    
     console.log("In DisplayMessage");
@@ -45,7 +45,7 @@ async function VisibilityChange() {
 }    
 
 var prevsum=0 
-var count =10;
+//var count =10;
  
 function TestAccelerometer() {
     let accelerometer = null;
@@ -62,13 +62,14 @@ function TestAccelerometer() {
         accelerometer.addEventListener('reading', x=> {
                 var sum = (x.target.x + x.target.y + x.target.z)
                 var delta = Math.abs(sum-prevsum)
-                count++
-                if (delta > 3 ) {
-                    console.log(`delta ${delta} ${count}`)
-                    if (count > 10) {
-                        DisplayMessage("Phone is shaking");
-                        count = 0;
-                    }
+               // count++
+                if (delta > 20 ) {
+                    console.log(`delta ${delta} `) //${count}
+                    //if (count > 10) {
+                        
+                        publish("shaking");
+                      //  count = 0;
+                   // }
                 } 
                  prevsum = sum;
         } );
@@ -87,20 +88,21 @@ function TestAccelerometer() {
 }
 
 
-var countor =10;
+//var countor =10;
 function handleOrientation(event) {
     var x= event.beta
     var y= event.gamma
     var sum = Math.abs(x+y)
-    countor++;
-    console.log(`sum=${sum} ${countor}`);
-    if (sum < 3) {
-        
-         if (countor > 10) {
-              DisplayMessage("Phone perfectly flat");
-              countor=0;
-         }
-    }
+  //  countor++;
+    //console.log(`sum=${sum} `); // ${countor}
+
+        ShowTitles(sum < 3)
+    //    else
+      //   if (countor > 10) {
+        //      DisplayMessage("Phone perfectly flat");
+          //    countor=0;
+        // }
+    //}
 }
 
 async function MessagesStart() {
