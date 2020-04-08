@@ -1,4 +1,4 @@
-import {DragItem} from './koios_util.mjs';
+import {DragItem,subscribe} from './koios_util.mjs';
 
 export async function SetupSliders() {
     var grid=document.getElementById("mainscreen");    
@@ -34,3 +34,14 @@ export async function SetupSliders() {
     }      
     DragItem("move","mainscreen","mainscreen",XYUpdate);
 }
+
+export async function SwitchIntroScreen(fOn) {
+    console.log("In SwitchIntroScreen");
+    var intro=document.getElementById("introscreen");
+    intro.style.display=fOn?"flex":"none";    
+}
+
+    
+    
+subscribe('playerloading',    x=>SwitchIntroScreen(true));
+subscribe('playerloaded',   x=>SwitchIntroScreen(false));

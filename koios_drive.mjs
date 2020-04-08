@@ -1,4 +1,4 @@
-console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
+//console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import {LoadGapi,InsertIFrame} from './koios_util.mjs';
 
@@ -25,7 +25,7 @@ export async function GetDrive(parentid) {
     //console.log(list.result.files[0]);
     const files = list.result.files;
     if (files.length) {
-      console.log('in GetDrive Files:');
+  //    console.log('in GetDrive Files:');
       files.map((file) => {
         
         if (file.mimeType =="application/vnd.google-apps.folder") // then it's a folder

@@ -1,3 +1,38 @@
+Version 0.76:
+
+Functional updates:
+
+
+Technical updates:
+- register video progress and display as 9 blocks
+- fixed fullscreen for ios
+
+Layout updates:
+- animation at welcome screen
+- seperated welcome screen and message screen
+- fullscreen buttons
+- video infoscreen on lower right
+- menu buttons (left & right) centered vertically
+- notes screen 
+    - yellow background
+    - larger margins
+- popup screen 
+    - arrows yellow
+    - lessons overview new layout
+
+Version 0.75
+
+Functional updates:
+- Enabled keyboard input: n=next video, p=previous video
+- Fixed the connection of the slides to the video & slide indicators are showing in the progress bar (currently in red)
+
+Technical updates:
+- Adjusted course overview to merge courses & course levels
+
+Layout updates:
+- Hoover over "move" icon to see extra information
+- Video and slide info "on top" of video and slides
+
 Version 0.74
 
 Functional updates:
@@ -6,7 +41,7 @@ Technical updates:
 
 Layout updates:
 Shake phone to leave fullscreen mode
-Lay phone flat to see extra information (e.g. titles of video and sheets)
+Lay phone flat to see extra information / Or hoover the slides area(e.g. titles of video and sheets)
 
 
 Version 0.73

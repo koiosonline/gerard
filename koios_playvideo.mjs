@@ -1,4 +1,4 @@
-console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
+//console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
 /* General comments
@@ -62,10 +62,7 @@ export async function SetVideoTitle(title) {
 
 }
 
-export async function ShowVideoTitle(fShow) {
-    document.getElementById("videotitle").style.display=fShow?"flex":"none"; // flex is used to center the text
-    
-}
+// see ShowTitles(fOn)
 
 
 

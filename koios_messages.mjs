@@ -8,7 +8,7 @@ export async function DisplayMessage(text) {
     //console.log(msg);
     msgtext.innerText=text;
     
-    msg.style.display="block";
+    msg.style.display="flex";
     await sleep(1000);
     msg.style.display="none";    
 }
@@ -16,7 +16,7 @@ export async function DisplayMessage(text) {
 export async function SwitchDisplayMessageContinous(fOn) {
     console.log("In InitDisplayMessageContinous");
     var msg=document.getElementById("message");
-    msg.style.display=fOn?"block":"none";    
+    msg.style.display=fOn?"flex":"none";    
     
     var msgtext=document.getElementById("msg-text");
     msgtext.innerText = "";
@@ -39,7 +39,7 @@ async function VisibilityChange() {
       console.log(`VisibilityChange ${document.visibilityState}`);
       if (document.visibilityState == 'visible') {
           var currenttime = new Date();
-          DisplayMessage(`Welcome back after ${Math.round( (currenttime.getTime()-prevtime.getTime())/1000)} seconds`);
+          console.log(`Welcome back after ${Math.round( (currenttime.getTime()-prevtime.getTime())/1000)} seconds`);
       }   else 
           prevtime=  new Date()    
 }    
@@ -88,26 +88,18 @@ function TestAccelerometer() {
 }
 
 
-//var countor =10;
 function handleOrientation(event) {
-    var x= event.beta
-    var y= event.gamma
-    var sum = Math.abs(x+y)
-  //  countor++;
-    //console.log(`sum=${sum} `); // ${countor}
-
-        ShowTitles(sum < 3)
-    //    else
-      //   if (countor > 10) {
-        //      DisplayMessage("Phone perfectly flat");
-          //    countor=0;
-        // }
-    //}
+    if (event.beta && event.gamma) { // prevent triggering on a desktop
+        var x= event.beta
+        var y= event.gamma
+        var sum = Math.abs(x+y)
+        ShowTitles(sum < 3) // only show extra info when sum is small, e.g. phone is flat
+    }
 }
 
 async function MessagesStart() {
-    SwitchDisplayMessageContinous(true)    
-    DisplayMessageContinous("Starting Koios online player");
+    console.log("In MessagesStart");
+    
     document.addEventListener('visibilitychange',VisibilityChange)
     
     console.log(window.Gyroscope);
@@ -116,15 +108,16 @@ async function MessagesStart() {
     console.log(window.Accelerometer);
     TestAccelerometer();
     
+    
     window.addEventListener("deviceorientation", handleOrientation, true);
+    
+    console.log(window.onerror);
+
+    
     
 }
 
-async function Playerloaded() {
-    await DisplayMessageContinous("Player loaded, have fun today");
-    await sleep(3000);
-    SwitchDisplayMessageContinous(false)
-}        
-
 subscribe('playerstart',    MessagesStart);
-subscribe('playerloaded',   Playerloaded);
+
+
+

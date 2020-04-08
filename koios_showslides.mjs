@@ -23,13 +23,13 @@ var prevslide=0;
 
 
 export function ShowTitles(fOn) {
-    var videotitle=document.getElementById("videotitle");
-    videotitle.parentNode.style.display=fOn?"block":"none"
+    var videoinfo=document.getElementById("videoinfo");
+    videoinfo.style.display=fOn?"flex":"none"
       
-     var list = document.getElementsByClassName("real-slides"); // list-slides
+     var list = document.getElementsByClassName("slideinfo"); 
      for (var i=0;i<list.length;i++) {
-         var target=list[i];
-         target.getElementsByTagName("h5")[0].style.display=fOn?"block":"none"
+         list[i].style.display=fOn?"block":"none"
+         
     }    
 }
 
@@ -47,11 +47,11 @@ function MouseOverSlides(ev) {
   
 export async function SetupSlideWindow(windowid) {
     console.log("In SetupSlideWindow");
-    var slidewindow=document.getElementById(windowid);
+    var slidewindow=document.getElementById("move"); // connect to "move" circle
     
     slidewindow.addEventListener("mouseenter",   MouseOverSlides);    
     slidewindow.addEventListener("mouseleave",   MouseOverSlides); 
-    ShowTitles(false)
+   // ShowTitles(false)
     
     
     
@@ -75,7 +75,7 @@ function PrepareSlidesList() {
     if (list && list[0]) {
         PrepareSlidesListTemplate = list[0];        
         PrepareSlidesListParent   = list[0].parentNode
-        list[0].remove(); //keep original slide for situation where no slide is present; remove again
+        //list[0].remove(); //keep original slide for situation where no slide is present; remove again
     } else
         console.error("real-slides not found");
 
@@ -113,8 +113,7 @@ export async function AddSlide(num,url,title) {
     /*
     var domid=document.getElementById("slideplayer");
     //console.log(domid);
-    var dots=domid.getElementsByClassName("w-slider-dot")
-    dots[slidenr].id=`dot-${num}`;
+
     
     dots[slidenr].style.display="";
     
@@ -161,36 +160,51 @@ var promiseGetAllSlides;
  
 
 
-export async function FoundSlides(sheets,vidinfo) {
+export async function FoundSlides(sheets,vidinfo) {           // found slide info via subtitles
     
     await promiseGetAllSlides; // wait till slide info from IPFS is ready
     console.log(`In FoundSlides`);
-   // console.log(sheets);
+    console.log(sheets);
     //await slidepromise; // now we have the slides
     
     var duration = vidinfo.duration;
  
   //  CleanSlides(); don't clean, now 2 ways to trigger
   
-  /* ff uit
+  
     if (sheets) {
         for (var i=0;i<sheets.length;i++) {
             var nums = sheets[i].text.replace(/[^0-9]/g,'');
             var num = parseInt(nums);
-            AddSlide(num,slides[num],"");
+            //AddSlide(num,slides[num],"");
             SetSlideIndicator(num,parseFloat(sheets[i].start) / duration,parseFloat(sheets[i].dur) / duration)
         }          
         SecondsArraySlides=SlidesToSeconds(sheets);
-    }
-*/    
-    
+    }    
 }    
 
+function SlidesToSeconds(sheets) {
+    var Seconds=[];
+    for (var j=0;j < sheets.length;j++) {
+         var subline=sheets[j];
+         var s=parseInt(subline.start);
+         var e=parseInt(parseFloat(subline.start)+parseFloat(subline.dur));  
+        var nums = sheets[j].text.replace(/[^0-9]/g,'');
+        var num = parseInt(nums);         
+     
+     //var num=j+1;
+        for (var k=s; k< e;k++)
+             Seconds[k]=num;
+     }
+     //console.log("In SlidesToSeconds");
+     //console.log(Seconds);
+     return Seconds;
+}
 
 
 export function PrepareAndLoadSlides(vidinfo) {
      CleanSlides(); 
-     function FoundIndexJson(slideindex) {
+     function FoundIndexJson(slideindex) {                                 // found slides via index.json on ipfs
         //console.log(`In FoundIndexJson title=${vidinfo.txt}`);        
         var getfirst=vidinfo.txt.split(" ")[0];
         var slidecount=0;        
@@ -208,7 +222,16 @@ export function PrepareAndLoadSlides(vidinfo) {
                     AddSlide(slideindex[i].slidenr,slides[slideindex[i].slidenr],title);
                 }
         }
+       // ShowTitles(false); // initally hide the titles, via stop/play
         Webflow.require('slider').redraw(); // regenerate the dots    
+        
+        
+         var domid=document.getElementById("slideplayer");
+         var dots=domid.getElementsByClassName("w-slider-dot")
+         for (var i=0;i<dots.length;i++)
+            dots[i].id=`dot-${i+1}`;
+        
+        
         publish ("slidesloaded");       
     }    
       
@@ -229,21 +252,6 @@ export function PrepareAndLoadSlides(vidinfo) {
 }  
   
   
-function SlidesToSeconds(sheets) {
-    var Seconds=[];
-    for (var j=0;j < sheets.length;j++) {
-         var subline=sheets[j];
-         var s=parseInt(subline.start);
-         var e=parseInt(parseFloat(subline.start)+parseFloat(subline.dur));  
-        var nums = sheets[j].text.replace(/[^0-9]/g,'');
-        var num = parseInt(nums);         
-        for (var k=s; k< e;k++)
-             Seconds[k]=num;
-     }
-     //console.log("In SlidesToSeconds");
-     //console.log(Seconds);
-     return Seconds;
-}
 
 export function UpdateSlide(CurrentPos) {   // called frequently
    if (SecondsArraySlides) {
@@ -258,12 +266,14 @@ async function SetSlide(n) {
     if (!n) n=0; // show the first slide
     
   
-    //console.log(`SetSlide ${n}`);
+    console.log(`SetSlide ${n}`);
     if (n == prevslide) 
         return; // not changed
     prevslide=n;
       
-    document.getElementById(`dot-${n}`).click();   // select the right slide
+    var dot=document.getElementById(`dot-${n}`)
+    if (dot)
+        dot.click();   // select the right slide
     
     /*
     //preferredslide=n;

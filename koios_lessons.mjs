@@ -1,4 +1,4 @@
-console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
+//console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
 import {LinkButton,HideButton,LinkClickButton,subscribe} from './koios_util.mjs';
@@ -186,6 +186,10 @@ function PrepButtons() {
     //buttonForward=LinkButton("forward",x=>SelectLesson(CurrentLesson +1));
     
     buttonForward=LinkClickButton("forward");subscribe("forwardclick",x=>SelectLesson(CurrentLesson +1));
+    
+    
+    subscribe("keypressedp",x=>SelectLesson(CurrentLesson -1)); 
+    subscribe("keypressedn",x=>SelectLesson(CurrentLesson +1)); 
     
     PrepButtons=function(){} // next time do nothing
 }

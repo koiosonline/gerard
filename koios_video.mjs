@@ -1,13 +1,13 @@
-console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
+//console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
  // imports
-    import {SetupVideoWindowYouTube,SetVideoTitle,ShowVideoTitle} from './koios_playvideo.mjs';
+    import {SetupVideoWindowYouTube,SetVideoTitle} from './koios_playvideo.mjs';
     import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koios_lessons.mjs';
     import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton} from './koios_util.mjs';
     import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
     import {} from './koios_getslides.mjs';
-    import {FoundSlides,PrepareAndLoadSlides,UpdateSlide,SetupSlideWindow} from './koios_showslides.mjs';
+    import {FoundSlides,PrepareAndLoadSlides,UpdateSlide,SetupSlideWindow,ShowTitles} from './koios_showslides.mjs';
     import {} from './koios_chat.mjs';
     import {} from './koios_notes.mjs';
     import {SetupSliders} from './koios_screenlayout.mjs';
@@ -22,7 +22,10 @@ console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 export var player=0;
 export var currentduration;
+
 { // Global variables
+var currentvideoid;
+
 var position;
 var logpos;
 var logtext=0;
@@ -51,12 +54,52 @@ function GetDuration() {
     if (player && player.getDuration) return  player.getDuration();
     return 0;
 }  
+
+var seensec=[];
+var seensum;
+var seenbucket=[];
+var sindex=[];
+var maxindex=[];
+let buckets=7;
+
+function InitProgress(vidinfo) {
+    console.log("InitProgress");
+    
+    
+    buckets=document.getElementsByClassName("progressvalue").length;
+    
+    seensum=0;
+    seenbucket=[]
+    seensec=[]
+    for (var i=0;i<=buckets;i++)
+        seenbucket[i]=0;
+    sindex=[]
+    var max = vidinfo.duration / buckets;
+    var barrier=max;
+    var index=0;
+    var j=0;
+    for (var i=0;i<vidinfo.duration;i++) {
+        sindex[i]=index;
+        j++;
+        if (j > barrier) {
+            barrier = barrier -j + max; // next barrier
+            maxindex[index]=j;
+            j=0;
+            index++;            
+        }            
+    }
+    DisplayCurrentVideoProgress()
+}    
+
 async function VideoLocation() { 
     var CurrentPos=0;
     var Duration=GetDuration();
     var PlaybackRate=1;
     var ReallyPlayed=0;  
     //console.log(`In VideoLocation pos=${CurrentPos}`);
+    
+    if (IsVideoPaused())
+        return;  // probably just ended, don't update any more
     
     if (player) {
         if (player.getCurrentTime) {
@@ -68,8 +111,42 @@ async function VideoLocation() {
     UpdateTranscript(CurrentPos);
     UpdateSlide(CurrentPos);
     SetVideoProgressBar(parseFloat (CurrentPos / Duration ));   
+    
+    var cursec=Math.floor(CurrentPos)
+    if (!seensec[cursec]) {
+        seensec[cursec]=true;
+        seensum++;
+        seenbucket[sindex[cursec]]++
+        DisplayCurrentVideoProgress()
+    }
 }  
 
+function DisplayCurrentVideoProgress() {
+    
+    var children=document.getElementsByClassName("progressvalue");
+    
+    var str=""
+    for (var i=0;i<buckets;i++) { // if larger than buckets, then div/0 errors   
+        var perc=parseFloat(seenbucket[i] / maxindex[i] )
+        perc = Math.sqrt(perc) * 100
+        children[i].style.height=`${perc}%`;
+        children[i].style.width=`${perc}%`;
+    }
+    
+   
+}    
+
+
+function SeenVideo() {
+    console.log(`Seen video ${currentvideoid}`);
+    var  CurrentPos=player.getCurrentTime();
+    var cp =  Math.floor(CurrentPos);
+    console.log(`In SeenVideo ${cp} ${currentduration} ${sindex[cp]} ${seenbucket[sindex[cp]]}`);
+    seenbucket[sindex[cp]] = Math.min(seenbucket[sindex[cp]]+1 , maxindex[sindex[cp]]);
+    DisplayCurrentVideoProgress();
+}    
+
+subscribe('videoend',    SeenVideo);
 
 
 
@@ -90,7 +167,7 @@ async function tcallback() {
    // console.log("In tcallback");
     VideoLocation();
    if (!IsVideoPaused())
-        setTimeout( tcallback, 1000); // 400
+        setTimeout( tcallback, 400); // 400
 }    
 /*
 function DisplayCurrentFunctionName(args) {
@@ -133,23 +210,42 @@ function CreateButton(name,funct,place) {
     place.appendChild(buttonback);
 }      
 function SetFullScreen(fSetFullScreen) {
-    console.log("Making fullscreen");
+    console.log(`Making fullscreen ${fSetFullScreen}`);
     let elem = document.body; // let elem = document.documentElement;
-    if (fSetFullScreen) {        
-        elem.requestFullscreen({ navigationUI: "hide" }).then({}).catch(err => {
-            console.log(`An error occurred while trying to switch into full-screen mode: ${err.message} (${err.name})`);
-        });
-    } else 
-       document.exitFullscreen(); 
+    if (fSetFullScreen) {                
+        if (elem.requestFullScreen)       console.log("elem.requestFullScreen")  
+        if (elem.mozRequestFullScreen)    console.log("elem.mozRequestFullScreen") 
+        if (elem.webkitRequestFullScreen) console.log("elem.webkitRequestFullScreen")
+        
+        if (elem.requestFullScreen) {
+            elem.requestFullScreen({ navigationUI: "hide" });
+        } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen({ navigationUI: "hide" });
+        } else if (elem.webkitRequestFullScreen) {
+            elem.webkitRequestFullScreen({ navigationUI: "hide" });
+        }   
+    } else {
+        if (document.exitFullscreen)       console.log("document.exitFullscreen")  
+        if (document.mozExitFullscreen)    console.log("document.mozExitFullscreen") 
+        if (document.webkitExitFullscreen) console.log("document.webkitExitFullscreen")
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozExitFullscreen) {
+            document.mozExitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }          
    fFullScreen = fSetFullScreen;
+   console.log(`Making fullscreen at end ${fSetFullScreen}`);
 }    
 function ToggleFullScreen() {
-   
+    console.log(`In ToggleFullScreen current value=${fFullScreen}`);
     SetFullScreen(!fFullScreen);
 }    
 
 subscribe("shaking",x=>{if (fFullScreen) SetFullScreen(false)});
-
+document.addEventListener("keydown", x=>{publish(`keypressed${x.key}`)}); // connect actions to keypresses, not implemented yet
 
 function GetVolume() {
     if (video) return video.volume;
@@ -244,7 +340,9 @@ export async function startVideo() {
    //         console.log(player.getDebugText());
    //     console.log(player.getVideoData());
     
-    ShowVideoTitle(false);
+    
+    ShowTitles(false)
+    
     
     if (video) {
         video.play();
@@ -264,7 +362,7 @@ function TranscriptShownCB(txt) {
 }
 function stopVideo() {
     console.log("In stopVideo");
-    ShowVideoTitle(true);
+    ShowTitles(true);
     if (video) video.pause();
     if (player) player.pauseVideo();
    // UpdateVideoIndicator(true);
@@ -333,24 +431,25 @@ subscribe('popupdisplaynone', x=> { if (fVideoRunning) startVideo(); } ); // if 
 async function LoadVideo(vidinfo) { // call when first video is loaded or a diffent video is selected
     
     console.log(`Loading video ${vidinfo.videoid} ${vidinfo.txt}`);
-    //console.log(vidinfo);
+    console.log(vidinfo);
     player=await playerpromise;
     if (player)
         player.cueVideoById(vidinfo.videoid,0); // start at beginning   
     
     currentduration = vidinfo.duration
+    currentvideoid = vidinfo.videoid;
     console.log(`In Loadvideo`);
     SetVideoTitle(vidinfo.txt);
-
+   SetVideoProgressBar(0)
     PrepareAndLoadSlides(vidinfo);
     
     GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
     GetSetupLitAndAssInfo(vidinfo.txt);
-    
+    InitProgress(vidinfo);
     
 }
 async function asyncloaded() {    
-    console.log(`In asyncloaded of script: ${import.meta.url}`);   
+    //console.log(`In asyncloaded of script: ${import.meta.url}`);   
     publish("playerstart");
    
     
@@ -378,8 +477,8 @@ async function asyncloaded() {
     //LinkButton("subtitle",ToggleCueVisibility);     
     LinkToggleButton("subtitle",false);subscribe("subtitleon",ToggleCueVisibility);subscribe("subtitleoff",ToggleCueVisibility);
     
-    //LinkButton("fullscreen",ToggleFullScreen);        
-    LinkToggleButton("fullscreen",false);subscribe("fullscreenon",ToggleFullScreen);subscribe("fullscreenoff",ToggleFullScreen);
+ //   LinkButton("fullscreen",ToggleFullScreen);        
+   LinkToggleButton("fullscreen",false);subscribe("fullscreenon",ToggleFullScreen);subscribe("fullscreenoff",ToggleFullScreen);
     
     CreateVideoSlider(); 
     // CreateSoundSlider();
@@ -406,6 +505,8 @@ async function asyncloaded() {
     console.log("Init ready");
 }
 
+
+publish("playerloading");
 SetupLogWindow();
 var url = window.location.pathname;
 var filename = url.substring(url.lastIndexOf('/')+1);
@@ -417,4 +518,15 @@ window.addEventListener('DOMContentLoaded', asyncloaded);  // load
 //  console.log('page is fully loaded');
    //console.log(Webflow);
 //}); */
+
+window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
+console.log("In onerror");
+    var str=`Error: ${message} ${source}, ${lineno}, ${colno}  `;
+    if (error && error.stack) str = str.concat('\n').concat(error.stack);
+    
+    //console.log(error.stack);
+    
+    DisplayMessage(str)
+    
+} 
 

@@ -1,4 +1,4 @@
-console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
+//console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
 import "https://apis.google.com/js/api.js";
@@ -73,7 +73,7 @@ export function LinkButton(nameButton,funct) {
 
 function ShowButton(button,fFirst) {    
 
-console.log(`In ShowButton fFirst = ${fFirst}`);
+//console.log(`In ShowButton fFirst = ${fFirst}`);
     //var altcolor="white";
     var buttonchildren=button.getElementsByClassName("w-button")
     
@@ -180,8 +180,8 @@ export function LinkToggleButton(nameButton,fInitial) {
         domidmousearea.addEventListener("mousemove",  SliderDrag);
         domidmousearea.addEventListener("touchmove",  SliderDrag);
         
-        domidmousearea.addEventListener("mouseup",    ev=>{console.log("mouseup");SliderStop();});  
-        domidmousearea.addEventListener("touchend",   ev=>{console.log("touchend");SliderStop();});  
+        domidmousearea.addEventListener("mouseup",    SliderStop);
+        domidmousearea.addEventListener("touchend",   SliderStop);
         
         
 /*        

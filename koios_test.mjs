@@ -47,6 +47,7 @@ async function Test() {
         //s1=subscribe('videoend',    x=> { DisplayMessageContinous(`Video #${CurrentLesson} has ended`) } );
         
         s2=subscribe('videostart',   async x=> {
+            console.log("videostart event");           
             await sleep(3000);
             var CurrentPos=Math.round(player.getCurrentTime()); // has been updated in the mean time
             if (CurrentPos < currentduration-7) {
