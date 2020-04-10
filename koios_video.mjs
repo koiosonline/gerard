@@ -3,7 +3,7 @@
  // imports
     import {SetupVideoWindowYouTube,SetVideoTitle} from './koios_playvideo.mjs';
     import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koios_lessons.mjs';
-    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton} from './koios_util.mjs';
+    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfo,SaveVideoSeen,LoadVideoSeen} from './koios_util.mjs';
     import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
     import {} from './koios_getslides.mjs';
@@ -55,40 +55,12 @@ function GetDuration() {
     return 0;
 }  
 
-var seensec=[];
-var seensum;
-var seenbucket=[];
-var sindex=[];
-var maxindex=[];
-let buckets=7;
+var seeninfo;
 
 function InitProgress(vidinfo) {
     console.log("InitProgress");
-    
-    
-    buckets=document.getElementsByClassName("progressvalue").length;
-    
-    seensum=0;
-    seenbucket=[]
-    seensec=[]
-    for (var i=0;i<=buckets;i++)
-        seenbucket[i]=0;
-    sindex=[]
-    var max = vidinfo.duration / buckets;
-    var barrier=max;
-    var index=0;
-    var j=0;
-    for (var i=0;i<vidinfo.duration;i++) {
-        sindex[i]=index;
-        j++;
-        if (j > barrier) {
-            barrier = barrier -j + max; // next barrier
-            maxindex[index]=j;
-            j=0;
-            index++;            
-        }            
-    }
-    DisplayCurrentVideoProgress()
+    seeninfo=LoadVideoSeen(vidinfo);
+    CanvasProgressInfo(document.getElementById("videoprogressbar"),true,seeninfo)
 }    
 
 async function VideoLocation() { 
@@ -96,7 +68,7 @@ async function VideoLocation() {
     var Duration=GetDuration();
     var PlaybackRate=1;
     var ReallyPlayed=0;  
-    //console.log(`In VideoLocation pos=${CurrentPos}`);
+    console.log(`In VideoLocation pos=${CurrentPos}`);
     
     if (IsVideoPaused())
         return;  // probably just ended, don't update any more
@@ -107,43 +79,26 @@ async function VideoLocation() {
             PlaybackRate=player.getPlaybackRate()
         }
     }
-
     UpdateTranscript(CurrentPos);
     UpdateSlide(CurrentPos);
     SetVideoProgressBar(parseFloat (CurrentPos / Duration ));   
     
     var cursec=Math.floor(CurrentPos)
-    if (!seensec[cursec]) {
-        seensec[cursec]=true;
-        seensum++;
-        seenbucket[sindex[cursec]]++
-        DisplayCurrentVideoProgress()
-    }
+    if (!seeninfo.seensec[cursec]) {
+        seeninfo.seensec[cursec]=1;
+        seeninfo.seensum++;
+    }    
+    SaveVideoSeen(seeninfo,currentvideoid,currentduration)      
+    
+    CanvasProgressInfo(document.getElementById("videoprogressbar"),true,seeninfo)
 }  
+ 
+ 
 
-function DisplayCurrentVideoProgress() {
-    
-    var children=document.getElementsByClassName("progressvalue");
-    
-    var str=""
-    for (var i=0;i<buckets;i++) { // if larger than buckets, then div/0 errors   
-        var perc=parseFloat(seenbucket[i] / maxindex[i] )
-        perc = Math.sqrt(perc) * 100
-        children[i].style.height=`${perc}%`;
-        children[i].style.width=`${perc}%`;
-    }
-    
-   
-}    
-
-
-function SeenVideo() {
+function SeenVideo() { // every few seconds save the progress
     console.log(`Seen video ${currentvideoid}`);
-    var  CurrentPos=player.getCurrentTime();
-    var cp =  Math.floor(CurrentPos);
-    console.log(`In SeenVideo ${cp} ${currentduration} ${sindex[cp]} ${seenbucket[sindex[cp]]}`);
-    seenbucket[sindex[cp]] = Math.min(seenbucket[sindex[cp]]+1 , maxindex[sindex[cp]]);
-    DisplayCurrentVideoProgress();
+    seeninfo.seenend=true;
+    SaveVideoSeen(seeninfo,currentvideoid,currentduration)    
 }    
 
 subscribe('videoend',    SeenVideo);
@@ -309,11 +264,11 @@ export async function SetVideoSeconds(seconds) {
 async function SetVideoProgressBar(perc) {
     // console.log(`SetVideoProgressBar ${perc}`); 
     if (slider)    
-        slider.style.width =  (perc*100)+"%";   
+        slider.style.left =  (perc*100)+"%";   
 
 }
 export async function CreateVideoSlider() {
-    slider=document.getElementById("videodrag").parentElement; 
+    slider=document.getElementById("videodrag");//.parentElement; 
 
     function XYUpdate(percx,percy) {
         if (percx >1) percx=1;

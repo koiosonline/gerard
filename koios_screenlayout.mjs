@@ -5,7 +5,8 @@ export async function SetupSliders() {
     var SetMiddleh=window.getComputedStyle(grid).getPropertyValue("grid-template-columns").split(" ")[1];       
     var SetM=window.getComputedStyle(grid).getPropertyValue("grid-template-rows").split(" ")    
     var SetMiddlev1=SetM[1];
-    var SetMiddlev2=SetM[2]
+    var SetMiddlev2=SetM[2];
+    var SetMiddlev3=SetM[3];
     
     if (!SetMiddleh) SetMiddleh="7px";
     
@@ -18,7 +19,7 @@ export async function SetupSliders() {
         var top   = (percy      < snap) ? "0px":`${percy*2}fr`;
         var bot   = ( (1-percy) < snap) ? "0px":`${(1-percy)*2}fr`;        
         var c=`${left} ${SetMiddleh} ${right}`;
-        var r=`${top} ${SetMiddlev1} ${SetMiddlev2} ${bot}`;
+        var r=`${top} ${SetMiddlev1} ${SetMiddlev2} ${SetMiddlev3} ${bot}`;
         grid.style["gridTemplateColumns"] = c;
         grid.style["gridTemplateRows"]    = r;
        // console.log(c)

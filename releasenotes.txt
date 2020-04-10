@@ -1,3 +1,19 @@
+Version 0.77:
+
+
+Functional updates:
+- see what has been watched (in lesson overview)
+
+Technical updates:
+- improved dragging the "move" button 
+- info about watched video's is stored (in the browser)
+
+Layout updates:
+- intro screen layout updated
+- relax animation updated
+- video progress bars shows previousely watched video
+- scroll bar in lesson overview
+
 Version 0.76:
 
 Functional updates:

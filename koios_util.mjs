@@ -143,7 +143,7 @@ export function LinkToggleButton(nameButton,fInitial) {
     var domiddragarea=document.getElementById(dragarea); 
     
         
-     async function SliderDrag(ev) {   
+     async  function SliderDrag(ev) {   
         var arearect=domiddragarea.getBoundingClientRect();   // recalc every time
         ev.preventDefault()            
         var x=undefined;
@@ -157,13 +157,14 @@ export function LinkToggleButton(nameButton,fInitial) {
         if (ev.clientY) y=ev.clientY; 
         if (y) percy = (y - arearect.top) / arearect.height     
         XYCB(percx,percy);
-        //console.log(`SliderDrag ${percx} ${percy}`);
+        console.log(`SliderDrag ${percx} ${percy}`);
     }
     
     function SetzIndex(fChange) {  
-        domiddraggable.style.zIndex = (fChange? "-1": "")
+    
+    console.log("In SetzIndex");
+        domiddraggable.style.zIndex = (fChange? "201": "")
         domidmousearea.style.zIndex  = (fChange? "1": "")
-        
         
         var arrchildren=domidmousearea.children;    
         for (var i=0;i<arrchildren.length;i++) 
@@ -171,46 +172,64 @@ export function LinkToggleButton(nameButton,fInitial) {
         
     }
     
+    
+    var mouse;
+    
     async function SliderStart(ev) {
         console.log(`Start dragging`);        
         SetzIndex(true); // set all childeren to lower z-index, so the mouse works well        
         SliderDrag(ev);
         
-        domidmousearea.addEventListener("dragover",   SliderDrag);           
-        domidmousearea.addEventListener("mousemove",  SliderDrag);
-        domidmousearea.addEventListener("touchmove",  SliderDrag);
         
-        domidmousearea.addEventListener("mouseup",    SliderStop);
-        domidmousearea.addEventListener("touchend",   SliderStop);
+         mouse=document.createElement("div");
+          mouse.style.width="100%"
+          mouse.style.height="100%"
+          domidmousearea.parentNode.appendChild(mouse); 
+        mouse.style.backgroundColor="rgba(255, 255, 255, 0.2)"
+        mouse.style.position="absolute"
+        mouse.style.zIndex="200"
+        mouse.style.top="0%"
+
+        
+        
+        mouse.addEventListener("dragover",   SliderDrag);           
+        mouse.addEventListener("mousemove",  SliderDrag);
+        mouse.addEventListener("touchmove",  SliderDrag);
+        
+        mouse.addEventListener("mouseup",    SliderStop);
+        mouse.addEventListener("touchend",   SliderStop);
         
         
 /*        
-        domidmousearea.addEventListener("dragend",    ev=>{console.log("dragend");SliderStop();});  
-        domidmousearea.addEventListener("drop",       ev=>{console.log("drop");SliderStop();});  
-        domidmousearea.addEventListener("dragexit",   ev=>{console.log("dragexit");SliderStop();});  
-        domidmousearea.addEventListener("dragleave",  ev=>{console.log("dragleave");SliderStop();});  
-        domidmousearea.addEventListener("mouseleave", ev=>{console.log("mouseleave");SliderStop();});  
-        domidmousearea.addEventListener("touchcancel",ev=>{console.log("touchcancel");SliderStop();});  
+        mouse.addEventListener("dragend",    ev=>{console.log("dragend");SliderStop();});  
+        mouse.addEventListener("drop",       ev=>{console.log("drop");SliderStop();});  
+        mouse.addEventListener("dragexit",   ev=>{console.log("dragexit");SliderStop();});  
+        mouse.addEventListener("dragleave",  ev=>{console.log("dragleave");SliderStop();});  
+        mouse.addEventListener("mouseleave", ev=>{console.log("mouseleave");SliderStop();});  
+        mouse.addEventListener("touchcancel",ev=>{console.log("touchcancel");SliderStop();});  
 */        
     }       
     
     async function SliderStop(ev) {
         console.log("Stop dragging");
         SetzIndex(false); // back to normal
-        domidmousearea.removeEventListener("dragover",   SliderDrag);           
-        domidmousearea.removeEventListener("mousemove",  SliderDrag);           
-        domidmousearea.removeEventListener("touchmove",  SliderDrag);
+        mouse.removeEventListener("dragover",   SliderDrag);           
+        mouse.removeEventListener("mousemove",  SliderDrag);           
+        mouse.removeEventListener("touchmove",  SliderDrag);
         
-        domidmousearea.removeEventListener("mouseup",    SliderStop);  
-        domidmousearea.removeEventListener("touchend",   SliderStop);
+        mouse.removeEventListener("mouseup",    SliderStop);  
+        mouse.removeEventListener("touchend",   SliderStop);
+
+mouse.parentNode.removeChild(mouse)
+
 
 /*        
-        domidmousearea.removeEventListener("drop",       SliderStop);            
-        domidmousearea.removeEventListener("dragend",    SliderStop);  
-        domidmousearea.removeEventListener("dragleave",  SliderStop);  
-        domidmousearea.removeEventListener("dragexit",   SliderStop);          
-        domidmousearea.removeEventListener("mouseleave", SliderStop);
-        domidmousearea.removeEventListener("touchcancel",SliderStop);
+        mouse.removeEventListener("drop",       SliderStop);            
+        mouse.removeEventListener("dragend",    SliderStop);  
+        mouse.removeEventListener("dragleave",  SliderStop);  
+        mouse.removeEventListener("dragexit",   SliderStop);          
+        mouse.removeEventListener("mouseleave", SliderStop);
+        mouse.removeEventListener("touchcancel",SliderStop);
 */
     console.log("Triggering resize");
     window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again        
@@ -327,5 +346,91 @@ export function FindDotConnectToTab(areaid,classid) {
     }    
     return undefined;
 }   
+
+
+
+
+export function CanvasProgressInfo(domid,fHorizontal,seeninfo) {
+    console.log(seeninfo);
+    console.log(domid);
+    var canvas=domid.getElementsByTagName("CANVAS")[0];
+    if (!canvas) {
+        canvas=document.createElement("CANVAS");        
+        domid.appendChild(canvas); 
+        canvas.width="20"  // symmetric
+        canvas.height="20"  // symmetric
+        canvas.style.width="100%"
+        canvas.style.height="100%"
+    }    
+    var ctx = canvas.getContext('2d');       
+    canvas.width="20"
+    canvas.height="20"    
+    var arearect=domid.getBoundingClientRect()
+    //console.log(arearect);
+    var factor
+    
+    if (fHorizontal) {
+        factor       = Math.round(arearect.width / seeninfo.seensec.length);
+        if (factor < 1) factor = 1; // in case bounding rect is still empty
+        canvas.width = seeninfo.seensec.length*factor // note, this cleans the ctx
+    }
+    else {
+        factor        = Math.round(arearect.height / seeninfo.seensec.length);
+        if (factor < 1) factor = 1;  // in case bounding rect is still empty
+        canvas.height = seeninfo.seensec.length // note, this cleans the ctx
+    }
+    //console.log(factor);
+    //console.log(canvas);
+    
+    ctx.fillStyle = window.getComputedStyle(domid).getPropertyValue("color"); // use text color of parent
+    //console.log( ctx.fillStyle );
+    //void ctx.fillRect(x, y, width, height);
+    for (var i=0;i<seeninfo.seensec.length;i++) {
+        //console.log(seeninfo.seensec[i]) 
+        if (seeninfo.seensec[i]) 
+            if (fHorizontal)
+                ctx.fillRect(i*factor, 0, factor, 20);
+            else
+                ctx.fillRect(0, i*factor, 20, factor);
+    }
+}
+
+
+
+
+export function LoadVideoSeen(vidinfo) {
+    var storageid=`video-${vidinfo.videoid}`;
+    var get=localStorage.getItem(storageid);
+    var jsonparsed={}
+    
+    if (get) { // previous info about this video        
+        jsonparsed=JSON.parse(get)
+        jsonparsed.seensum=0
+        for (var i=0;i<vidinfo.duration;i++)
+            jsonparsed.seensum += jsonparsed.seensec[i];
+        
+    } else {
+        jsonparsed.seensum=0;
+        jsonparsed.seensec=[]
+        for (var i=0;i<vidinfo.duration;i++)
+            jsonparsed.seensec[i]=0;
+        jsonparsed.seenend=false;
+    }
+    return jsonparsed;
+}    
+
+export function SaveVideoSeen(seeninfo,seenend,videoid,duration) {
+    var storageid=`video-${videoid}`;
+    var seenperc=parseFloat(seeninfo.seensum / duration).toFixed(3)
+    var obj = { seensec: seeninfo.seensec, seenperc: seeninfo.seenperc, seenend: seeninfo.fEndReached };
+    console.log(obj)
+    var myJSON = JSON.stringify(obj);    
+    localStorage.setItem(storageid,myJSON)        
+}    
+
+
+
+
+
 
 

@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe} from './koios_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo} from './koios_util.mjs';
 
 // Global vars
 var PrepareLessonsListTemplate;   
@@ -134,12 +134,21 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     
     cln.id=`lesson-${index}`;
     
+    cln.videoid=videoid; // to store & retrieve data about the video
+    
     LinkButton(cln.id,x=> {
         console.log(`select lesson ${index}`);
         SelectLesson(index)
     });
+    //GetProgressInfo(cln);
+    
+    var canvasloc=cln.getElementsByClassName("pi-lesson")[0]
+    
+    var seeninfothisvideo=LoadVideoSeen(vidinfo)
+    CanvasProgressInfo(canvasloc,false,seeninfothisvideo)  // vertical
     
 } 
+
 
 
 
