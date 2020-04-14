@@ -1,6 +1,6 @@
 
 import {LinkButton,sleep,subscribe,FindDotConnectToTab,LinkToggleButton} from './koios_util.mjs';
-import {player,currentduration,startVideo,SetVideoSeconds} from './koios_video.mjs';
+import {player,currentvidinfo,startVideo,SetVideoSeconds} from './koios_video.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
 
 import {CurrentLesson,LastLesson} from './koios_lessons.mjs';
@@ -50,9 +50,9 @@ async function Test() {
             console.log("videostart event");           
             await sleep(3000);
             var CurrentPos=Math.round(player.getCurrentTime()); // has been updated in the mean time
-            if (CurrentPos < currentduration-7) {
+            if (CurrentPos < currentvidinfo.duration-7) {
                 DisplayMessageContinous(`Fast forward`);
-                SetVideoSeconds(currentduration-5);
+                SetVideoSeconds(currentvidinfo.duration-5);
             } 
                 
         } );               

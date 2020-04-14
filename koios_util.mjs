@@ -137,13 +137,13 @@ export function LinkToggleButton(nameButton,fInitial) {
 }
 
 
- export function DragItem(draggable,dragarea,mousearea,XYCB) {
+ export function DragItem(draggable,dragarea,mousearea,XYCB,ClickCB) { 
     var domiddraggable=document.getElementById(draggable); 
     var domidmousearea=document.getElementById(mousearea); 
     var domiddragarea=document.getElementById(dragarea); 
-    
-        
-     async  function SliderDrag(ev) {   
+
+             
+   function SliderDrag(ev) {     
         var arearect=domiddragarea.getBoundingClientRect();   // recalc every time
         ev.preventDefault()            
         var x=undefined;
@@ -157,88 +157,79 @@ export function LinkToggleButton(nameButton,fInitial) {
         if (ev.clientY) y=ev.clientY; 
         if (y) percy = (y - arearect.top) / arearect.height     
         XYCB(percx,percy);
-        console.log(`SliderDrag ${percx} ${percy}`);
+        // console.log(`SliderDrag ${percx} ${percy}`);    
     }
     
-    function SetzIndex(fChange) {  
+var touchstart;    
+    async function SliderStartTouch(ev) {
+        console.log(`Start touch`);   
+        touchstart=new Date();        
+        SliderDrag(ev);               
+        domidmousearea.addEventListener("touchmove",  SliderDrag);
+        domidmousearea.addEventListener("touchend",   SliderStopTouch);
+    }       
     
-    console.log("In SetzIndex");
-        domiddraggable.style.zIndex = (fChange? "201": "")
-        domidmousearea.style.zIndex  = (fChange? "1": "")
+    async function SliderStopTouch(ev) {
+        console.log(`Stop touch`);    
+        var touchend=new Date();
         
-        var arrchildren=domidmousearea.children;    
-        for (var i=0;i<arrchildren.length;i++) 
-            arrchildren[i].style.zIndex=(fChange? "-2": "")      
-        
-    }
-    
-    
-    var mouse;
-    
-    async function SliderStart(ev) {
-        console.log(`Start dragging`);        
-        SetzIndex(true); // set all childeren to lower z-index, so the mouse works well        
-        SliderDrag(ev);
+        domidmousearea.removeEventListener("touchmove",  SliderDrag);
+        domidmousearea.removeEventListener("touchend",   SliderStopTouch);
+        console.log("Triggering resize");
+        window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again        
         
         
-         mouse=document.createElement("div");
-          mouse.style.width="100%"
-          mouse.style.height="100%"
-          domidmousearea.parentNode.appendChild(mouse); 
+          console.log(touchend.getTime()-touchstart.getTime()); 
+        
+        if (ClickCB && (touchend.getTime()-touchstart.getTime() < 200 ) ) { // then just a click
+            console.log("Short touch");
+            ClickCB();
+        }
+        
+        
+    }            
+    
+
+var mouse;    
+var clickstart;
+    async function SliderStartMouse(ev) {
+        console.log(`Start mouse`);
+        clickstart=new Date();
+        
+        mouse=document.createElement("div");
+        mouse.style.width="100%"
+        mouse.style.height="100%"
+        domidmousearea.parentNode.appendChild(mouse); 
         mouse.style.backgroundColor="rgba(255, 255, 255, 0.2)"
         mouse.style.position="absolute"
         mouse.style.zIndex="200"
         mouse.style.top="0%"
 
-        
-        
-        mouse.addEventListener("dragover",   SliderDrag);           
         mouse.addEventListener("mousemove",  SliderDrag);
-        mouse.addEventListener("touchmove",  SliderDrag);
-        
-        mouse.addEventListener("mouseup",    SliderStop);
-        mouse.addEventListener("touchend",   SliderStop);
-        
-        
-/*        
-        mouse.addEventListener("dragend",    ev=>{console.log("dragend");SliderStop();});  
-        mouse.addEventListener("drop",       ev=>{console.log("drop");SliderStop();});  
-        mouse.addEventListener("dragexit",   ev=>{console.log("dragexit");SliderStop();});  
-        mouse.addEventListener("dragleave",  ev=>{console.log("dragleave");SliderStop();});  
-        mouse.addEventListener("mouseleave", ev=>{console.log("mouseleave");SliderStop();});  
-        mouse.addEventListener("touchcancel",ev=>{console.log("touchcancel");SliderStop();});  
-*/        
-    }       
+        mouse.addEventListener("mouseup",    SliderStopMouse);
+    }
     
-    async function SliderStop(ev) {
-        console.log("Stop dragging");
-        SetzIndex(false); // back to normal
-        mouse.removeEventListener("dragover",   SliderDrag);           
+    async function SliderStopMouse(ev) {
+        console.log("Stop mouse"); 
+        var clickend=new Date();
+                
         mouse.removeEventListener("mousemove",  SliderDrag);           
-        mouse.removeEventListener("touchmove",  SliderDrag);
+        mouse.removeEventListener("mouseup",    SliderStopMouse);  
+        mouse.parentNode.removeChild(mouse)
+        console.log("Triggering resize");
+        window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again   
+            
+         console.log(clickend.getTime()-clickstart.getTime());   
+            
+        if (ClickCB && (clickend.getTime()-clickstart.getTime() < 150 ) ) { // then just a click
+            console.log("Clicked");
+            ClickCB();
+        }
         
-        mouse.removeEventListener("mouseup",    SliderStop);  
-        mouse.removeEventListener("touchend",   SliderStop);
-
-mouse.parentNode.removeChild(mouse)
-
-
-/*        
-        mouse.removeEventListener("drop",       SliderStop);            
-        mouse.removeEventListener("dragend",    SliderStop);  
-        mouse.removeEventListener("dragleave",  SliderStop);  
-        mouse.removeEventListener("dragexit",   SliderStop);          
-        mouse.removeEventListener("mouseleave", SliderStop);
-        mouse.removeEventListener("touchcancel",SliderStop);
-*/
-    console.log("Triggering resize");
-    window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again        
-    }   
-    domiddraggable.addEventListener('mousedown',  SliderStart);
-    domiddraggable.addEventListener('touchstart', SliderStart);
-  //  domiddraggable.addEventListener('dragstart',  SliderStart);    
-  
-  
+    }
+    
+    domiddraggable.addEventListener('touchstart', SliderStartTouch);
+    domiddraggable.addEventListener('mousedown',  SliderStartMouse);  
 }
 
 // Developers can annotate touch and wheel listeners with {passive: true} to indicate that they will never invoke preventDefault.
@@ -351,8 +342,8 @@ export function FindDotConnectToTab(areaid,classid) {
 
 
 export function CanvasProgressInfo(domid,fHorizontal,seeninfo) {
-    console.log(seeninfo);
-    console.log(domid);
+    //console.log(seeninfo);
+    //console.log(domid);
     var canvas=domid.getElementsByTagName("CANVAS")[0];
     if (!canvas) {
         canvas=document.createElement("CANVAS");        
@@ -382,11 +373,13 @@ export function CanvasProgressInfo(domid,fHorizontal,seeninfo) {
     //console.log(factor);
     //console.log(canvas);
     
-    ctx.fillStyle = window.getComputedStyle(domid).getPropertyValue("color"); // use text color of parent
+    
+    var primcolor=window.getComputedStyle(domid).getPropertyValue("color"); // use text color of parent
     //console.log( ctx.fillStyle );
     //void ctx.fillRect(x, y, width, height);
     for (var i=0;i<seeninfo.seensec.length;i++) {
         //console.log(seeninfo.seensec[i]) 
+        ctx.fillStyle = primcolor; // seeninfo.seensec[i] ? primcolor:  "yellow";
         if (seeninfo.seensec[i]) 
             if (fHorizontal)
                 ctx.fillRect(i*factor, 0, factor, 20);
@@ -419,18 +412,41 @@ export function LoadVideoSeen(vidinfo) {
     return jsonparsed;
 }    
 
-export function SaveVideoSeen(seeninfo,seenend,videoid,duration) {
-    var storageid=`video-${videoid}`;
-    var seenperc=parseFloat(seeninfo.seensum / duration).toFixed(3)
-    var obj = { seensec: seeninfo.seensec, seenperc: seeninfo.seenperc, seenend: seeninfo.fEndReached };
-    console.log(obj)
+export function SaveVideoSeen(seeninfo,vidinfo) {
+    var storageid=`video-${vidinfo.videoid}`;
+    var seenperc=parseFloat(seeninfo.seensum / vidinfo.duration).toFixed(3)
+    var obj = { seensec: seeninfo.seensec, seenperc: seeninfo.seenperc, seenend: seeninfo.seenend };
+    //console.log(obj)
     var myJSON = JSON.stringify(obj);    
-    localStorage.setItem(storageid,myJSON)        
+    localStorage.setItem(storageid,myJSON)  
 }    
 
 
+// see chrome dev console / tab application / left column: Local storage
 
 
 
 
+export function GetCidViaIpfsProvider(cid,nr) {
+    return `${ipfsproviders[nr]}/${cid}`;    
+}    
 
+export function NrIpfsProviders() {
+   return ipfsproviders.length;
+}    
+let ipfsproviders=["https://ipfs.io/ipfs","https://ipfs.infura.io/ipfs"];
+
+export async function ipfsgetjson(cid) {
+
+    var indexjson
+    for (var i=0;i<NrIpfsProviders();i++) {
+        var url=GetCidViaIpfsProvider(cid,i);
+        console.log(`Checking ${url}`);
+        indexjson=await fetch(url);   // /index.json
+        if (indexjson.ok) break; // found a working version     
+    }
+    if (!indexjson.ok)
+        return undefined;    
+    var json = await indexjson.json();
+    return json;
+}    

@@ -1,5 +1,17 @@
-Version 0.77:
+Version 0.78:
 
+Functional updates:
+- main screen layout can toggle between large notes ares & large slides area, by clicking on the drag icon
+
+Technical updates:
+- fixed progress bar for android
+- support for multiple ipfs providers
+
+Layout updates:
+- set android search bar color (only works when no theme has been set)
+
+
+Version 0.77:
 
 Functional updates:
 - see what has been watched (in lesson overview)

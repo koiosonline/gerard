@@ -21,10 +21,12 @@
 
 
 export var player=0;
-export var currentduration;
+//export var currentduration;
+export var currentvidinfo;
 
 { // Global variables
-var currentvideoid;
+//var currentvideoid;
+
 
 var position;
 var logpos;
@@ -68,7 +70,7 @@ async function VideoLocation() {
     var Duration=GetDuration();
     var PlaybackRate=1;
     var ReallyPlayed=0;  
-    console.log(`In VideoLocation pos=${CurrentPos}`);
+   // console.log(`In VideoLocation pos=${CurrentPos}`);
     
     if (IsVideoPaused())
         return;  // probably just ended, don't update any more
@@ -88,7 +90,7 @@ async function VideoLocation() {
         seeninfo.seensec[cursec]=1;
         seeninfo.seensum++;
     }    
-    SaveVideoSeen(seeninfo,currentvideoid,currentduration)      
+    SaveVideoSeen(seeninfo,currentvidinfo)
     
     CanvasProgressInfo(document.getElementById("videoprogressbar"),true,seeninfo)
 }  
@@ -98,7 +100,7 @@ async function VideoLocation() {
 function SeenVideo() { // every few seconds save the progress
     console.log(`Seen video ${currentvideoid}`);
     seeninfo.seenend=true;
-    SaveVideoSeen(seeninfo,currentvideoid,currentduration)    
+    SaveVideoSeen(seeninfo,currentvidinfo)
 }    
 
 subscribe('videoend',    SeenVideo);
@@ -391,8 +393,10 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     if (player)
         player.cueVideoById(vidinfo.videoid,0); // start at beginning   
     
-    currentduration = vidinfo.duration
-    currentvideoid = vidinfo.videoid;
+    
+    currentvidinfo = vidinfo;
+    //currentduration = vidinfo.duration
+    //currentvideoid = vidinfo.videoid;
     console.log(`In Loadvideo`);
     SetVideoTitle(vidinfo.txt);
    SetVideoProgressBar(0)
@@ -445,8 +449,13 @@ async function asyncloaded() {
     var metaDom = document.getElementsByName("viewport");
     metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
     var newmeta=document.createElement("meta");
-    newmeta.name="viewport";
-    newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";   
+    //newmeta.name="viewport";
+//    newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";   // not inserted??   
+  //  newmeta=document.createElement("meta");
+    newmeta.name="theme-color" 
+    newmeta.content="#EBEBD3" //#20FFB1"
+    document.getElementsByTagName("head")[0].appendChild(newmeta);
+     
     SetupSliders();
     //NavigateLessons();   
     

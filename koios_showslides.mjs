@@ -3,7 +3,7 @@
 
 
 import {GetAllSlides,slides} from './koios_getslides.mjs';
-import {publish} from './koios_util.mjs';
+import {publish,GetCidViaIpfsProvider,NrIpfsProviders} from './koios_util.mjs';
 
 
 
@@ -94,7 +94,19 @@ PrepareSlidesList(); // sooner
 
 var slidenr=0;
 
-export async function AddSlide(num,url,title) {
+export async function AddSlide(num,cid,title) {
+    
+    var ipfsproviderindex=0;
+    
+    function urlerrorhandling() {
+        if (ipfsproviderindex++ >= NrIpfsProviders() ) {
+            this.onerror =  null; // no more options
+        } else
+            this.src=GetCidViaIpfsProvider(cid,ipfsproviderindex);
+        
+        console.log(`In urlerrorhandling for cid ${cid} ipfsproviderindex ${ipfsproviderindex}`);
+    }
+    
     //console.log(`Add slide ${url}  ${title}`);
     //PrepareSlidesList()
     
@@ -105,7 +117,8 @@ export async function AddSlide(num,url,title) {
 //    var list = document.getElementsByClassName("real-slides")
 //    var target=list[slidenr];
     if (target) {
-        target.getElementsByTagName("img")[0].src=url;
+        target.getElementsByTagName("img")[0].src=GetCidViaIpfsProvider(cid,0);
+        target.getElementsByTagName("img")[0].onerror=urlerrorhandling;
         target.getElementsByTagName("h5")[0].innerHTML=title; // `Slide #${num} ${title}`;
         target.style.display="";
     }
@@ -163,8 +176,8 @@ var promiseGetAllSlides;
 export async function FoundSlides(sheets,vidinfo) {           // found slide info via subtitles
     
     await promiseGetAllSlides; // wait till slide info from IPFS is ready
-    console.log(`In FoundSlides`);
-    console.log(sheets);
+  //  console.log(`In FoundSlides`);
+  //  console.log(sheets);
     //await slidepromise; // now we have the slides
     
     var duration = vidinfo.duration;
@@ -266,7 +279,7 @@ async function SetSlide(n) {
     if (!n) n=0; // show the first slide
     
   
-    console.log(`SetSlide ${n}`);
+  //  console.log(`SetSlide ${n}`);
     if (n == prevslide) 
         return; // not changed
     prevslide=n;
