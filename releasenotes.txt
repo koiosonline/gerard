@@ -14,6 +14,7 @@ Layout updates:
 - shadows at < >, oooo (slides & video)
 - hires pictures of video's shown
 - drag to next video is working now
+- test button is hidden in production version 
 
 Version 0.78:
 

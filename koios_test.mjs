@@ -1,12 +1,11 @@
 
-import {LinkButton,sleep,subscribe,FindDotConnectToTab,LinkToggleButton} from './koios_util.mjs';
+import {LinkButton,sleep,subscribe,FindDotConnectToTab,LinkToggleButton,HideButton} from './koios_util.mjs';
 import {player,currentvidinfo,startVideo,SetVideoSeconds} from './koios_video.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
 import {CurrentLesson,LastLesson} from './koios_lessons.mjs';
 
-var fInTest=window.location.href.includes("test");
+var fInTest;
 
-console.log(`fInTest=${fInTest}`);
 
 
 //const wf=Webflow.require('ix2');
@@ -16,9 +15,22 @@ console.log(`fInTest=${fInTest}`);
 
 
 
+
+
+subscribe("playerloading",  InitTest);
+
+function InitTest() {
+    var fInTest=window.location.href.includes("test");
+    console.log(`fInTest=${fInTest}`);
+
+    HideButton("test",!fInTest)
+    if (fInTest)
+      LinkToggleButton("test",false);subscribe("teston",Test);subscribe("testoff",Test);
+}    
+
 //LinkButton("test",Test);
-if (fInTest)
-  LinkToggleButton("test",false);subscribe("teston",Test);subscribe("testoff",Test);
+
+
 
 /*
 async function Test2() {
