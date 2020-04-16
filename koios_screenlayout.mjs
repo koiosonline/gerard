@@ -1,4 +1,5 @@
 import {DragItem,subscribe,LinkToggleButton} from './koios_util.mjs';
+import {player} from './koios_video.mjs';
 
 export async function SetupSliders() {
     var grid=document.getElementById("mainscreen");    
@@ -14,17 +15,27 @@ export async function SetupSliders() {
     function XYUpdate(percx,percy) {
         //console.log(percx,percy)
         const snap = 0.01;
-        var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
-        var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*2}fr`;
-        var top   = (percy      < snap) ? "0px":`${percy*2}fr`;
-        var bot   = ( (1-percy) < snap) ? "0px":`${(1-percy)*2}fr`;        
+        //var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
+        //var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*2}fr`;
+        //var top   = (percy      < snap) ? "0px":`${percy*2}fr`;
+        //var bot   = ( (1-percy) < snap) ? "0px":`${(1-percy)*2}fr`;        
+        
+        var left  = (percx      < snap) ? "0px":`${percx*100}%`;
+        var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*100}%`;
+        
+        var top   = (percy      < snap) ? "0px":`${percy*100}%`;
+        var bot   = ( (1-percy) < snap) ? "0px":`${(1-percy)*100}%`;        
+
+        
+        
         var c=`${left} ${SetMiddleh} ${right}`;
         var r=`${top} ${SetMiddlev1}  ${bot}`;
         grid.style["gridTemplateColumns"] = c;
         grid.style["gridTemplateRows"]    = r;
-       // console.log(c)
-       // console.log(r);
-        
+        //console.log(c)
+        //console.log(r);
+        //console.log(player.g.g);
+        //console.log(`Player: ${player.g.g.width} ${player.g.g.height}`);
         
         
         var a=window.getComputedStyle(grid).getPropertyValue("grid-template-columns")
@@ -44,11 +55,71 @@ export async function SwitchIntroScreen(fOn) {
 
     
     
-subscribe('playerloading',    x=>SwitchIntroScreen(true));
-subscribe('playerloaded',   x=>{  
-            SwitchMainLayout(true);
-            SwitchIntroScreen(false); 
-        });
+subscribe('playerloading',  InitScreenlayout1);
+subscribe('playerloaded',   InitScreenlayout2); 
+           
+
+function InitScreenlayout1() { // when page is loaded
+    SwitchIntroScreen(true);
+    
+    let dotstyle = document.createElement("style"); // w-slider-dot  doesn't work from webflow
+    dotstyle.type = "text/css";    
+    dotstyle.innerHTML=`
+    .w-slider-dot           {   box-shadow: 1px 1px 3px 0  rgba(0,0,0,0.4); } 
+    `
+    // #000
+    // .w-slider-dot.w-active { background-color: green; }     
+    //  .w-icon-slider-right    {   text-shadow:  1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue; } 
+    document.body.appendChild(dotstyle); 
+    
+}    
+
+function InitScreenlayout2() { // after everything has been loaded
+     SwitchMainLayout(true);
+     
+     
+     var slidewindow=document.getElementById("move"); // connect to "move" circle
+    
+    slidewindow.addEventListener("mouseenter",   MouseOverSlides);    
+    slidewindow.addEventListener("mouseleave",   MouseOverSlides); 
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    SwitchIntroScreen(false); 
+}    
+
+
+function handleOrientation(event) {
+    if (event.beta && event.gamma) { // prevent triggering on a desktop
+        var x= event.beta
+        var y= event.gamma
+        var sum = Math.abs(x+y)
+        ShowTitles(sum < 3) // only show extra info when sum is small, e.g. phone is flat
+    }
+}
+
+
+
+
+export function ShowTitles(fOn) {
+    var videoinfo=document.getElementById("videoinfo");
+    videoinfo.style.display=fOn?"flex":"none"
+      
+     var list = document.getElementsByClassName("slideinfo"); 
+     for (var i=0;i<list.length;i++) {
+         list[i].style.display=fOn?"block":"none"
+         
+    }    
+}
+
+
+
+function MouseOverSlides(ev) {
+    
+    console.log("In MouseOverSlides");
+    switch (ev.type) {       
+        case "mouseleave": ShowTitles(false);break; 
+        case "mouseenter": ShowTitles(true);break;
+    }
+}
 
 
 
@@ -89,3 +160,5 @@ export async function SwitchMainLayout(fLargeNotes) {
     fGlobalLargeNotes = fLargeNotes
 }
     
+
+

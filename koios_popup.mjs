@@ -32,7 +32,7 @@ function ChildChanged(childdomid,childnr) {
 
 export function InitPopup() { 
     MonitorDomid("popup","w-slider-nav","w-slider-dot","w-active",ChildChanged)    
-    MonitorVisible("popup")
+    MonitorVisible("popup") // publishes when object changes vibility
 }    
 
 // Later, you can stop observing

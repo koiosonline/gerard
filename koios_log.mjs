@@ -1,4 +1,4 @@
-
+import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koios_messages.mjs';
 
 var logtext;
 export function SetupLogWindow() {  // not async to
@@ -13,10 +13,17 @@ export function SetupLogWindow() {  // not async to
     position.appendChild(logtext);    
     log("Test logwindow")
   
-    //console.log("Switching to HTML logging");
-    //console.log=log;
-    //console.error=log;
-    //console.warn=log;
+ // logtext=document.getElementById("notes");
+ // console.log(logtext);
+  
+  /*
+    console.log("Switching to HTML logging");
+    console.log=log;
+    console.error=log;
+    console.warn=log;
+*/    
+    
+    
     
 }
 export function log(s) {
@@ -29,4 +36,9 @@ export function log(s) {
         
     if (logtext)
         logtext.innerHTML +=s+"\r";
+    
+    logtext.scrollTop = logtext.scrollHeight; // keep the windows "scrolled down"
+    
+    
+    
 }

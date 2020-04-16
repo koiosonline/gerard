@@ -7,10 +7,10 @@
     import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
     import {} from './koios_getslides.mjs';
-    import {FoundSlides,PrepareAndLoadSlides,UpdateSlide,SetupSlideWindow,ShowTitles} from './koios_showslides.mjs';
+    import {FoundSlides,UpdateSlide} from './koios_showslides.mjs';
     import {} from './koios_chat.mjs';
     import {} from './koios_notes.mjs';
-    import {SetupSliders} from './koios_screenlayout.mjs';
+    import {SetupSliders,ShowTitles} from './koios_screenlayout.mjs';
     import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koios_speech.mjs';
     import {SetupLogWindow} from './koios_log.mjs';
     import {SetupChat} from './koios_chat.mjs';
@@ -311,6 +311,9 @@ export async function startVideo() {
     }
  //   UpdateVideoIndicator(false);
 
+
+    publish("videostarted"); 
+
     tcallback(); // callbacks for the progress
 }
 function TranscriptShownCB(txt) {
@@ -324,7 +327,7 @@ function stopVideo() {
     if (player) player.pauseVideo();
    // UpdateVideoIndicator(true);
     StopSpeak();
-
+    publish("videostopped"); 
 
 }
 function TogglePauseVideo() {
@@ -389,6 +392,10 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     
     console.log(`Loading video ${vidinfo.videoid} ${vidinfo.txt}`);
     console.log(vidinfo);
+    
+    publish("loadvideo",vidinfo); // note: with parameter
+    
+    
     player=await playerpromise;
     if (player)
         player.cueVideoById(vidinfo.videoid,0); // start at beginning   
@@ -400,7 +407,7 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     console.log(`In Loadvideo`);
     SetVideoTitle(vidinfo.txt);
    SetVideoProgressBar(0)
-    PrepareAndLoadSlides(vidinfo);
+    
     
     GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
     GetSetupLitAndAssInfo(vidinfo.txt);
@@ -464,7 +471,7 @@ async function asyncloaded() {
     player=await playerpromise;    
     SetVideoTranscriptCallbacks(SetVideoSeconds,TranscriptShownCB);
     SelectLanguage("nl");    
-    SetupSlideWindow("slideplayer");
+    
     
     console.log("Init ready");
 }

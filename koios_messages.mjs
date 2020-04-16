@@ -1,5 +1,5 @@
 import {sleep,subscribe,publish} from './koios_util.mjs';  
-import {ShowTitles} from './koios_showslides.mjs';  
+
 
 export async function DisplayMessage(text) {    
     console.log("In DisplayMessage");
@@ -88,14 +88,6 @@ function TestAccelerometer() {
 }
 
 
-function handleOrientation(event) {
-    if (event.beta && event.gamma) { // prevent triggering on a desktop
-        var x= event.beta
-        var y= event.gamma
-        var sum = Math.abs(x+y)
-        ShowTitles(sum < 3) // only show extra info when sum is small, e.g. phone is flat
-    }
-}
 
 async function MessagesStart() {
     console.log("In MessagesStart");
@@ -109,7 +101,7 @@ async function MessagesStart() {
     TestAccelerometer();
     
     
-    window.addEventListener("deviceorientation", handleOrientation, true);
+
     
     console.log(window.onerror);
 

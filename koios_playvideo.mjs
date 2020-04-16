@@ -62,9 +62,6 @@ export async function SetVideoTitle(title) {
 
 }
 
-// see ShowTitles(fOn)
-
-
 
 async function onStateChange(event) {
     //console.log(`In onStateChange ${event.data}`);

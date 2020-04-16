@@ -1,28 +1,33 @@
 
-import {loadScriptAsync,LoadGapi,ipfsgetjson} from './koios_util.mjs';
-import {AddSlide} from './koios_showslides.mjs';
-
- 
-export var slides= [];
-
-var preferredslide=0;
+import {loadScriptAsync,LoadGapi,ipfsgetjson,subscribe,publish} from './koios_util.mjs';
 
 
-export async function GetAllSlides(cbFoundIndexJson) {
-    
+
+
+subscribe("loadvideo",GetSlidesFromVideo)
+
+function GetSourceCid() {    
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString); 
     let cid = urlParams.get('slides') || 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
-    console.log(`In GetAllSlides cid=${cid}`);
-    
-    var slideindex = await ipfsgetjson(cid);
-    console.log(slideindex);
-    
-    slides=[]; // reset slides
-    if (slideindex && slideindex.length > 0) 
-        for (var i=0;i<slideindex.length;i++) {       
-            slides[slideindex[i].slidenr]=slideindex[i].png; // `https://ipfs.io/ipfs/${slideindex[i].png}`;
-        }
-    cbFoundIndexJson(slideindex);   
-} 
+    console.log(`In GetSourceCid cid=${cid}`);
+    return cid;
+}    
+
+var oldcid;
+var slideindex;
+
+async function GetSlidesFromVideo(vidinfo) {    
+    console.log("In GetSlidesFromVideo");
+    console.log(vidinfo);
+    var cid=GetSourceCid();
+    if (cid != oldcid)
+        slideindex = await ipfsgetjson(cid);
+    var match = vidinfo.txt.split(" ")[0];
+    var showslides=[]        
+    for (var i=0;i<slideindex.length;i++) 
+        if (slideindex[i].chapter === match) 
+            showslides.push(slideindex[i])
+    publish("foundslides",showslides);
+}    
 

@@ -29,7 +29,11 @@ export async function GetYouTubePlaylists() {
         result.id    = list.result.items[i].id;
         result.title = list.result.items[i].snippet.title;
         result.description = list.result.items[i].snippet.description;
-        result.thumbnail = list.result.items[i].snippet.thumbnails.default.url;
+        
+        
+        
+        
+        result.thumbnail = list.result.items[i].snippet.thumbnails.high.url; // default.url;
         resultlist.push(result)
     }
     //console.log("In GetYouTubePlaylists");
@@ -45,7 +49,8 @@ export async function GetYouTubePlayListItems() {
     const urlParams = new URLSearchParams(queryString);
     //console.log(urlParams);
     
-    let playlistId = urlParams.get('playlistId') || "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef";
+    let playlistId = urlParams.get('playlistId') || "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD";
+    // koios intro PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD
     // level 2 "PL_tbH3aD86Kt7mITDw67sJMI6M0fRF2Zx";
     // level 1 "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef";
     
@@ -85,7 +90,10 @@ export async function GetYouTubePlayListItems() {
             //result.id    = list.result.items[i].id;
             result.title        = snippet.title;
             result.description  = snippet.description;
-            result.thumbnail    = snippet.thumbnails.default.url;
+            
+            console.log(snippet.thumbnails);
+            
+            result.thumbnail    = snippet.thumbnails.maxres? snippet.thumbnails.maxres.url : snippet.thumbnails.high.url; // default.url;
             result.videoid      = snippet.resourceId.videoId
             result.chapter      = false;
             resultlist.push(result);

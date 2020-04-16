@@ -157,7 +157,10 @@ export function LinkToggleButton(nameButton,fInitial) {
         if (ev.clientY) y=ev.clientY; 
         if (y) percy = (y - arearect.top) / arearect.height     
         XYCB(percx,percy);
-        // console.log(`SliderDrag ${percx} ${percy}`);    
+        //console.log(`SliderDrag ${percx.toFixed(2)} ${percy.toFixed(2)}`);   
+
+window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again   
+        
     }
     
 var touchstart;    
@@ -450,3 +453,34 @@ export async function ipfsgetjson(cid) {
     var json = await indexjson.json();
     return json;
 }    
+
+
+
+export class DomList {    
+    constructor (objectclass) {
+        console.log(`In constructor of DomList with objectclass=${objectclass}`);
+        var list = document.getElementsByClassName(objectclass);
+        //console.log(list)    
+        if (list && list[0]) {
+            this.template    = list[0];        
+            this.parentnode  = list[0].parentNode
+            list[0].remove();
+        } else
+            console.error(`${objectclass} not found`);
+    }
+    
+    AddListItem() {
+        console.log("In AddListItem");
+        if (!this.template) return undefined;
+        var target = this.template.cloneNode(true);
+        this.parentnode.appendChild(target);  
+        return target;
+    }
+ 
+    EmptyList() {        
+        while (this.parentnode && this.parentnode.firstChild)
+            this.parentnode.removeChild(this.parentnode.lastChild); // first remove previous children    
+    }
+}    
+
+

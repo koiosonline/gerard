@@ -1,3 +1,20 @@
+Version 0.79:
+
+Functional updates:
+- slideswindow can show pdf's and websites (including a link to show in a seperate tab)
+- added introduction video
+ 
+Technical updates:
+- add sort order for courses
+
+Layout updates:
+- resize screen with move button improved 
+    - percentages instead of fr
+    - redraw of screen with every move
+- shadows at < >, oooo (slides & video)
+- hires pictures of video's shown
+- drag to next video is working now
+
 Version 0.78:
 
 Functional updates:

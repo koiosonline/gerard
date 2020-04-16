@@ -2,7 +2,6 @@
 import {LinkButton,sleep,subscribe,FindDotConnectToTab,LinkToggleButton} from './koios_util.mjs';
 import {player,currentvidinfo,startVideo,SetVideoSeconds} from './koios_video.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
-
 import {CurrentLesson,LastLesson} from './koios_lessons.mjs';
 
 var fInTest=window.location.href.includes("test");
@@ -18,7 +17,7 @@ console.log(`fInTest=${fInTest}`);
 
 
 //LinkButton("test",Test);
-
+if (fInTest)
   LinkToggleButton("test",false);subscribe("teston",Test);subscribe("testoff",Test);
 
 /*

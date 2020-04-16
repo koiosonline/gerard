@@ -1,7 +1,8 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo} from './koios_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep} from './koios_util.mjs';
+import {player} from './koios_video.mjs';
 
 // Global vars
 var PrepareLessonsListTemplate;   
@@ -23,42 +24,7 @@ var globalLessonslist; // format:
 // thumbnail
 // videoid
 
-/*
-class Task {
-  constructor(name) {
-    this.name = name;
-  }
-  GetName() {
-    return this.name;
-  }
-}
 
-class Video extends Task {
-|
-
-class Quiz extends Task {
-}
-
-class Chapter extends Task {
-}
-
-
-class Lesson {
-    constructor() {
-        this.length = 0;  
-        this.data = {};
-    }
-}    
-const lesson= new Lesson();
-
-
-
-class Video {
-   slides   => time
-   transcripts [language] => time
-   time[] => slide / transcript
-}    
-*/
 
 
 var onlyLessonsIndexList=[]
@@ -74,6 +40,10 @@ export async function DisplayLessons(LoadVideoCB) {
     var items=await GetYouTubePlayListItems()
     
     for (var i=0;i<items.length;i++) {
+        
+        
+        //console.log(items[i]);
+        
        if (items[i].chapter)
           AddChapter(items[i].title)
        else {
@@ -147,6 +117,10 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     var seeninfothisvideo=LoadVideoSeen(vidinfo)
     CanvasProgressInfo(canvasloc,false,seeninfothisvideo)  // vertical
     
+    
+     var target = GlobalVideoPagesList.AddListItem()
+     target.getElementsByTagName("h5")[0].innerHTML=`Video ${txt}`;
+     target.getElementsByClassName("lesson-image-large")[0].src=thumbnail; 
 } 
 
 
@@ -203,6 +177,22 @@ function PrepButtons() {
     PrepButtons=function(){} // next time do nothing
 }
  
+ 
+
+var GlobalVideoPagesList;
+
+
+
+subscribe("playerloading",  InitLessons);
+
+function InitLessons() {
+    
+    GlobalVideoPagesList = new DomList("real-videos")
+    
+    MonitorDomid("videofield","w-slider-nav","w-slider-dot","w-active",VideoChildChanged)       
+}
+
+
 
  
 /* 
@@ -228,4 +218,53 @@ export async function GetLessonInfo(lessonspromise,direction=0) { // -1 is previ
 */
 
 
+
+
+
+
+
+function VideoChildChanged(childdomid,childnr) {
+    console.log(`In function VideoChildChanged ${childnr}`);
     
+    //var videoplayercontainer=document.getElementById("videoplayercontainer");
+    /*
+    console.log(childnr);
+    
+    var rv=document.getElementsByClassName("real-videos");
+    console.log(rv);
+    if (videoplayercontainer && rv.length > 0 && rv[childnr])
+        rv[childnr].appendChild(videoplayercontainer);
+    console.log(onlyLessonsIndexList);
+    */
+    
+      //  player.cueVideoById(onlyLessonsIndexList[childnr].videoid,0)
+    if (onlyLessonsIndexList.length > 0)
+        SelectLesson(childnr)
+    
+    
+        
+}    
+
+subscribe("loadvideo",ShowThumbnails);
+//subscribe("videocued",  ShowPlayButton);
+subscribe("videostarted",HideThumbnail)
+
+
+async function ShowThumbnails() {
+   var vimages=document.getElementsByClassName("lesson-image-large")
+    for (var i=0;i<vimages.length;i++)
+        vimages[i].style.display="block";
+}    
+
+async function HideThumbnail() {    
+    var vimages=document.getElementsByClassName("lesson-image-large")
+    vimages[CurrentLesson].style.display="none";
+}    
+
+/*
+var videoplayercontainer=document.getElementById("videoplayercontainer");
+videoplayercontainer.style.display="none"
+await sleep(300);
+videoplayercontainer.style.display="block"
+
+*/
