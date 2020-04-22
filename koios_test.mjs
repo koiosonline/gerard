@@ -1,5 +1,5 @@
 
-import {LinkButton,sleep,subscribe,FindDotConnectToTab,LinkToggleButton,HideButton} from './koios_util.mjs';
+import {LinkButton,sleep,subscribe,LinkToggleButton,HideButton} from './koios_util.mjs';
 import {player,currentvidinfo,startVideo,SetVideoSeconds} from './koios_video.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
 import {CurrentLesson,LastLesson} from './koios_lessons.mjs';
@@ -21,6 +21,10 @@ subscribe("playerloading",  InitTest);
 
 function InitTest() {
     var fInTest=window.location.href.includes("test");
+    
+    
+    fInTest=false; // disable test button
+    
     console.log(`fInTest=${fInTest}`);
 
     HideButton("test",!fInTest)

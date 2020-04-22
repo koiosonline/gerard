@@ -1,44 +1,85 @@
-import {publish,subscribe,GetCidViaIpfsProvider,NrIpfsProviders,DomList,sleep} from './koios_util.mjs';
+import {publish,subscribe,GetCidViaIpfsProvider,NrIpfsProviders,DomList,sleep,MonitorDomid} from './koios_util.mjs';
 
 var SecondsArraySlides;
 var prevslide=0;
 var GlobalPrepareSlidesList; 
 var GlobalSlideIndicatorList;
+var GlobalUrlList;
 
 subscribe("playerloading",  InitShowSlides);
 subscribe("foundslides",FoundSlidesViaJson) // called when sheets are found via json file
 
-
-// subscribe("loadvideo",)
-
 function InitShowSlides() {
-    console.log("In InitShowSlides");    
+    console.log("In InitShowSlides");      
     GlobalPrepareSlidesList = new DomList("real-slides")
-    //GlobalPrepareSlidesList.EmptyList()
-   
     GlobalSlideIndicatorList = new DomList("slideposition")
-    //GlobalSlideIndicatorList.EmptyList();
-}
     
-function FoundSlidesViaJson(slidesarray) {
+    
+    MonitorDomid("slideplayer","w-slider-nav","w-slider-dot","w-active",SlideChanged)       
+    
+}
+
+
+
+
+/*
+subscribe("loadvideo",SlidesForVideo)    
+function SlidesForVideo(vidinfo) {
+    GlobalPrepareSlidesList.EmptyList()
+        var match = vidinfo.txt.split(" ")[0];
+    AddSlide(0,1,{title:"index",chapter:"chapter",url:`https://www.koios.online/browse-links?match=${match}`})
+    
+       publish("slidesloaded"); // to close init screen
+    
+}    
+*/    
+    
+async function FoundSlidesViaJson(slidesarray) {
     console.log("In FoundSlidesViaJson");
     console.log(slidesarray);
     
     GlobalPrepareSlidesList.EmptyList()
     GlobalSlideIndicatorList.EmptyList();
     
-    for (var i=0;i<slidesarray.length;i++)
-       AddSlide(i,slidesarray.length,slidesarray[i])
-   
-    Webflow.require('slider').redraw(); // regenerate the dots    
+/*            
+    var list=""
+    list +=`<a href="https://www.google.com">https://www.google.com</a><br>`
+    for (var i=0;i<slidesarray.length;i++) {
+       var urltarget = GlobalUrlList.AddListItem()  
+       console.log(urltarget);
+        urltarget.getElementsByTagName("a")[0].href=slidesarray[i].url || slidesarray[i].pdf || slidesarray[i].cid
+        urltarget.getElementsByTagName("a")[0].innerHTML=slidesarray[i].title
+       
+       if (slidesarray[i].url) list +=`<a href=${slidesarray[i].url}>${slidesarray[i].url}</a><br>`
+       if (slidesarray[i].pdf) list +=`<a href=${slidesarray[i].pdf}>${slidesarray[i].pdf}</a><br>`
+       if (slidesarray[i].cid) {
+           var url=GetCidViaIpfsProvider(slidesarray[i].cid,0)
+           url = `https://docs.google.com/viewerng/viewer?url=${url}&embedded=true`;
+            list +=`<a href=${url}>${url}</a><br>`
+       }     
+    }  
+*/
+ //AddSlide(0,1,{title:"index",chapter:"chapter",url:`https://www.koios.online/browse-links?match=BC-3.0`})
+// AddSlide(0,1,{title:"index",chapter:"chapter",content:list})
+    
+    for (var i=0;i<slidesarray.length;i++) 
+          AddSlide(i,slidesarray.length,slidesarray[i])
+
+    await sleep(100); // wait a little while, otherwise redraw doesn't work
+    var x= Webflow.require('slider').redraw(); //////////////////////////////////////////////////////////////// regenerate the dots    
+    
     var domid=document.getElementById("slideplayer");
     var dots=domid.getElementsByClassName("w-slider-dot")
     for (var i=0;i<dots.length;i++)
         dots[i].id=`dot-${i+1}`;
-    publish ("slidesloaded");          
+    publish ("slidesloaded");
+    
+   
+    prevslide=0;
+    SetSlide(1); // update all info about first slide
 }    
 
-async function AddSlide(num,total,slidesinfo) {
+function AddSlide(num,total,slidesinfo) {
     
     console.log(`In AddSlide ${num} ${slidesinfo.png} ${slidesinfo.title}`);
     
@@ -57,17 +98,20 @@ async function AddSlide(num,total,slidesinfo) {
             var url=GetCidViaIpfsProvider(slidesinfo.png,0);
             target.getElementsByTagName("img")[0].src=url;
             target.getElementsByTagName("img")[0].onerror=urlerrorhandling;
-            var a=target.getElementsByClassName("href-button")[0];
-            a.href=url;
-            a.target="_blank"
+         //   var a=target.getElementsByClassName("href-button")[0];
+         //   a.href=url;
+         //   a.target="_blank"
         }
-        if (slidesinfo.pdf) {
+/*        if (slidesinfo.pdf) {
            SetupPDFWindowGoogle(target,slidesinfo.pdf);            
         }    
         if (slidesinfo.url)  {
             SetupURL(target,slidesinfo.url);
         }
-        target.getElementsByTagName("h5")[0].innerHTML=`Slide #${num+1} of ${total} ${slidesinfo.chapter} ${slidesinfo.title}`;
+        
+      
+*/        
+       // target.getElementsByTagName("h5")[0].innerHTML=`Slide #${num+1} of ${total} ${slidesinfo.chapter} ${slidesinfo.title}`;
         target.style.display="";
     }
 }
@@ -89,9 +133,9 @@ async function AddSlide(num,total,slidesinfo) {
         ifrm.addEventListener('load', e => { fLoaded=true } );
         
         
-        var a=sf.getElementsByClassName("href-button")[0];
-        a.href=url
-        a.target="_blank"
+        //var a=sf.getElementsByClassName("href-button")[0];
+        //a.href=url
+        //a.target="_blank"
         
         for (var i=0;i<5;i++) { // try 5 times
             await sleep (5000);
@@ -107,9 +151,14 @@ async function AddSlide(num,total,slidesinfo) {
      async function SetupURL(sf,url) {   
         console.log("In SetupURL");
         
-        var a=sf.getElementsByClassName("href-button")[0];
-        a.href=url
-        a.target="_blank"
+        //var a=sf.getElementsByClassName("href-button")[0];
+        
+        url = url.replace("http:", "https:"); // to prevent error message Mixed Content: The page at '<URL>' was loaded over HTTPS, but requested an insecure frame '<URL>'
+        
+        console.log(url);
+        
+        //a.href=url
+        //a.target="_blank"
         
         var ifrm=document.createElement("iframe");
         var fLoaded=false;
@@ -122,7 +171,14 @@ async function AddSlide(num,total,slidesinfo) {
 
 
 
+
+
+
+
 export async function FoundSlides(sheets,vidinfo) {           // found slide info via subtitles   
+
+console.log("In FoundSlides");
+
     var duration = vidinfo.duration;
     if (sheets) {
         for (var i=0;i<sheets.length;i++) {
@@ -156,7 +212,7 @@ function SlidesToSeconds(sheets) {
 
 
 function SetSlideIndicator(slidenr,xposperc,lengthperc) {
-  //  console.log(`In SetSlideIndicator ${xposperc} ${lengthperc}`);
+    console.log(`In SetSlideIndicator ${xposperc} ${lengthperc}`);
     var cln = GlobalSlideIndicatorList.AddListItem();
     cln.style.left= (xposperc*100)+"%";
     cln.style.width= (lengthperc*100)+"%";
@@ -173,7 +229,8 @@ export function UpdateSlide(CurrentPos) {   // called frequently
 }
 
 
-async function SetSlide(n) {    
+async function SetSlide(n) {    // n starts at 1
+    console.log(`In SetSlide ${n}`);
     if (!n) n=0; // show the first slide
     if (n == prevslide) 
         return; // not changed
@@ -181,10 +238,13 @@ async function SetSlide(n) {
     var dot=document.getElementById(`dot-${n}`)
     if (dot)
         dot.click();   // select the right slide
+    
+     publish("slideselected",n-1);
+    
 } 
 
 
-
- 
-
-
+function SlideChanged(childdomid,childnr) { // childnr starts at 0
+    console.log(`In function SlideChanged ${childnr}`);
+       publish("slideselected",childnr);
+} 

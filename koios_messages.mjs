@@ -47,6 +47,7 @@ async function VisibilityChange() {
 var prevsum=0 
 //var count =10;
  
+/* 
 function TestAccelerometer() {
     let accelerometer = null;
     try {
@@ -86,7 +87,7 @@ function TestAccelerometer() {
         }
     }
 }
-
+*/
 
 
 async function MessagesStart() {
@@ -94,16 +95,16 @@ async function MessagesStart() {
     
     document.addEventListener('visibilitychange',VisibilityChange)
     
-    console.log(window.Gyroscope);
-    console.log(window.ProximitySensor);
-    console.log(window.AmbientLightSensor);
-    console.log(window.Accelerometer);
-    TestAccelerometer();
+//    console.log(window.Gyroscope);
+//    console.log(window.ProximitySensor);
+//    console.log(window.AmbientLightSensor);
+//    console.log(window.Accelerometer);
+   // TestAccelerometer();
     
     
 
     
-    console.log(window.onerror);
+    //console.log(window.onerror);
 
     
     

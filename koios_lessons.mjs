@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep} from './koios_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber} from './koios_util.mjs';
 import {player} from './koios_video.mjs';
 
 // Global vars
@@ -51,7 +51,10 @@ export async function DisplayLessons(LoadVideoCB) {
        } 
     }    
     globalLessonslist = items;
-    return SelectLesson(1) // select a lesson with slides
+    
+    Webflow.require('slider').redraw(); // create to dots
+    
+    return SelectLesson(0) // select a lesson with slides
 }
 
 
@@ -119,8 +122,13 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     
     
      var target = GlobalVideoPagesList.AddListItem()
-     target.getElementsByTagName("h5")[0].innerHTML=`Video ${txt}`;
-     target.getElementsByClassName("lesson-image-large")[0].src=thumbnail; 
+    // target.getElementsByTagName("h5")[0].innerHTML=`Video ${txt}`;
+     if (target.getElementsByClassName("lesson-image-large").length > 0)
+        target.getElementsByClassName("lesson-image-large")[0].src=thumbnail; 
+    
+    
+    
+    
 } 
 
 
@@ -157,6 +165,8 @@ export async function SelectLesson(index) {
    CurrentLesson=index;   
   
    globalLoadVideoCB(onlyLessonsIndexList[CurrentLesson]);   
+   SelectTabBasedOnNumber("videofield",CurrentLesson);
+   
 }
 
 
@@ -238,7 +248,7 @@ function VideoChildChanged(childdomid,childnr) {
     */
     
       //  player.cueVideoById(onlyLessonsIndexList[childnr].videoid,0)
-    if (onlyLessonsIndexList.length > 0)
+    if (onlyLessonsIndexList.length > 0 && childnr !=CurrentLesson) // not neccesary when already on CurrentLesson
         SelectLesson(childnr)
     
     

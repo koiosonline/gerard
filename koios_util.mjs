@@ -121,21 +121,26 @@ export function LinkClickButton(nameButton) {
 }
 
 export function LinkToggleButton(nameButton,fInitial) {
-    var fOn=fInitial;
-    
+    ForceButton(nameButton,fInitial);    
     var button=document.getElementById(nameButton);
     if (button) {
-        ShowButton(button,fOn)
         button.title=nameButton; // add hoover text
-        button.addEventListener("click", x=>{
-            fOn = !fOn;
-            publish(`${nameButton}${fOn?"on":"off"}`);            
-            ShowButton(button,fOn)
+        button.addEventListener("click", x=>{            
+            
+            ForceButton(nameButton,!button.fOn);
+            publish(`${nameButton}${button.fOn?"on":"off"}`);
         });
     }
     return button;
 }
 
+export function ForceButton(nameButton,fValue) {
+    var button=document.getElementById(nameButton);
+     if (button) {
+        button.fOn = fValue;
+        ShowButton(button,fValue)
+     }        
+}
 
  export function DragItem(draggable,dragarea,mousearea,XYCB,ClickCB) { 
     var domiddraggable=document.getElementById(draggable); 
@@ -325,8 +330,8 @@ export function MonitorVisible(areaid) {
 
 
 
-export function FindDotConnectToTab(areaid,classid) {
-    console.log("In FindDotConnectToTab");
+export function SelectTabBasedOnName(areaid,classid) {
+    console.log("In SelectTabBasedOnName");
     var domid=document.getElementById(areaid);
     var slides=domid.getElementsByClassName("w-slide");
     var dots=domid.getElementsByClassName("w-slider-dot");
@@ -335,10 +340,21 @@ export function FindDotConnectToTab(areaid,classid) {
         var domidclass=slides[i].className;        
         domidclass = domidclass.replace("w-slide", "").trim();
         console.log(domidclass);
-        if (domidclass == classid)
-            return dots[i]
+        if (domidclass == classid) {
+             dots[i].click();
+             break;
+        }
     }    
-    return undefined;
+}   
+
+
+export function SelectTabBasedOnNumber(areaid,id) {
+    
+    var domid=document.getElementById(areaid);
+    var dots=domid.getElementsByClassName("w-slider-dot");
+    //console.log(dots);
+    console.log(`In SelectTabBasedOnNumber id=${id} dots.length=${dots.length}`);
+    dots[id].click()    
 }   
 
 

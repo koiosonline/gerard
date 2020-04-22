@@ -1,3 +1,28 @@
+Version 0.80:
+
+Functional updates:
+- literature tab shows links & notes for the links
+
+Technical updates:
+- fixed issues with video selection
+- shake & tilt mobile triggers disabled
+- improved the large start button logic
+- optimized text layout of notes
+
+Layout updates:
+- large start button added
+- added about tab
+- version info moved to about tab
+- test button hidden
+- music button moved to settings
+- video & slide name popup removed
+- left menu moves the rest of the screen to the right (so can been kept open on large screens)
+- navigation dots on video screen very small
+- adjusted video thumbnail to allways cover
+- adjusted slides to allways fit
+- centered large start button
+- slide-dots: green shadow on selected slide
+
 Version 0.79:
 
 Functional updates:
@@ -15,6 +40,8 @@ Layout updates:
 - hires pictures of video's shown
 - drag to next video is working now
 - test button is hidden in production version 
+
+
 
 Version 0.78:
 

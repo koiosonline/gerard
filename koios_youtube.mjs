@@ -91,7 +91,7 @@ export async function GetYouTubePlayListItems() {
             result.title        = snippet.title;
             result.description  = snippet.description;
             
-            console.log(snippet.thumbnails);
+           // console.log(snippet.thumbnails);
             
             result.thumbnail    = snippet.thumbnails.maxres? snippet.thumbnails.maxres.url : snippet.thumbnails.high.url; // default.url;
             result.videoid      = snippet.resourceId.videoId

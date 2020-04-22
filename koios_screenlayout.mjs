@@ -1,4 +1,4 @@
-import {DragItem,subscribe,LinkToggleButton} from './koios_util.mjs';
+import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep} from './koios_util.mjs';
 import {player} from './koios_video.mjs';
 
 export async function SetupSliders() {
@@ -66,11 +66,33 @@ function InitScreenlayout1() { // when page is loaded
     dotstyle.type = "text/css";    
     dotstyle.innerHTML=`
     .w-slider-dot           {   box-shadow: 1px 1px 3px 0  rgba(0,0,0,0.4); } 
+    
+     .w-active {   box-shadow: 1px 1px 3px 0  rgba(0,255,0,0.4); } 
+    
+    .video_field .w-slider-dot           {           
+        width: .2em;
+        height: .2em;
+        margin: 0 1px .5em;        
+        } 
+     .video_field .w-slider-nav {
+        padding-top: 0px;
+        height: 7px;
     `
     // #000
     // .w-slider-dot.w-active { background-color: green; }     
     //  .w-icon-slider-right    {   text-shadow:  1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue; } 
     document.body.appendChild(dotstyle); 
+    
+    
+    async function ToggleMenuVisible() {
+        await sleep(100);
+       console.log("In ToggleMenuVisible");
+       window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again 
+    }    
+    MonitorVisible("menuleft") // publishes when object changes visibility
+    subscribe('menuleftdisplayflex',ToggleMenuVisible);
+    subscribe('menuleftdisplaynone',ToggleMenuVisible);
+
     
 }    
 
@@ -78,15 +100,14 @@ function InitScreenlayout2() { // after everything has been loaded
      SwitchMainLayout(true);
      
      
-     var slidewindow=document.getElementById("move"); // connect to "move" circle
-    
-    slidewindow.addEventListener("mouseenter",   MouseOverSlides);    
-    slidewindow.addEventListener("mouseleave",   MouseOverSlides); 
-    window.addEventListener("deviceorientation", handleOrientation, true);
+    //var slidewindow=document.getElementById("move"); // connect to "move" circle    
+    //slidewindow.addEventListener("mouseenter",   MouseOverSlides);    
+    //slidewindow.addEventListener("mouseleave",   MouseOverSlides); 
+    //window.addEventListener("deviceorientation", handleOrientation, true);
     SwitchIntroScreen(false); 
 }    
 
-
+/*
 function handleOrientation(event) {
     if (event.beta && event.gamma) { // prevent triggering on a desktop
         var x= event.beta
@@ -95,9 +116,6 @@ function handleOrientation(event) {
         ShowTitles(sum < 3) // only show extra info when sum is small, e.g. phone is flat
     }
 }
-
-
-
 
 export function ShowTitles(fOn) {
     var videoinfo=document.getElementById("videoinfo");
@@ -110,8 +128,6 @@ export function ShowTitles(fOn) {
     }    
 }
 
-
-
 function MouseOverSlides(ev) {
     
     console.log("In MouseOverSlides");
@@ -120,7 +136,7 @@ function MouseOverSlides(ev) {
         case "mouseenter": ShowTitles(true);break;
     }
 }
-
+*/
 
 
 var fGlobalLargeNotes=true;
@@ -145,7 +161,7 @@ export async function SwitchMainLayout(fLargeNotes) {
     var slideplayerlarge=document.getElementById("slideplayerlarge");
     slideplayerlarge.style.display=!fLargeNotes?"flex":"none";    
     
-    var notes=document.getElementById("notes");
+    var notes=document.getElementById("notescontainer");
     var slideplayer=document.getElementById("slideplayer");
 
     
