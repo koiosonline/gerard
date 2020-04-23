@@ -1,7 +1,7 @@
 import {publish,subscribe,GetCidViaIpfsProvider,NrIpfsProviders,DomList,sleep,MonitorDomid} from './koios_util.mjs';
 
 var SecondsArraySlides;
-var prevslide=0;
+var prevslide=undefined;
 var GlobalPrepareSlidesList; 
 var GlobalSlideIndicatorList;
 var GlobalUrlList;
@@ -75,8 +75,8 @@ async function FoundSlidesViaJson(slidesarray) {
     publish ("slidesloaded");
     
    
-    prevslide=0;
-    SetSlide(1); // update all info about first slide
+    prevslide=undefined;
+    SetSlide(undefined); // update all info about first slide
 }    
 
 function AddSlide(num,total,slidesinfo) {
@@ -91,17 +91,19 @@ function AddSlide(num,total,slidesinfo) {
             this.src=GetCidViaIpfsProvider(slidesinfo.png,ipfsproviderindex);        
         console.log(`In urlerrorhandling for cid ${slidesinfo.png} ipfsproviderindex ${ipfsproviderindex}`);
     }    
-    
-    var target = GlobalPrepareSlidesList.AddListItem()
-    if (target) {
-        if (slidesinfo.png) {
-            var url=GetCidViaIpfsProvider(slidesinfo.png,0);
+    if (slidesinfo.png) {
+        var url=GetCidViaIpfsProvider(slidesinfo.png,0);    
+        var target = GlobalPrepareSlidesList.AddListItem()
+        if (target) {
             target.getElementsByTagName("img")[0].src=url;
             target.getElementsByTagName("img")[0].onerror=urlerrorhandling;
+            target.style.display="";
+        }
+    }
+}
          //   var a=target.getElementsByClassName("href-button")[0];
          //   a.href=url;
          //   a.target="_blank"
-        }
 /*        if (slidesinfo.pdf) {
            SetupPDFWindowGoogle(target,slidesinfo.pdf);            
         }    
@@ -112,9 +114,7 @@ function AddSlide(num,total,slidesinfo) {
       
 */        
        // target.getElementsByTagName("h5")[0].innerHTML=`Slide #${num+1} of ${total} ${slidesinfo.chapter} ${slidesinfo.title}`;
-        target.style.display="";
-    }
-}
+    
 
 
 
@@ -230,16 +230,20 @@ export function UpdateSlide(CurrentPos) {   // called frequently
 
 
 async function SetSlide(n) {    // n starts at 1
-    console.log(`In SetSlide ${n}`);
-    if (!n) n=0; // show the first slide
+    console.log(`In SetSlide ${n} ${prevslide} ${n==prevslide}`);
+    //if (!n) n=0; // show the first slide
     if (n == prevslide) 
         return; // not changed
-    prevslide=n;
-    var dot=document.getElementById(`dot-${n}`)
-    if (dot)
-        dot.click();   // select the right slide
     
-     publish("slideselected",n-1);
+    console.log("Still in SetSlide")
+    prevslide=n;
+    if (n != undefined) {
+        var dot=document.getElementById(`dot-${n}`)
+        if (dot)
+            dot.click();   // select the right slide ==> calls function SlideChanged
+    }
+    
+     publish("slideselected",n==undefined? n : n-1);
     
 } 
 

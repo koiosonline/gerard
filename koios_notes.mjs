@@ -1,4 +1,4 @@
-import {LinkButton,LinkClickButton,subscribe,DomList} from './koios_util.mjs';    
+import {LinkButton,LinkClickButton,subscribe,DomList,GetCidViaIpfsProvider} from './koios_util.mjs';    
 import {DisplayMessage} from './koios_messages.mjs';  
 
 
@@ -23,12 +23,16 @@ function ShowSlidesInNotes(slidesarray) {
         CleanprevSlides[i](); // call clean function for previous slides
 
     for (var i=0;i<slidesarray.length;i++) {
-       var target = GlobalSlideNotesBlockList.AddListItem() 
-       if (target) {
-            var t1=target.getElementsByClassName("slide-notes-header")[0]
-            SetupHeader(t1,`#${i+1}: ${slidesarray[i].title}`);
-            var t2=target.getElementsByClassName("slide-notes-text")[0]            
-            CleanprevSlides.push(SetupTextArea(t2,slidesarray[i].png))
+        if (slidesarray[i].png) {
+            var target = GlobalSlideNotesBlockList.AddListItem() 
+            if (target) {            
+                var t1=target.getElementsByClassName("slide-notes-header")[0]
+                SetupHeader(t1,`#${i+1}: ${slidesarray[i].title}`);
+                var t2=target.getElementsByClassName("slide-notes-text")[0]            
+                CleanprevSlides.push(SetupTextArea(t2,slidesarray[i].png))
+                var t3=target.getElementsByClassName("mini-slide")[0]    
+                t3.src=GetCidViaIpfsProvider(slidesarray[i].png,0);
+            }
         }
     }
 } // note combined witn breaking=pre in webflow for headings & pre-wrap for text
@@ -68,14 +72,24 @@ function SetupTextArea(target,uniqueid) {
     return Clean;
 }     
     
-var Cleanprev;    
+var CleanprevN;    
+var CleanprevQ;    
 function ShowVideoInfoInNotes(vidinfo) {
     var target=document.getElementById("video-notes")    
     SetupHeader(target,`${vidinfo.txt}`)    
     var notes=document.getElementById("notes")
-    if (Cleanprev)
-        Cleanprev();  
-    Cleanprev=SetupTextArea(notes,vidinfo.videoid,true)    
+    if (CleanprevN)
+        CleanprevN();  
+    CleanprevN=SetupTextArea(notes,vidinfo.videoid,true)    
+
+    target=document.getElementById("video-questions")    
+    SetupHeader(target,"Questions")    
+    var questions=document.getElementById("questions")
+    if (CleanprevQ)
+        CleanprevQ();  
+    CleanprevQ=SetupTextArea(questions,`questions-${vidinfo.videoid}`,true)    
+
+
     
 }    
 

@@ -55,28 +55,30 @@ subscribe('popupdisplayblock',x=> {
 
 
 
-var RelaxTime=5000;
 
-export async function Relax() {
-    console.log("Relax");
-    publish ("startrelax");
+
+export async function SelectPopup(name) {
+    console.log(`SelectPopup ${name}`);
+    publish (`start${name}`);
+    OpenPopup(true)
+    SelectTabBasedOnName("popup",name);  
+    publish (`stop${name}`);
+}
+
+
+   
+export async function OpenPopup(fOpen) {
     var style = window.getComputedStyle(document.getElementById("popup"))
-    if (style.display.includes("none")) { // then popup not visible    
-        document.getElementById('bottle').click();    
-        sleep(1000);
+    
+    var fCurrentlyOpen = !style.display.includes("none")
+    
+    if ((fCurrentlyOpen && !fOpen) || (!fCurrentlyOpen && fOpen)) {
+        document.getElementById('bottle').click();        
+        await sleep(1000);
     }
     console.log(document.getElementById("popup").style.cssText);
-    
-   
-   SelectTabBasedOnName("popup","relax");
-    
-   
-    await sleep(RelaxTime);
-    
-    var style = window.getComputedStyle(document.getElementById("popup"))
-    if (style.display.includes("block")) { // then popup not visible    
-        document.getElementById('bottle').click();    
-    }
-    publish ("stoprelax");
 }
+
+   
+   
    

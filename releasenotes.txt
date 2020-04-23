@@ -1,3 +1,16 @@
+Version 0.81:
+
+Functional updates:
+- upload page created
+
+Technical updates:
+- prep for ipfsstorage of subtitles
+- notes converted to "symbol" so it can be used in browse-links
+
+Layout updates:
+- slide thumbnails shown in notes
+
+
 Version 0.80:
 
 Functional updates:

@@ -118,3 +118,15 @@ export async function GetYouTubePlayListItems() {
 }
 
 
+export async function forIPFSexport()     //creates an array of objects in the right format for IPFS export.
+{
+  var totalYoutubeInfo = await GetYouTubePlaylists();
+  for(var i=0;i<totalYoutubeInfo.length;i++)
+  {
+    totalYoutubeInfo[i].videos = await GetYouTubePlayListItems(totalYoutubeInfo[i].id);
+  }
+  return totalYoutubeInfo;
+}
+
+
+

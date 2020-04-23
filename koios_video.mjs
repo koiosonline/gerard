@@ -16,7 +16,7 @@
     import {SetupChat} from './koios_chat.mjs';
     import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
     import {} from './koios_test.mjs';
-    import {Relax,InitPopup} from './koios_popup.mjs';
+    import {SelectPopup,InitPopup} from './koios_popup.mjs';
     import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koios_messages.mjs';
     import {} from './koios_music.mjs';
     import {} from './koios_literature.mjs';
@@ -113,12 +113,19 @@ subscribe('videoend',    SeenVideo);
 async function NextVideo() {
     stopVideo();
     
-    await Relax();
+    //await Relax();
     
+    var RelaxTime=5000;
+    await SelectPopup("relax")
+    await sleep(RelaxTime);
+    await SelectPopup("literature")
+    
+    /*
     if (CurrentLesson == LastLesson) 
         publish ("lessonsend") 
     else      
         SelectLesson(CurrentLesson +1);
+    */
 }    
 
 
