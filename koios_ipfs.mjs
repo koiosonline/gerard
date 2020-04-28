@@ -11,42 +11,51 @@ export async function setupIPFS()
 {
   console.log("In SetupIPFS");
   await Promise.all([ // see https://www.npmjs.com/package/ipfs
+    loadScriptAsync("https://bundle.run/buffer"), // https://packd.now.sh/buffer
     loadScriptAsync("https://unpkg.com/ipfs/dist/index.js"),
   ]);
-  console.log("Ipfs libraries loaded");
+  console.log("Ipfs & buffer libraries loaded");
   var ipfs = await window.Ipfs.create(); //await??
   return ipfs;
 }
 
-
+/*
 export async function setupBuffer()
 {
   console.log("Setup buffer");
   await Promise.all([
-    loadScriptAsync("https://packd.now.sh/buffer")
+    
   ]);
   console.log("buffer libraries loaded");
 }
-
+*/
 
 export async function uploadYtDataToIpfs()        //Puts the object on ipfs
 {
-  var ipfs = await setupIPFS();
-  var hash; //IPFS hash
-  for await (const result of ipfs.add(JSON.stringify(await includeSubtitlesforIpfsExport())))
-  {
-    console.log(result);
-    hash = result.path;
-  }
-  return hash;
+    var ipfs = await setupIPFS();
+    var list=await includeSubtitlesforIpfsExport()
+    var res=[]
+
+    for (var i=0;i<list.length;i++) { 
+        console.log(`Storing ${list[i].id}`)
+        var hash; //IPFS hash
+        for await (const result of ipfs.add(JSON.stringify(list[i])))
+        {
+            console.log(result);
+            hash = result.path;
+        }
+        res.push({playlist:list[i].id,title:list[i].title,hash:hash});
+    }      
+    return res
 }
 
 
 export async function getYtInfoIpfs(hash)           //Gets the json string from ipfs and parses it into an object
 {
-  await setupBuffer();
-  var Buf = window.buffer.Buffer;
+ // await setupBuffer();
+  
   var ipfs = await setupIPFS();
+  var Buf = window.buffer.Buffer;
   var videoAndPlaylistInfo;
   var chunks = [];
   for await (const chunk of ipfs.cat(hash))
@@ -54,7 +63,7 @@ export async function getYtInfoIpfs(hash)           //Gets the json string from 
     chunks.push(chunk);
   }
   videoAndPlaylistInfo = JSON.parse(Buf.concat(chunks).toString());
-  console.log(videoAndPlaylistInfo);
+  //console.log(videoAndPlaylistInfo);
   return videoAndPlaylistInfo;
 }
 
@@ -72,9 +81,10 @@ export async function includeSubtitlesforIpfsExport()   //Adds the subtitle obje
       var lan=data[i].videos[x].subtitles.length;
       var subs=lan?data[i].videos[x].subtitles[0].subtitle.length:0
     console.log(`Video: ${data[i].videos[x].videoid} languages: ${lan} subtitles: ${subs} `);
-    //console.log(data[i].videos[x].subtitles);
+    console.log(data[i].videos[x].subtitles);
     }
   }
+  console.log(data);
   return data;
 }
 

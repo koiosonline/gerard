@@ -1,8 +1,9 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
-import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
+//import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
 import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber} from './koios_util.mjs';
 import {player} from './koios_video.mjs';
+import {getYtInfoIpfs} from './koios_ipfs.mjs';
 
 // Global vars
 var PrepareLessonsListTemplate;   
@@ -30,24 +31,28 @@ var globalLessonslist; // format:
 var onlyLessonsIndexList=[]
 
 
-
-
-
 export async function DisplayLessons(LoadVideoCB) {
+    console.log("In DisplayLessons")
     globalLoadVideoCB = LoadVideoCB;
     PrepButtons();
-    var x=await GetYouTubePlaylists()
-    var items=await GetYouTubePlayListItems()
+//    var x=await GetYouTubePlaylists()
+//   var items=await GetYouTubePlayListItems()
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let videoinfo = urlParams.get('videoinfo') || "QmPZpwKA1fZWkeRofm8qEbu9AJYydBjD3BfobBtAv1SP4p"
+    console.log(videoinfo);
+    var items=await getYtInfoIpfs(videoinfo)
+    console.log(items)
     
-    for (var i=0;i<items.length;i++) {
-        
+    for (var i=0;i<items.videos.length;i++) {
         
         //console.log(items[i]);
         
-       if (items[i].chapter)
-          AddChapter(items[i].title)
+       if (items.videos[i].chapter)
+          AddChapter(items.videos[i].title)
        else {
-          AddLessonsItem(items[i].title,items[i].thumbnail,items[i].description,items[i].videoid,items[i].duration);
+          AddLessonsItem(items.videos[i]); //.title,items.videos[i].thumbnail,items.videos[i].description,items.videos[i].videoid,items.videos[i].duration);
        } 
     }    
     globalLessonslist = items;
@@ -55,6 +60,8 @@ export async function DisplayLessons(LoadVideoCB) {
     Webflow.require('slider').redraw(); // create to dots
     
     return SelectLesson(0) // select a lesson with slides
+
+    
 }
 
 
@@ -83,14 +90,17 @@ function PrepareLessonsList() {
 }    
 
 
-function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
+function AddLessonsItem(vidinfo) { // txt,thumbnail,description,videoid,duration) {
     PrepareLessonsList();
     //console.log(`In AddLessonsItem ${txt} `);
-    var vidinfo={};
-    vidinfo.videoid=videoid;
-    vidinfo.duration=duration;
-    vidinfo.txt=txt;
-    vidinfo.description=description;
+    //var vidinfo={};
+    //vidinfo.videoid=videoid;
+    //vidinfo.duration=duration;
+    //vidinfo.txt=txt;
+    //vidinfo.description=description;
+    
+    
+    vidinfo.txt=vidinfo.title; /// refactor
     
     onlyLessonsIndexList.push(vidinfo);    
     LastLesson=onlyLessonsIndexList.length-1; // allways keep this var updated.
@@ -98,16 +108,16 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     var index = LastLesson;
     var cln = PrepareLessonsListTemplate.cloneNode(true);
     PrepareLessonsListParent.appendChild(cln);
-    //cln.getElementsByTagName("div")[0].innerHTML=txt;
-    //cln.getElementsByTagName("img")[0].src=thumbnail;    
+    //cln.getElementsByTagName("div")[0].innerHTML=vidinfo.txt;
+    //cln.getElementsByTagName("img")[0].src=vidinfo.thumbnail;    
     
 
-    cln.getElementsByClassName("lesson-name")[0].innerHTML=txt;
-    cln.getElementsByClassName("lesson-image")[0].src=thumbnail; 
+    cln.getElementsByClassName("lesson-name")[0].innerHTML=vidinfo.txt;
+    cln.getElementsByClassName("lesson-image")[0].src=vidinfo.thumbnail; 
     
     cln.id=`lesson-${index}`;
     
-    cln.videoid=videoid; // to store & retrieve data about the video
+    cln.videoid=vidinfo.videoid; // to store & retrieve data about the video
     
     LinkButton(cln.id,x=> {
         console.log(`select lesson ${index}`);
@@ -122,9 +132,9 @@ function AddLessonsItem(txt,thumbnail,description,videoid,duration) {
     
     
      var target = GlobalVideoPagesList.AddListItem()
-    // target.getElementsByTagName("h5")[0].innerHTML=`Video ${txt}`;
+    // target.getElementsByTagName("h5")[0].innerHTML=`Video ${vidinfo.txt}`;
      if (target.getElementsByClassName("lesson-image-large").length > 0)
-        target.getElementsByClassName("lesson-image-large")[0].src=thumbnail; 
+        target.getElementsByClassName("lesson-image-large")[0].src=vidinfo.thumbnail; 
     
     
     
@@ -152,8 +162,8 @@ export async function SelectLesson(index) {
     if (index < 0)          index = 0;
     if (index > LastLesson) index = LastLesson;
     
-    HideButton("back",    index <= 0);
-    HideButton("forward", index >= LastLesson );
+    //HideButton("back",    index <= 0);
+    //HideButton("forward", index >= LastLesson );
 
     var prevdomid=document.getElementById(`lesson-${CurrentLesson}`);
     if (prevdomid) {        
@@ -173,16 +183,16 @@ export async function SelectLesson(index) {
 function PrepButtons() {
     //buttonBack=LinkButton("back"   ,x=>SelectLesson(CurrentLesson -1));
     
-    buttonBack=LinkClickButton("back");subscribe("backclick",x=>SelectLesson(CurrentLesson -1));
+    //buttonBack=LinkClickButton("back");subscribe("backclick",x=>SelectLesson(CurrentLesson -1));
     
     
     //buttonForward=LinkButton("forward",x=>SelectLesson(CurrentLesson +1));
     
-    buttonForward=LinkClickButton("forward");subscribe("forwardclick",x=>SelectLesson(CurrentLesson +1));
+    //buttonForward=LinkClickButton("forward");subscribe("forwardclick",x=>SelectLesson(CurrentLesson +1));
     
     
-    subscribe("keypressedp",x=>SelectLesson(CurrentLesson -1)); 
-    subscribe("keypressedn",x=>SelectLesson(CurrentLesson +1)); 
+    //subscribe("keypressedp",x=>SelectLesson(CurrentLesson -1)); 
+    //subscribe("keypressedn",x=>SelectLesson(CurrentLesson +1)); 
     
     PrepButtons=function(){} // next time do nothing
 }

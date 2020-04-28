@@ -1,7 +1,26 @@
+Version 0.82:
+
+Functional updates:
+- facet search to select courses
+- link to feedback in slack (icon question mark)
+   - in intro screen
+   - message screen
+   - popupscreen
+- index screen within popupscreen
+- set higher videospeed (prototype)
+
+
+Technical updates:
+- improved handling of move button when leaving the browser window (with mouse)
+
+Layout updates:
+- start/back/forward buttons from left menu removed (alternatives are available)
+
 Version 0.81:
 
 Functional updates:
 - upload page created
+- after relax, the literature is shown
 
 Technical updates:
 - prep for ipfsstorage of subtitles

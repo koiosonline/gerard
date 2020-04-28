@@ -18,8 +18,8 @@ var oldcid;
 var slideindex;
 
 async function GetSlidesFromVideo(vidinfo) {    
-   // console.log("In GetSlidesFromVideo");
-   // console.log(vidinfo);
+    console.log("In GetSlidesFromVideo");
+    console.log(vidinfo);
     var cid=GetSourceCid();
     if (cid != oldcid)
         slideindex = await ipfsgetjson(cid);

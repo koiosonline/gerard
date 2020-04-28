@@ -202,6 +202,7 @@ var mouse;
 var clickstart;
     async function SliderStartMouse(ev) {
         console.log(`Start mouse`);
+        ev.preventDefault();
         clickstart=new Date();
         
         mouse=document.createElement("div");
@@ -215,14 +216,19 @@ var clickstart;
 
         mouse.addEventListener("mousemove",  SliderDrag);
         mouse.addEventListener("mouseup",    SliderStopMouse);
+        mouse.addEventListener("mouseleave",    SliderStopMouse);
+        mouse.style.cursor="move"
     }
     
     async function SliderStopMouse(ev) {
         console.log("Stop mouse"); 
+        ev.preventDefault();
         var clickend=new Date();
                 
         mouse.removeEventListener("mousemove",  SliderDrag);           
         mouse.removeEventListener("mouseup",    SliderStopMouse);  
+        mouse.removeEventListener("mouseleave",    SliderStopMouse);  
+        mouse.style.cursor=""
         mouse.parentNode.removeChild(mouse)
         console.log("Triggering resize");
         window.dispatchEvent(new Event('resize')); // resize window to make sure the slide scroll is calibrated again   
@@ -473,9 +479,9 @@ export async function ipfsgetjson(cid) {
 
 
 export class DomList {    
-    constructor (objectclass) {
+    constructor (objectclass,parentdomid) {
         console.log(`In constructor of DomList with objectclass=${objectclass}`);
-        var list = document.getElementsByClassName(objectclass);
+        var list = (parentdomid?parentdomid:document).getElementsByClassName(objectclass);
         //console.log(list)    
         if (list && list[0]) {
             this.template    = list[0];        

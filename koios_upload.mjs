@@ -7,7 +7,7 @@ import {SetupLogWindow,log} from './koios_log.mjs';
 
 console.log("Hello koios_upload");
   
-  SetupLogWindow(true)
+  SetupLogWindow(false)
     LinkClickButton("startprocess");subscribe("startprocessclick",startprocess);
     
     
@@ -17,8 +17,9 @@ async function startprocess() {
     
     
     //var x=await getYtInfoIpfs("QmWRpcQt5wn49rAKrBE1NBEqEvoEd7c7XTALrDryJKwUqA");
-    var x=await includeSubtitlesforIpfsExport();
-    log(x);
+    var x=await uploadYtDataToIpfs();
+    for (var i=0;i<x.length;i++)
+        log(x[i]);
     
     
     //log(includeSubtitlesforIpfsExport() )

@@ -39,7 +39,7 @@ async function FoundSlidesViaJson(slidesarray) {
     console.log(slidesarray);
     
     GlobalPrepareSlidesList.EmptyList()
-    GlobalSlideIndicatorList.EmptyList();
+    
     
 /*            
     var list=""
@@ -176,15 +176,19 @@ function AddSlide(num,total,slidesinfo) {
 
 
 export async function FoundSlides(sheets,vidinfo) {           // found slide info via subtitles   
-
+ GlobalSlideIndicatorList.EmptyList();
 console.log("In FoundSlides");
-
+console.log(sheets);
+console.log(vidinfo);
     var duration = vidinfo.duration;
     if (sheets) {
+        
         for (var i=0;i<sheets.length;i++) {
             var nums = sheets[i].text.replace(/[^0-9]/g,'');
             var num = parseInt(nums);
             //AddSlide(num,slides[num],"");
+            
+            console.log(`In FoundSlides ${i}`);
             SetSlideIndicator(num,parseFloat(sheets[i].start) / duration,parseFloat(sheets[i].dur) / duration)
         }          
         SecondsArraySlides=SlidesToSeconds(sheets);
