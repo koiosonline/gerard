@@ -83,7 +83,7 @@ function ShowVideoInfoInNotes(vidinfo) {
     CleanprevN=SetupTextArea(notes,vidinfo.videoid,true)    
 
     target=document.getElementById("video-questions")    
-    SetupHeader(target,"Questions")    
+    SetupHeader(target,"Repetition questions")    
     var questions=document.getElementById("questions")
     if (CleanprevQ)
         CleanprevQ();  

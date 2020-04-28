@@ -432,12 +432,19 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
 }
 
 
-function RotateVideoSpeed() {
-        
+var globalVideospeed=0;
+async function RotateVideoSpeed() {
+        globalVideospeed++
+        if (globalVideospeed >=3) globalVideospeed=0;
 
-    player.setPlaybackRate(2)
-        
-        
+  switch (globalVideospeed) {
+      case 0: player.setPlaybackRate(1);console.log("Speed 1");break;
+      case 1: player.setPlaybackRate(1.5);console.log("Speed 1.5");break;
+      case 2: player.setPlaybackRate(2);console.log("Speed 2");break;
+  }
+      
+  await sleep(100); // wait until speed is processed      
+        DisplayMessage(`Video speed set to ${player.getPlaybackRate()}x`);
 }
 
     

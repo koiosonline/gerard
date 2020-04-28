@@ -1,4 +1,5 @@
-import {sleep,publish,subscribe,MonitorDomid,MonitorVisible,SelectTabBasedOnName,DomList,SelectTabBasedOnNumber} from './koios_util.mjs';
+import {sleep,publish,subscribe,MonitorDomid,MonitorVisible,SelectTabBasedOnName,DomList,SelectTabBasedOnNumber,LinkClickButton} from './koios_util.mjs';
+import {SelectNextLesson}  from './koios_lessons.mjs';
 
 var oldtarget;
 var oldbackgroundColor;
@@ -66,10 +67,28 @@ function ChildChanged(childdomid,childnr) {
 }    
 
 
+function NextVideoClick() {
+    OpenPopup(false)
+     SelectNextLesson() 
+}    
+
+function NextCourseClick() {
+    
+    SelectTabBasedOnName("popup","courses-overview") // class of the tab
+}  
+
+
 export function InitPopup() { 
     MonitorDomid("popup","w-slider-nav","w-slider-dot","w-active",ChildChanged)    
     MonitorVisible("popup") // publishes when object changes vibility
     GetAllTabs("popup")
+    
+    LinkClickButton("next_video",false);subscribe("next_videoclick",NextVideoClick);
+         
+    LinkClickButton("next_course",false);subscribe("next_courseclick",NextCourseClick);
+    
+    
+    
 }    
 
 // Later, you can stop observing

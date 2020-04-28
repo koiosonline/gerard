@@ -40,7 +40,7 @@ export async function DisplayLessons(LoadVideoCB) {
 
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    let videoinfo = urlParams.get('videoinfo') || "QmPZpwKA1fZWkeRofm8qEbu9AJYydBjD3BfobBtAv1SP4p"
+    let videoinfo = urlParams.get('videoinfo') || "QmaamPoDLEhTa9fYC9c6ec7F4gng94zQsw3fWFGAyR8kMe" // "QmPZpwKA1fZWkeRofm8qEbu9AJYydBjD3BfobBtAv1SP4p"
     console.log(videoinfo);
     var items=await getYtInfoIpfs(videoinfo)
     console.log(items)
@@ -177,6 +177,11 @@ export async function SelectLesson(index) {
    globalLoadVideoCB(onlyLessonsIndexList[CurrentLesson]);   
    SelectTabBasedOnNumber("videofield",CurrentLesson);
    
+}
+
+
+export async function SelectNextLesson() {   
+    SelectLesson(CurrentLesson +1)
 }
 
 

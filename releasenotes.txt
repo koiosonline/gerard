@@ -1,3 +1,25 @@
+Version 0.83:
+
+Functional updates:
+- upload function
+    - management info about videos
+    - check for deleted videos
+
+- browse-links
+    - fixed grid positioning
+
+Technical updates:
+
+- browse-links
+    - allow links to change top window
+
+Layout updates:
+- yellow < > in popup added shadow
+- right side menu in popup screen
+    - next video button
+    - next course button (currently redirect to course-overview page)
+- second slide at intro video
+
 Version 0.82:
 
 Functional updates:

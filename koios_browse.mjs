@@ -9,23 +9,23 @@ window.addEventListener('DOMContentLoaded', asyncloaded);  // load
 async function asyncloaded() {  
     const urlParams = new URLSearchParams(window.location.search); 
     const parentUrlParams = new URLSearchParams(window.parent.location.search);    
-    let match = urlParams.get('match') || parentUrlParams.get('match')  || "koios";
+    let match = urlParams.get('match') || parentUrlParams.get('match'); // if empty then matches everythng
     console.log(`In koios_browse match=${match}`);   
-    let cid = urlParams.get('slides') || parentUrlParams.get('slides') || 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
+    let cid = urlParams.get('slides') || parentUrlParams.get('slides') || "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
     console.log(`In koios_browse cid=${cid}`);
    
     var domid=document.getElementById("browse-window");
     var iframe=document.createElement("iframe");
     iframe.width="100%"
     iframe.height="100%"
-    iframe.name="browse-window"
+    iframe.name="browse-window-frame"
     domid.appendChild(iframe);
    
     var slideindex = await ipfsgetjson(cid);        
     var GlobalUrlList = new DomList("browser-url") // before real-slides (because is child)  
     var str=""    
     for (var i=0;i<slideindex.length;i++) {
-        if (slideindex[i].chapter !== match) 
+        if (match && slideindex[i].chapter !== match) 
             continue; // ignore
             
         var url = slideindex[i].url 
@@ -40,7 +40,7 @@ async function asyncloaded() {
         }    
         if (url) {
             url = url.replace("http:", "https:");
-            str +=SetInfo(url,slideindex[i].title,"browse-window")+"<br>"
+            str +=SetInfo(url,slideindex[i].title,"browse-window-frame")+"<br>"
         }
     }          
     

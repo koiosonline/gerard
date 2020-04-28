@@ -76,6 +76,10 @@ if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
         var resultlistindex=resultlist.length;
         for (var i=0;i<list.result.items.length;i++) {
             var snippet=list.result.items[i].snippet;
+            
+            
+            if (snippet.description== "This video is unavailable.") continue; // GP 28-4-2020 support deleted videos
+            
             var result={};            
             var deslines = snippet.description.split("\n"); // find ___ChapterTitles___
             if (deslines[0] && deslines[0].includes("___")) {  
@@ -90,7 +94,10 @@ if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
             result.title        = snippet.title;
             result.description  = snippet.description;
             
-           // console.log(snippet.thumbnails);
+            console.log(i);
+            console.log(list.result.items[i])
+            
+            console.log(snippet.thumbnails);
             
             result.thumbnail    = snippet.thumbnails.maxres? snippet.thumbnails.maxres.url : snippet.thumbnails.high.url; // default.url;
             result.videoid      = snippet.resourceId.videoId

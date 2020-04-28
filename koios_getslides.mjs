@@ -9,7 +9,7 @@ subscribe("loadvideo",GetSlidesFromVideo)
 function GetSourceCid() {    
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString); 
-    let cid = urlParams.get('slides') || 'QmXzRAXrFUou1FWHBMUvbb66bT8xfToQH3HJWqUNhTiXLX' // 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
+    let cid = urlParams.get('slides') || "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmXzRAXrFUou1FWHBMUvbb66bT8xfToQH3HJWqUNhTiXLX' // 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
     console.log(`In GetSourceCid cid=${cid}`);
     return cid;
 }    

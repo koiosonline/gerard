@@ -204,7 +204,7 @@ async function asyncloaded() {
     await loadScriptAsync("https://unpkg.com/itemsjs@latest/dist/itemsjs.min.js")
     var fInIframe =  ( window.location !== window.parent.location );
     
-    var url = new URL(window.parent.location);        
+    var url = new URL(window.parent.parent.location);         // 2x parent in case in double iframe
     
     MergeLevels(fInIframe,url);   
 }

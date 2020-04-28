@@ -46,7 +46,7 @@ export async function uploadYtDataToIpfs()        //Puts the object on ipfs
         }
         res.push({playlist:list[i].id,title:list[i].title,hash:hash});
     }      
-    return res
+    return {res:res,list:list} // GP 28-4 also export list
 }
 
 
