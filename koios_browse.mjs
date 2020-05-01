@@ -24,11 +24,27 @@ async function asyncloaded() {
     var slideindex = await ipfsgetjson(cid);        
     var GlobalUrlList = new DomList("browser-url") // before real-slides (because is child)  
     var str=""    
+    
+    function sortfunction(a,b) {
+        if (b.url && !a.url) return -1
+        if (a.url && !b.url) return 1
+        
+        var aa= a.url || a.cid || a.pdf
+        var bb= b.url || b.cid || b.pdf
+        
+        if (aa < bb) return -1
+        if (aa > bb) return +1
+        return 0;
+    }
+    
+    slideindex.sort(sortfunction);
+    
+    
     for (var i=0;i<slideindex.length;i++) {
         if (match && slideindex[i].chapter !== match) 
             continue; // ignore
             
-        var url = slideindex[i].url 
+        var url = slideindex[i].url
         if (!url && slideindex[i].cid) {
             url = slideindex[i].cid
             url = GetCidViaIpfsProvider(slideindex[i].cid,0)
@@ -38,20 +54,25 @@ async function asyncloaded() {
             url = slideindex[i].pdf
             url = `https://docs.google.com/viewerng/viewer?url=${url}&embedded=true`;
         }    
-        if (url) {
-            url = url.replace("http:", "https:");
-            str +=SetInfo(url,slideindex[i].title,"browse-window-frame")+"<br>"
+        if (url) {            
+            str +=SetInfo(url,slideindex[i].title,"browse-window-frame",slideindex[i].url?false:true)+"<br>"
         }
     }          
     
     SetExtLink(str)
 
-
-    function SetInfo(url,txt,target) {
+var prevurl=undefined
+    function SetInfo(url,txt,target,fDocument) { 
+        if (url == prevurl) return "";  // filter out duplicates (already sorted)
+        prevurl = url;
+    
+        url = url.replace("http:","https:"); // to prevent error messages from browser
         var urltarget = GlobalUrlList.AddListItem()  
         var domid=urltarget.getElementsByTagName("a")[0]
+        if (!txt)
+            txt=url
         
-        domid.innerHTML=txt
+        domid.innerHTML=`${fDocument?"Doc":"url"}: ${txt}`
         domid.href=url
         domid.target=target
         
@@ -63,7 +84,7 @@ async function asyncloaded() {
     function SetExtLink(html) {
         var blob = new Blob([html], {type: 'text/html'});
         var url = URL.createObjectURL(blob);      
-        SetInfo(url,"external","_blank");    
+        SetInfo(url,"external","_blank",false);    
     }    
 
 }

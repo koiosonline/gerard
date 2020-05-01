@@ -129,9 +129,10 @@ var CatList;
     //console.log(JSON.stringify(movies, null, 2));
 
 
-MakeSelection(CatList,"level")
 MakeSelection(CatList,"course")
-MakeSelection(CatList,"contributer")
+MakeSelection(CatList,"level")
+
+//MakeSelection(CatList,"contributer")
         
         
 function MakeSelection(domid,catid) {
@@ -145,10 +146,29 @@ function MakeSelection(domid,catid) {
     console.log(JSON.stringify(top_level, null, 2));
 
     for (var i=0;i<top_level.data.buckets.length;i++) {
-        var levelitem = LevelList.AddListItem() 
         var name=top_level.data.buckets[i].key
+        
+        if (name.toLowerCase().includes("test")){
+            
+            SelectItems("course-level-id",catid,name,false)
+            continue; // skip all tests
+        }
+        
+        var levelitem = LevelList.AddListItem() 
+        
         levelitem.getElementsByClassName("select-txt")[0].innerHTML=name
-        SetButton(levelitem,catid,i,name);    
+        
+        
+        var select_btn=levelitem.getElementsByClassName("select-button")[0]
+        SetButton("course-level-id",select_btn,catid,i,name,true);    // course-level-id is located in html-embed
+        
+        var info_btn=levelitem.getElementsByClassName("info-button")[0]
+        switch (catid) {
+           case "level":      // SetButton("levels",info_btn,catid,i,name,false);    break;
+                            info_btn.style.display="none";break;
+           case "course":      SetButton("course-id",info_btn,catid,i,name,false);    break;
+           case "contributer": SetButton("contributers",info_btn,catid,i,name,false);  break;
+        }
     }
 }
     /*
@@ -173,18 +193,21 @@ function MakeSelection(domid,catid) {
 */
 
 
-    function SetButton(domid,cat,index,name) { // to remember state
-        var id=`${cat}item${index}`
+    function SetButton(listid,domid,cat,index,name,fInitial) { // to remember state
+        var id=`${listid}${cat}item${index}`
         domid.id=id
-        LinkToggleButton(id,true);subscribe(`${id}on`,x=>SelectItems(cat,name,true));subscribe(`${id}off`,x=>SelectItems(cat,name,false));
+        LinkToggleButton(id,fInitial);subscribe(`${id}on`,x=>SelectItems(listid,cat,name,true));subscribe(`${id}off`,x=>SelectItems(listid,cat,name,false));
     }    
+        
+    
 
-    function SelectItems(cat,item,fOn) {
+    function SelectItems(listid,cat,item,fOn) {
+       var list_items=document.getElementsByClassName(listid); 
      
       console.log(`In SelectItems ${cat} ${item} ${fOn}`);
       
-       for (var i=0;i<course_level_items.length;i++) {        
-           var target=course_level_items[i]
+       for (var i=0;i<list_items.length;i++) {        
+           var target=list_items[i]
            if (target.getAttribute(cat)==item) {
                console.log(`Found ${cat} ${item}`);
                console.log(target.parentNode.parentNode);
@@ -206,7 +229,14 @@ async function asyncloaded() {
     
     var url = new URL(window.parent.parent.location);         // 2x parent in case in double iframe
     
-    MergeLevels(fInIframe,url);   
+    MergeLevels(fInIframe,url); 
+
+    if (fInIframe) {
+        var domid=document.getElementById("koiosheader");
+        domid.style.display="none"
+    }
+        
+    
 }
 
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  

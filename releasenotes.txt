@@ -1,3 +1,20 @@
+Version 0.84:
+
+
+Functional updates:
+
+
+Technical updates:
+- browse next & prev video in popup pages
+
+Layout updates:
+- cursus change on index page
+- course selection screen 
+    - optimized
+    - header shown when outside of iframe
+    - test courses suppressed
+- course & video shown in popup pages
+
 Version 0.83:
 
 Functional updates:

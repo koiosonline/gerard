@@ -103,8 +103,10 @@ function ShowNotesOfSelectedSlide(n) { // n starts at 0
     var target2=document.getElementsByClassName("slide-notes-text")    
     for (var i=0;i<target1.length;i++) {
         
-        target1[i].style.fontSize =i==n?"12px":"9px"
-        target2[i].style.fontSize =i==n?"12px":"9px"
+      //  target1[i].style.fontSize =i==n?"12px":"9px"
+      //  target2[i].style.fontSize =i==n?"12px":"9px"
+      
+        target1[i].style.color =i==n?"black":"gray"
     }
 }
     

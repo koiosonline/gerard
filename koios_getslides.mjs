@@ -26,7 +26,7 @@ async function GetSlidesFromVideo(vidinfo) {
     var match = vidinfo.txt.split(" ")[0];
     var showslides=[]        
     for (var i=0;i<slideindex.length;i++) 
-        if (slideindex[i].chapter === match) 
+        if ((slideindex[i].chapter === match) && (slideindex[i].png) ) 
             showslides.push(slideindex[i])
     publish("foundslides",showslides);
 }    

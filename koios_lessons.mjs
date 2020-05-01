@@ -12,7 +12,7 @@ var PrepareChapterTemplate;
 var PrepareChapterParent;  
 export var CurrentLesson=0;
 export var LastLesson=0;
-
+export var CurrentCourseTitle="";
 
 var buttonBack;
 var buttonForward;
@@ -44,6 +44,7 @@ export async function DisplayLessons(LoadVideoCB) {
     console.log(videoinfo);
     var items=await getYtInfoIpfs(videoinfo)
     console.log(items)
+    CurrentCourseTitle=items.title;
     
     for (var i=0;i<items.videos.length;i++) {
         
@@ -180,8 +181,8 @@ export async function SelectLesson(index) {
 }
 
 
-export async function SelectNextLesson() {   
-    SelectLesson(CurrentLesson +1)
+export async function SelectNextLesson(delta) {   
+    SelectLesson(CurrentLesson + delta)
 }
 
 
