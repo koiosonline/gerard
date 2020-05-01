@@ -14,6 +14,7 @@ Layout updates:
     - header shown when outside of iframe
     - test courses suppressed
 - course & video shown in popup pages
+- literature sorted
 
 Version 0.83:
 
