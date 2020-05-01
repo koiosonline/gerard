@@ -1,3 +1,16 @@
+Version 0.85:
+
+Functional updates:
+
+
+Technical updates:
+
+Layout updates:
+- remove log / quiz / transcript / about tabs
+- moved slack link in popup to right menu bar
+- popup, arrows to bottum ot screen
+- popup, dots replace by icons
+
 Version 0.84:
 
 

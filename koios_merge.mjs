@@ -148,7 +148,7 @@ function MakeSelection(domid,catid) {
     for (var i=0;i<top_level.data.buckets.length;i++) {
         var name=top_level.data.buckets[i].key
         
-        if (name.toLowerCase().includes("test")){
+        if (catid == "course" && !name.toLowerCase().includes("blockchain")){
             
             SelectItems("course-level-id",catid,name,false)
             continue; // skip all tests

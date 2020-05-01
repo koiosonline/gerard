@@ -18,7 +18,24 @@ function GetAllTabs(areaid) {
         console.log(tabinfo)        
         var target = IndexBlockList.AddListItem() 
         CreateBlock(target,i,tabinfo.name,tabinfo.icon);
+     
+
+       console.log("copy icon to bottom");
         
+
+
+        var childdomid=domid.getElementsByClassName("w-slider-dot")[i]
+console.log(childdomid);
+
+
+        childdomid.innerHTML=tabinfo.icon;
+        childdomid.style.fontFamily=tabinfo.fam;
+        
+        childdomid.style.backgroundColor="transparent"   // hide circle
+        
+
+
+     
     }
     
     
@@ -48,8 +65,8 @@ function ChildChanged(childdomid,childnr) {
     console.log(`In function ChildChanged ${childnr}`);
     if (childdomid !== oldtarget) {
         if (oldtarget) {
-            oldtarget.style.backgroundColor = oldbackgroundColor;
-            oldtarget.innerHTML=""
+           // oldtarget.style.backgroundColor = oldbackgroundColor;
+           // oldtarget.innerHTML=""
             oldtarget.style.fontSize=oldfontSize;
         }
         oldbackgroundColor = childdomid.style.backgroundColor;
@@ -83,6 +100,8 @@ function NextCourseClick() {
 
 
 export function InitPopup() { 
+    Webflow.require('slider').redraw(); // create to dots
+    
     MonitorDomid("popup","w-slider-nav","w-slider-dot","w-active",ChildChanged)    
     MonitorVisible("popup") // publishes when object changes vibility
     GetAllTabs("popup")

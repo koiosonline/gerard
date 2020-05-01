@@ -1,7 +1,7 @@
 import {publish,subscribe} from './koios_util.mjs';
 
 
-subscribe("playerloading",  InitAbout);
+// subscribe("playerloading",  InitAbout);  // disabled
 
  
 
