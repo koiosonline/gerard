@@ -114,12 +114,12 @@ async function NextVideo() {
     stopVideo();
     
     //await Relax();
-    
+/*
     var RelaxTime=5000;
     await SelectPopup("relax")
     await sleep(RelaxTime);
     await SelectPopup("literature")
-    
+*/    
     /*
     if (CurrentLesson == LastLesson) 
         publish ("lessonsend") 

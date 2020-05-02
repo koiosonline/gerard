@@ -366,7 +366,7 @@ export function SelectTabBasedOnNumber(areaid,id) {
 
 
 
-export function CanvasProgressInfo(domid,fHorizontal,seeninfo) {
+export function CanvasProgressInfo(domid,fHorizontal,seeninfo,maxduration) {
     //console.log(seeninfo);
     //console.log(domid);
     var canvas=domid.getElementsByTagName("CANVAS")[0];
@@ -385,15 +385,30 @@ export function CanvasProgressInfo(domid,fHorizontal,seeninfo) {
     //console.log(arearect);
     var factor
     
-    if (fHorizontal) {
-        factor       = Math.round(arearect.width / seeninfo.seensec.length);
-        if (factor < 1) factor = 1; // in case bounding rect is still empty
-        canvas.width = seeninfo.seensec.length*factor // note, this cleans the ctx
+    if (fHorizontal) {                
+        if (maxduration) {
+            var percsize=seeninfo.seensec.length/maxduration                     // this code can be optimized a bit more (also for vertical)
+            console.log(`percsize=${percsize}`)
+            factor       = Math.round(arearect.width / maxduration);
+            if (factor < 1) factor = 1; // in case bounding rect is still empty
+            canvas.width = "500px" //`${percsize*100}%` //*arearect.width; 
+            domid.style.width = `${percsize*100}%` // `${canvas.width}px`
+            //canvas.width = percsize*arearect.width; 
+        } else {            
+            factor       = Math.round(arearect.width / seeninfo.seensec.length);
+            if (factor < 1) factor = 1; // in case bounding rect is still empty
+            canvas.width = seeninfo.seensec.length*factor // note, this cleans the ctx                
+        }
+        console.log(canvas)
+        console.log(domid)
+        
     }
     else {
-        factor        = Math.round(arearect.height / seeninfo.seensec.length);
+        factor        = Math.round(arearect.height / maxduration);
         if (factor < 1) factor = 1;  // in case bounding rect is still empty
-        canvas.height = seeninfo.seensec.length // note, this cleans the ctx
+        canvas.height = percsize*arearect.height; // `${seeninfo.seensec.length/maxduration}%` // note, this cleans the ctx
+        domid.style.height = `${canvas.height}px`
+        canvas.style.height = `${canvas.height}px`
     }
     //console.log(factor);
     //console.log(canvas);

@@ -13,6 +13,7 @@ var PrepareChapterParent;
 export var CurrentLesson=0;
 export var LastLesson=0;
 export var CurrentCourseTitle="";
+export var maxduration=0;
 
 var buttonBack;
 var buttonForward;
@@ -58,7 +59,13 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
     var items=await getYtInfoIpfs(videoinfo)
     console.log(items)
     CurrentCourseTitle=items.title;
-          
+    maxduration=0;
+    for (var i=0;i<items.videos.length;i++)      
+         if (!items.videos[i].chapter)
+             maxduration = Math.max(maxduration,items.videos[i].duration);
+         
+    console.log(`maxduration ${maxduration}`)     
+         
     for (var i=0;i<items.videos.length;i++) {
         
         //console.log(items[i]);
@@ -67,6 +74,8 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
           AddChapter(items.videos[i].title)
        else {
           AddLessonsItem(items.videos[i]); //.title,items.videos[i].thumbnail,items.videos[i].description,items.videos[i].videoid,items.videos[i].duration);
+          
+          
        } 
     }    
     globalLessonslist = items;
@@ -133,7 +142,7 @@ function AddLessonsItem(vidinfo) { // txt,thumbnail,description,videoid,duration
     //cln.getElementsByTagName("img")[0].src=vidinfo.thumbnail;    
     
 
-    cln.getElementsByClassName("lesson-name")[0].innerHTML=vidinfo.txt;
+    cln.getElementsByClassName("lesson-name")[0].innerHTML=`${vidinfo.txt} (${vidinfo.duration} s)`;
     cln.getElementsByClassName("lesson-image")[0].src=vidinfo.thumbnail; 
     
     cln.id=`lesson-${index}`;
@@ -149,7 +158,7 @@ function AddLessonsItem(vidinfo) { // txt,thumbnail,description,videoid,duration
     var canvasloc=cln.getElementsByClassName("pi-lesson")[0]
     
     var seeninfothisvideo=LoadVideoSeen(vidinfo)
-    CanvasProgressInfo(canvasloc,false,seeninfothisvideo)  // vertical
+    CanvasProgressInfo(canvasloc,true,seeninfothisvideo,maxduration)  // vertical
     
     
      var target = GlobalVideoPagesList.AddListItem()

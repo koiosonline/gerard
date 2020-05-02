@@ -1,3 +1,18 @@
+Version 0.87:
+
+Functional updates:
+
+Technical updates:
+
+Layout updates:
+- lesson overview
+    horizontal progress bar (not fully functining)
+- course overview
+    - removed 2nd scroll bar
+    - removed level buttons
+    - removed advance blockchain level
+
+
 Version 0.86:
 
 Functional updates:
@@ -7,7 +22,7 @@ Technical updates:
 - parameter no longer included in url
 
 Layout updates:
-
+- several updates by ricardo
 
 Version 0.85:
 

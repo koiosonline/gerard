@@ -193,7 +193,7 @@ if (fInIframe) { // only then jump to right course
 
 
 MakeSelection(CatList,"course")
-MakeSelection(CatList,"level")
+//MakeSelection(CatList,"level")
 
 //MakeSelection(CatList,"contributer")
         
@@ -207,15 +207,17 @@ function MakeSelection(domid,catid) {
       per_page: 10
     })
     console.log(JSON.stringify(top_level, null, 2));
-
+    
+            
     for (var i=0;i<top_level.data.buckets.length;i++) {
         var name=top_level.data.buckets[i].key
         
-        if (catid == "course" && !name.toLowerCase().includes("blockchain")){
+        if (catid == "course" && !name.toLowerCase().includes("blockchain") ){
             
             SelectItems("course-level-id",catid,name,false)
             continue; // skip all tests
         }
+    
         
         var levelitem = LevelList.AddListItem() 
         
