@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 //import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber} from './koios_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetCourseInfo} from './koios_util.mjs';
 import {player} from './koios_video.mjs';
 import {getYtInfoIpfs} from './koios_ipfs.mjs';
 
@@ -31,6 +31,9 @@ var globalLessonslist; // format:
 var onlyLessonsIndexList=[]
 
 
+
+
+
 export async function DisplayLessons(LoadVideoCB) {
     console.log("In DisplayLessons")
     globalLoadVideoCB = LoadVideoCB;
@@ -38,14 +41,24 @@ export async function DisplayLessons(LoadVideoCB) {
 //    var x=await GetYouTubePlaylists()
 //   var items=await GetYouTubePlayListItems()
 
+
+var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R"
+
+
+/*
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    let videoinfo = urlParams.get('videoinfo') || "QmaamPoDLEhTa9fYC9c6ec7F4gng94zQsw3fWFGAyR8kMe" // "QmPZpwKA1fZWkeRofm8qEbu9AJYydBjD3BfobBtAv1SP4p"
+    let videoinfo = urlParams.get('videoinfo') || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R"
+//    "QmaamPoDLEhTa9fYC9c6ec7F4gng94zQsw3fWFGAyR8kMe" // "QmPZpwKA1fZWkeRofm8qEbu9AJYydBjD3BfobBtAv1SP4p"
+
+*/
+
+
     console.log(videoinfo);
     var items=await getYtInfoIpfs(videoinfo)
     console.log(items)
     CurrentCourseTitle=items.title;
-    
+          
     for (var i=0;i<items.videos.length;i++) {
         
         //console.log(items[i]);
@@ -60,9 +73,16 @@ export async function DisplayLessons(LoadVideoCB) {
     
     Webflow.require('slider').redraw(); // create to dots
     
-    return SelectLesson(0) // select a lesson with slides
+    
+    var prevlesson=localStorage.getItem(`lesson-${CurrentCourseTitle}`);
+    
+    console.log(`prevlesson ${prevlesson}`)
+    
+    return SelectLesson(prevlesson?prevlesson:0) // select a lesson with slides
 
     
+        
+             
 }
 
 
@@ -159,10 +179,12 @@ function AddChapter(txt) {
 
 export async function SelectLesson(index) {   
 
-    console.log(`In SelectLesson index=${index}`);
+    console.log(`In SelectLesson !! index=${index}`);
     if (index < 0)          index = 0;
     if (index > LastLesson) index = LastLesson;
-    
+   
+
+   
     //HideButton("back",    index <= 0);
     //HideButton("forward", index >= LastLesson );
 
@@ -177,6 +199,11 @@ export async function SelectLesson(index) {
   
    globalLoadVideoCB(onlyLessonsIndexList[CurrentLesson]);   
    SelectTabBasedOnNumber("videofield",CurrentLesson);
+   
+console.log(`Storing lesson nr lesson-${CurrentCourseTitle} ${CurrentLesson}`);
+   localStorage.setItem(`lesson-${CurrentCourseTitle}`, CurrentLesson);
+   
+   
    
 }
 

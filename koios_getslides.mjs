@@ -1,5 +1,5 @@
 
-import {loadScriptAsync,LoadGapi,ipfsgetjson,subscribe,publish} from './koios_util.mjs';
+import {loadScriptAsync,LoadGapi,ipfsgetjson,subscribe,publish,GetCourseInfo} from './koios_util.mjs';
 
 
 
@@ -9,7 +9,7 @@ subscribe("loadvideo",GetSlidesFromVideo)
 function GetSourceCid() {    
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString); 
-    let cid = urlParams.get('slides') || "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmXzRAXrFUou1FWHBMUvbb66bT8xfToQH3HJWqUNhTiXLX' // 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
+    let cid = GetCourseInfo("slides")  || "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmXzRAXrFUou1FWHBMUvbb66bT8xfToQH3HJWqUNhTiXLX' // 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m'; urlParams.get('slides')
     console.log(`In GetSourceCid cid=${cid}`);
     return cid;
 }    

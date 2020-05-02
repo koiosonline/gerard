@@ -1,3 +1,14 @@
+Version 0.86:
+
+Functional updates:
+- remembers course & video
+
+Technical updates:
+- parameter no longer included in url
+
+Layout updates:
+
+
 Version 0.85:
 
 Functional updates:

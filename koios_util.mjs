@@ -504,5 +504,23 @@ export class DomList {
             this.parentnode.removeChild(this.parentnode.lastChild); // first remove previous children    
     }
 }    
-
-
+ 
+ 
+ 
+export function GetCourseInfo(key) {
+    var cl=localStorage.getItem("CourseLevel"); 
+    
+    console.log(`GetCourseInfo ${cl}`)
+    
+    var course_level_items=document.getElementsByClassName("course-level-id"); 
+    for (var i=0;i<course_level_items.length;i++) {        
+        var target=course_level_items[i]
+        console.log(target);
+        var courselevel=target.getAttribute("courselevel");
+        console.log(courselevel);
+        if (courselevel == cl) {// found the requested or previous courselevel
+            return target.getAttribute(key);
+        }
+    }
+   return undefined;
+}

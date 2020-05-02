@@ -40,19 +40,35 @@ async function MergeLevels(fInIframe,parenturl) {
     }     
     
     
-    function FindAllLinks(fInIframe,parenturl) {
-        var links=document.getElementsByTagName("a");
+    function FindAllLinks(target,fInIframe,parenturl,courselevel) {
+        console.log(`In FindAllLinks ${courselevel}`);
+        console.log(target);
+        var links=target.getElementsByTagName("a");
         for (var i=0;i<links.length;i++) {          
             links[i].target="_top"; // change the "top" page when clicking a link       
             //console.log(`In koios_merge.mjs ${links[i].href} fInIframe=${fInIframe}`);
-            if (fInIframe && links[i].href.includes("playlistId")) {     
-                
-                links[i].href = links[i].href.replace("/viewer", parenturl.pathname);
-                //console.log(`New url ${links[i].href}`);
+            if (links[i].href.toLowerCase().includes("koios")) {                     
+
+                if (fInIframe)
+                    links[i].href = links[i].href.replace("/viewer", parenturl.pathname);
+                console.log(`New url ${links[i].href}`);
+               // if (!links[i].href.includes("hash"))
+                 //   links[i].href =`${links[i].href}&hash=${hashCode(courselevel)}`
+                console.log(`New url ${links[i].href}`);
+                StoreSelection(links[i])
+                 
             }
+        }        
+        function StoreSelection(target) { // seperate function to store state
+            console.log("Setting listener for");
+            console.log(target)
+            target.addEventListener("click",  SaveToLocalStorage);
+             function SaveToLocalStorage() {
+                 console.log(`Saving ${courselevel}`);                 
+                 localStorage.setItem("CourseLevel", courselevel);  // this is how the player knows what is selected
+             }    
         }
-    }    
-    
+    }   
  
     var course_level_items=document.getElementsByClassName("course-level-id"); 
     //console.log(course_level_items);
@@ -62,7 +78,7 @@ async function MergeLevels(fInIframe,parenturl) {
         ProcessCourseLevel(course_level_items[i])
     }
 */    
-    FindAllLinks(fInIframe,parenturl);
+    
 
 
 var CatList;
@@ -72,12 +88,20 @@ var CatList;
     var data=[]
     for (var i=0;i<course_level_items.length;i++) {        
         var target=course_level_items[i]
+        
+        
+        
+        
         var save={}
         save.course=target.getAttribute("course");
         save.courselevel=target.getAttribute("courselevel");
         save.level=target.getAttribute("level");        
         save.contributer=target.getAttribute("contributer");        
+        save.url=target.getAttribute("url");
         data.push(save)
+        
+        FindAllLinks(target.parentNode.parentNode,fInIframe,parenturl,save.courselevel);
+        
     }
     console.log(data);
         
@@ -127,6 +151,45 @@ var CatList;
       }
     })
     //console.log(JSON.stringify(movies, null, 2));
+
+console.log("All courses");
+console.log(data);
+
+/*
+if (fInIframe) { // only then jump to right course
+
+    var cl=localStorage.getItem("CourseLevel"); 
+    console.log(cl);
+    var hcl=hashCode(cl)
+    
+    const queryString = window.parent.parent.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let hash = urlParams.get('hash') 
+    console.log(`hash ${hash}`);
+    
+      
+    if (hash != hcl) { // find corrent url
+        for (var z=0;z<data.length;z++) {
+            console.log(`Check ${data[z].courselevel}`)
+            if (data[z].courselevel == cl) {
+                
+                var url =`${data[z].url}&hash=${hcl}`
+                
+                console.log(`Going to url: ${url}`)    
+                console.log(window.parent.parent.location.href)
+                url=url.replace("/viewer", parenturl.pathname);
+                console.log(parenturl.pathname);
+                console.log(url)
+                window.parent.parent.location.href = url        
+                
+                
+                
+                
+            }
+        }
+    }         
+}
+*/
 
 
 MakeSelection(CatList,"course")

@@ -1,6 +1,8 @@
 // https://www.koios.online/browse-links?slides=QmQ9WwsBNSZGTAiFdDPn47PfMvN3nyfMrk93tkVXp6dvW7&match=BC-3.0
 
-import {loadScriptAsync,LoadGapi,ipfsgetjson,subscribe,publish,DomList,GetCidViaIpfsProvider } from './koios_util.mjs';
+import {loadScriptAsync,LoadGapi,ipfsgetjson,subscribe,publish,DomList,GetCidViaIpfsProvider,GetCourseInfo } from './koios_util.mjs';
+
+
 import {} from './koios_getslides.mjs';
 
 
@@ -11,7 +13,7 @@ async function asyncloaded() {
     const parentUrlParams = new URLSearchParams(window.parent.location.search);    
     let match = urlParams.get('match') || parentUrlParams.get('match'); // if empty then matches everythng
     console.log(`In koios_browse match=${match}`);   
-    let cid = urlParams.get('slides') || parentUrlParams.get('slides') || "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m';
+    let cid =  GetCourseInfo("slides") || "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m'; urlParams.get('slides')|| parentUrlParams.get('slides') 
     console.log(`In koios_browse cid=${cid}`);
    
     var domid=document.getElementById("browse-window");
