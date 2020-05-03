@@ -1,23 +1,6 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
-import "https://apis.google.com/js/api.js";
-
-
-export async function LoadGapi() {
-  //console.log('gapi load start');
-  await new Promise(function(resolve, reject) {  gapi.load('client:auth2', resolve); });
-  gapi.client.setApiKey("AIzaSyBPDSeL1rNL9ILyN2rX11FnHeBePld7HOQ");
-  await Promise.all( [ 
-        gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"),
-        gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"),
-        //   gapi.client.load("https://content.googleapis.com/discovery/v1/apis/slides/v1/rest");  doesn't work because of authorization issues
-       ]
-    );  
-  //console.log('gapi loaded');  
-  LoadGapi=function(){} // next time: do nothing
-}
-
 
 
 export var loadScriptAsync = function(uri){
@@ -297,7 +280,7 @@ export function subscribe(eventName, callback) {
 export function MonitorDomid(areaid,parentclass,childclass,triggerclass,cbChildChanged) {
     
     function cbMutation(mutationsList, observer) {
-        console.log("in cbMutation");
+    //    console.log("in cbMutation");
         for(let mutation of mutationsList) {
             if (mutation.type === 'attributes') { // console.log('The ' + mutation.attributeName + ' attribute was modified.');                
                 var target = mutation.target;
@@ -388,7 +371,7 @@ export function CanvasProgressInfo(domid,fHorizontal,seeninfo,maxduration) {
     if (fHorizontal) {                
         if (maxduration) {
             var percsize=seeninfo.seensec.length/maxduration                     // this code can be optimized a bit more (also for vertical)
-            console.log(`percsize=${percsize}`)
+           // console.log(`percsize=${percsize}`)
             factor       = Math.round(arearect.width / maxduration);
             if (factor < 1) factor = 1; // in case bounding rect is still empty
             canvas.width = "500px" //`${percsize*100}%` //*arearect.width; 
@@ -399,8 +382,8 @@ export function CanvasProgressInfo(domid,fHorizontal,seeninfo,maxduration) {
             if (factor < 1) factor = 1; // in case bounding rect is still empty
             canvas.width = seeninfo.seensec.length*factor // note, this cleans the ctx                
         }
-        console.log(canvas)
-        console.log(domid)
+      //  console.log(canvas)
+      //  console.log(domid)
         
     }
     else {
@@ -495,7 +478,7 @@ export async function ipfsgetjson(cid) {
 
 export class DomList {    
     constructor (objectclass,parentdomid) {
-        console.log(`In constructor of DomList with objectclass=${objectclass}`);
+     //   console.log(`In constructor of DomList with objectclass=${objectclass}`);
         var list = (parentdomid?parentdomid:document).getElementsByClassName(objectclass);
         //console.log(list)    
         if (list && list[0]) {
@@ -507,7 +490,7 @@ export class DomList {
     }
     
     AddListItem() {
-        console.log("In AddListItem");
+       // console.log("In AddListItem");
         if (!this.template) return undefined;
         var target = this.template.cloneNode(true);
         this.parentnode.appendChild(target);  
@@ -530,9 +513,9 @@ export function GetCourseInfo(key) {
     var course_level_items=document.getElementsByClassName("course-level-id"); 
     for (var i=0;i<course_level_items.length;i++) {        
         var target=course_level_items[i]
-        console.log(target);
+        //console.log(target);
         var courselevel=target.getAttribute("courselevel");
-        console.log(courselevel);
+        //console.log(courselevel);
         if (courselevel == cl) {// found the requested or previous courselevel
             return target.getAttribute(key);
         }

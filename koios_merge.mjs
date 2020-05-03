@@ -41,8 +41,8 @@ async function MergeLevels(fInIframe,parenturl) {
     
     
     function FindAllLinks(target,fInIframe,parenturl,courselevel) {
-        console.log(`In FindAllLinks ${courselevel}`);
-        console.log(target);
+       // console.log(`In FindAllLinks ${courselevel}`);
+       // console.log(target);
         var links=target.getElementsByTagName("a");
         for (var i=0;i<links.length;i++) {          
             links[i].target="_top"; // change the "top" page when clicking a link       
@@ -51,20 +51,20 @@ async function MergeLevels(fInIframe,parenturl) {
 
                 if (fInIframe)
                     links[i].href = links[i].href.replace("/viewer", parenturl.pathname);
-                console.log(`New url ${links[i].href}`);
+               // console.log(`New url ${links[i].href}`);
                // if (!links[i].href.includes("hash"))
                  //   links[i].href =`${links[i].href}&hash=${hashCode(courselevel)}`
-                console.log(`New url ${links[i].href}`);
+              //  console.log(`New url ${links[i].href}`);
                 StoreSelection(links[i])
                  
             }
         }        
         function StoreSelection(target) { // seperate function to store state
-            console.log("Setting listener for");
-            console.log(target)
+           // console.log("Setting listener for");
+          //  console.log(target)
             target.addEventListener("click",  SaveToLocalStorage);
              function SaveToLocalStorage() {
-                 console.log(`Saving ${courselevel}`);                 
+                 //console.log(`Saving ${courselevel}`);                 
                  localStorage.setItem("CourseLevel", courselevel);  // this is how the player knows what is selected
              }    
         }
@@ -103,7 +103,7 @@ var CatList;
         FindAllLinks(target.parentNode.parentNode,fInIframe,parenturl,save.courselevel);
         
     }
-    console.log(data);
+  //  console.log(data);
         
 
     var configuration= {
@@ -152,8 +152,8 @@ var CatList;
     })
     //console.log(JSON.stringify(movies, null, 2));
 
-console.log("All courses");
-console.log(data);
+//console.log("All courses");
+//console.log(data);
 
 /*
 if (fInIframe) { // only then jump to right course
@@ -206,7 +206,7 @@ function MakeSelection(domid,catid) {
       name: catid,
       per_page: 10
     })
-    console.log(JSON.stringify(top_level, null, 2));
+   // console.log(JSON.stringify(top_level, null, 2));
     
             
     for (var i=0;i<top_level.data.buckets.length;i++) {
@@ -269,13 +269,13 @@ function MakeSelection(domid,catid) {
     function SelectItems(listid,cat,item,fOn) {
        var list_items=document.getElementsByClassName(listid); 
      
-      console.log(`In SelectItems ${cat} ${item} ${fOn}`);
+  //    console.log(`In SelectItems ${cat} ${item} ${fOn}`);
       
        for (var i=0;i<list_items.length;i++) {        
            var target=list_items[i]
            if (target.getAttribute(cat)==item) {
-               console.log(`Found ${cat} ${item}`);
-               console.log(target.parentNode.parentNode);
+           //    console.log(`Found ${cat} ${item}`);
+           //    console.log(target.parentNode.parentNode);
                target.parentNode.parentNode.style.display=fOn?"block":"none"
            }
        }  

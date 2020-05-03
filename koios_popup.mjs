@@ -15,17 +15,17 @@ function GetAllTabs(areaid) {
     
     for (var i=0;i<slides.length;i++) {
         var tabinfo=GetTabHeading(domid,i);
-        console.log(tabinfo)        
+   //     console.log(tabinfo)        
         var target = IndexBlockList.AddListItem() 
         CreateBlock(target,i,tabinfo.name,tabinfo.icon);
      
 
-       console.log("copy icon to bottom");
+    //   console.log("copy icon to bottom");
         
 
 
         var childdomid=domid.getElementsByClassName("w-slider-dot")[i]
-console.log(childdomid);
+//console.log(childdomid);
 
 
         childdomid.innerHTML=tabinfo.icon;
@@ -87,8 +87,11 @@ function ChildChanged(childdomid,childnr) {
  subscribe("loadvideo",VideoLoaded)
  
 function VideoLoaded(vidinfo) {
-     var domid=document.getElementById("popupvideoname");
-     domid.innerHTML=`${CurrentCourseTitle} / ${vidinfo.txt}`
+    var domid=document.getElementById("popupvideoname");
+    domid.innerHTML=`${CurrentCourseTitle} / ${vidinfo.txt}`
+    domid.style.overflow="hidden"
+    domid.style.textOverflow="ellipsis"  
+    domid.style.whiteSpace="nowrap"
 
 }    
  

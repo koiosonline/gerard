@@ -50,7 +50,7 @@ export async function uploadYtDataToIpfs()        //Puts the object on ipfs
 }
 
 
-export async function getYtInfoIpfs(hash)           //Gets the json string from ipfs and parses it into an object
+export async function getYtInfoIpfs(hash)           //Gets the json string from ipfs and parses it into an object /// not used, see ipfsgetjson
 {
  // await setupBuffer();
   

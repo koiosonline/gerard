@@ -35,8 +35,8 @@ function SlidesForVideo(vidinfo) {
 */    
     
 async function FoundSlidesViaJson(slidesarray) {
-    console.log("In FoundSlidesViaJson");
-    console.log(slidesarray);
+ //   console.log("In FoundSlidesViaJson");
+ //   console.log(slidesarray);
     
     GlobalPrepareSlidesList.EmptyList()
     
@@ -81,7 +81,7 @@ async function FoundSlidesViaJson(slidesarray) {
 
 function AddSlide(num,total,slidesinfo) {
     
-    console.log(`In AddSlide ${num} ${slidesinfo.png} ${slidesinfo.title}`);
+    //console.log(`In AddSlide ${num} ${slidesinfo.png} ${slidesinfo.title}`);
     
     var ipfsproviderindex=0;    
     function urlerrorhandling() {

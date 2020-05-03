@@ -1,3 +1,22 @@
+Version 1.00:
+
+Functional updates:
+
+
+Technical updates:
+- fixed copy notes to clipboard
+- removed google api calls from player
+- reduce & fix log messages
+- removed dependancy on https://unpkg.com/ipfs/dist/index.js (error rate exceeded)
+- removed several log messages
+
+Layout updates:
+- copy notes to clipboard moves to top of notes
+- literature
+    - notes area removed
+    - changed layout of links
+- popup optimized screen width
+
 Version 0.87:
 
 Functional updates:

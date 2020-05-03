@@ -14,7 +14,7 @@
     import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koios_speech.mjs';
     import {SetupLogWindow} from './koios_log.mjs';
     import {SetupChat} from './koios_chat.mjs';
-    import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
+    //import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
     import {} from './koios_test.mjs';
     import {SelectPopup,InitPopup} from './koios_popup.mjs';
     import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koios_messages.mjs';
@@ -421,12 +421,12 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     SetVideoTitle(vidinfo.txt);
    SetVideoProgressBar(0)
     
-    console.log(vidinfo)
+  //  console.log(vidinfo)
    // GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
     for (var i=0;i< vidinfo.subtitles.length;i++) 
        if (vidinfo.subtitles[i].lang == "vor")
             FoundSlides(vidinfo.subtitles[i].subtitle,vidinfo);
-    GetSetupLitAndAssInfo(vidinfo.txt);
+    //GetSetupLitAndAssInfo(vidinfo.txt);
     InitProgress(vidinfo);
     
 }
@@ -496,7 +496,7 @@ videofield.addEventListener('click', x=>{console.log("videofield click");if (!Is
     InitSpeak();
     var chatlink="https://gitter.im/web3examples/test/~embed";    
     //SetupChat("chat",chatlink);
-    SetupLitAndAss();
+    //SetupLitAndAss();
     // CreateButton("closekeyboard",x=>document.blur(),document.getElementById('notes'));
     var metaDom = document.getElementsByName("viewport");
     metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
@@ -526,7 +526,7 @@ publish("playerloading");
 SetupLogWindow();
 var url = window.location.pathname;
 var filename = url.substring(url.lastIndexOf('/')+1);
-console.log(filename);
+//console.log(filename);
 //console.log(`In ${window.location.href} starting script: ${document.currentScript.src}`);
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
 /*  https://gist.github.com/kvyb/3b370c40696ffc222563c8a70276af15

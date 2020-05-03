@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 //import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetCourseInfo} from './koios_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetCourseInfo,ipfsgetjson} from './koios_util.mjs';
 import {player} from './koios_video.mjs';
 import {getYtInfoIpfs} from './koios_ipfs.mjs';
 
@@ -55,16 +55,19 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
 */
 
 
-    console.log(videoinfo);
-    var items=await getYtInfoIpfs(videoinfo)
-    console.log(items)
+  //  console.log(videoinfo);
+    
+    var items = await ipfsgetjson(videoinfo)
+    
+    // var items=await getYtInfoIpfs(videoinfo)
+  //  console.log(items)
     CurrentCourseTitle=items.title;
     maxduration=0;
     for (var i=0;i<items.videos.length;i++)      
          if (!items.videos[i].chapter)
              maxduration = Math.max(maxduration,items.videos[i].duration);
          
-    console.log(`maxduration ${maxduration}`)     
+   // console.log(`maxduration ${maxduration}`)     
          
     for (var i=0;i<items.videos.length;i++) {
         
@@ -85,7 +88,7 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
     
     var prevlesson=localStorage.getItem(`lesson-${CurrentCourseTitle}`);
     
-    console.log(`prevlesson ${prevlesson}`)
+    //console.log(`prevlesson ${prevlesson}`)
     
     return SelectLesson(prevlesson?prevlesson:0) // select a lesson with slides
 
