@@ -1,7 +1,7 @@
 import {publish,subscribe} from './koios_util.mjs';
 
 
-// subscribe("playerloading",  InitAbout);  // disabled
+subscribe("playerloading",  InitAbout);  
 
  
 
@@ -9,7 +9,9 @@ import {publish,subscribe} from './koios_util.mjs';
 var globalIframe
 function InitAbout() {
     console.log("In InitAbout");        
-    var domid=document.getElementById("about");
+    var domid=document.getElementById("popup");
+    
+    /*
     var iframe=document.createElement("iframe");
     iframe.width="100%"
     iframe.height="90vh"
@@ -18,7 +20,7 @@ function InitAbout() {
     iframe.src="https://www.koios.online/#about2"
     domid.appendChild(iframe); 
     globalIframe=iframe;
-    
+    */    
     
     var domidver=document.getElementById("version");
     domid.appendChild(domidver)

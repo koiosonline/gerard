@@ -14,33 +14,26 @@ function GetAllTabs(areaid) {
     var IndexBlockList = new DomList("index-block")  
     
     for (var i=0;i<slides.length;i++) {
+
         var tabinfo=GetTabHeading(domid,i);
-   //     console.log(tabinfo)        
-        var target = IndexBlockList.AddListItem() 
-        CreateBlock(target,i,tabinfo.name,tabinfo.icon);
-     
-
-    //   console.log("copy icon to bottom");
-        
-
-
+        if (tabinfo.name.toLowerCase() != "index") { // don't show the index in the index
+        //     console.log(tabinfo)        
+                var target = IndexBlockList.AddListItem() 
+                CreateBlock(target,i,tabinfo.name,tabinfo.icon);
+        }
+        //   console.log("copy icon to bottom");
         var childdomid=domid.getElementsByClassName("w-slider-dot")[i]
-//console.log(childdomid);
-
-
+        //console.log(childdomid);
         childdomid.innerHTML=tabinfo.icon;
-        childdomid.style.fontFamily=tabinfo.fam;
-        
+        childdomid.style.fontFamily=tabinfo.fam;        
         childdomid.style.backgroundColor="transparent"   // hide circle
-        
-
-
-     
     }
     
     
     function CreateBlock(domid,id,name,icon) { // seperate function to remember state for click
-        target.getElementsByTagName("h2")[0].innerHTML = name;
+        //target.getElementsByTagName("h2")[0].innerHTML = name;
+        
+        target.getElementsByClassName("tab-name")[0].innerHTML = name;        
         target.getElementsByClassName("large-icon")[0].innerHTML = icon;        
         domid.addEventListener("click",  x=>SelectTabBasedOnNumber(areaid,id));
      }

@@ -221,7 +221,7 @@ console.log(`Storing lesson nr lesson-${CurrentCourseTitle} ${CurrentLesson}`);
 
 
 export async function SelectNextLesson(delta) {   
-    SelectLesson(CurrentLesson + delta)
+    SelectLesson(parseInt(CurrentLesson) + parseInt(delta))
 }
 
 

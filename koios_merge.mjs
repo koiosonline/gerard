@@ -49,8 +49,17 @@ async function MergeLevels(fInIframe,parenturl) {
             //console.log(`In koios_merge.mjs ${links[i].href} fInIframe=${fInIframe}`);
             if (links[i].href.toLowerCase().includes("koios")) {                     
 
-                if (fInIframe)
-                    links[i].href = links[i].href.replace("/viewer", parenturl.pathname);
+             
+                    var urlhref = new URL(links[i].href)
+                    console.log(urlhref);
+                    console.log(links[i].href)
+                if (fInIframe) 
+                        links[i].href = links[i].href.replace("/viewer", parenturl.pathname);
+                    links[i].href = links[i].href.replace(urlhref.host, parenturl.host); // also change the prefix
+                    console.log(links[i].href)
+            
+                    
+                    
                // console.log(`New url ${links[i].href}`);
                // if (!links[i].href.includes("hash"))
                  //   links[i].href =`${links[i].href}&hash=${hashCode(courselevel)}`

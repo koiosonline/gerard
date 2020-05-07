@@ -3,8 +3,8 @@
 import {loadScriptAsync,ipfsgetjson,subscribe,publish,DomList,GetCidViaIpfsProvider,GetCourseInfo } from './koios_util.mjs';
 
 
-import {} from './koios_getslides.mjs';
-import {} from './koios_notes.mjs';
+//import {} from './koios_getslides.mjs';
+//import {} from './koios_notes.mjs';
 
 
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  

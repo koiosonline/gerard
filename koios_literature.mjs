@@ -23,6 +23,6 @@ function InitLiterature() {
 function VideoLiterature(vidinfo) {
     console.log("In VideoLiterature");        
     var match = vidinfo.txt.split(" ")[0];
-    globalIframe.src=`https://www.koios.online/browse-links?match=${match}`
+    globalIframe.src=`browse-links?match=${match}`
 }
 

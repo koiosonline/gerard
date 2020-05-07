@@ -2,6 +2,19 @@ Version 1.00:
 
 Functional updates:
 
+Technical updates:
+- support for https://koios-final.webflow.io/....
+
+Layout updates:
+- popup yellow arrows not overlapping with rest
+- popup don's show index in index
+- fullscreen icon hidden when popup shows (otherwise interfere with yellow arrows)
+- version info; only shown in popup, small font, topleft corner
+
+Version 1.00:
+
+Functional updates:
+
 
 Technical updates:
 - fixed copy notes to clipboard
