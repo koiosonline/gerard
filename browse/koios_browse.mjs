@@ -1,10 +1,13 @@
 // https://www.koios.online/browse-links?slides=QmQ9WwsBNSZGTAiFdDPn47PfMvN3nyfMrk93tkVXp6dvW7&match=BC-3.0
 
-import {loadScriptAsync,ipfsgetjson,subscribe,publish,DomList,GetCidViaIpfsProvider,GetCourseInfo } from './koios_util.mjs';
+import {loadScriptAsync,ipfsgetjson,subscribe,publish,DomList,GetCidViaIpfsProvider,GetCourseInfo } from '../lib/koios_util.mjs';
 
 
 //import {} from './koios_getslides.mjs';
 //import {} from './koios_notes.mjs';
+
+
+
 
 
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  

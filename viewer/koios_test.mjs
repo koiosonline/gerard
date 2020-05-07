@@ -1,6 +1,6 @@
 
-import {LinkButton,sleep,subscribe,LinkToggleButton,HideButton} from './koios_util.mjs';
-import {player,currentvidinfo,startVideo,SetVideoSeconds} from './koios_video.mjs';
+import {LinkButton,sleep,subscribe,LinkToggleButton,HideButton} from '../lib/koios_util.mjs';
+import {player,currentvidinfo,startVideo,SetVideoSeconds} from './koios_viewer.mjs';
 import {SwitchDisplayMessageContinous,DisplayMessageContinous} from './koios_messages.mjs';
 import {CurrentLesson,LastLesson} from './koios_lessons.mjs';
 

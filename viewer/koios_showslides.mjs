@@ -1,4 +1,4 @@
-import {publish,subscribe,GetCidViaIpfsProvider,NrIpfsProviders,DomList,sleep,MonitorDomid} from './koios_util.mjs';
+import {publish,subscribe,GetCidViaIpfsProvider,NrIpfsProviders,DomList,sleep,MonitorDomid} from '../lib/koios_util.mjs';
 
 var SecondsArraySlides;
 var prevslide=undefined;

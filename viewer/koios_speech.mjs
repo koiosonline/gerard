@@ -1,4 +1,4 @@
-import {LinkButton} from './koios_util.mjs';
+import {LinkButton} from '../lib/koios_util.mjs';
 
 var voices = [];
 var synth = window.speechSynthesis;

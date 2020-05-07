@@ -1,4 +1,4 @@
-import {LinkButton,sleep,subscribe,LinkToggleButton,HideButton,InsertIFrame,loadScriptAsync} from './koios_util.mjs';
+import {LinkButton,sleep,subscribe,LinkToggleButton,HideButton,InsertIFrame,loadScriptAsync} from '../lib/koios_util.mjs';
 // https://developers.soundcloud.com/docs/api/html5-widget
 
   // scrolling="no" frameborder="no" 

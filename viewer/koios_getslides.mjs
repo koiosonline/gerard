@@ -1,5 +1,5 @@
 
-import {loadScriptAsync,ipfsgetjson,subscribe,publish,GetCourseInfo} from './koios_util.mjs';
+import {loadScriptAsync,ipfsgetjson,subscribe,publish,GetCourseInfo} from '../lib/koios_util.mjs';
 
 
 

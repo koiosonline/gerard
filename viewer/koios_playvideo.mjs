@@ -53,7 +53,7 @@ player.setOption('captions', 'track', {});
 
 */  
 
-import {LinkButton,loadScriptAsync,publish,LinkClickButton,subscribe} from './koios_util.mjs';
+import {LinkButton,loadScriptAsync,publish,LinkClickButton,subscribe} from '../lib/koios_util.mjs';
 
 
 export async function SetVideoTitle(title) {

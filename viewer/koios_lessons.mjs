@@ -1,9 +1,9 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 //import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koios_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetCourseInfo,ipfsgetjson} from './koios_util.mjs';
-import {player} from './koios_video.mjs';
-import {getYtInfoIpfs} from './koios_ipfs.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetCourseInfo,ipfsgetjson} from '../lib/koios_util.mjs';
+import {player} from './koios_viewer.mjs';
+//import {getYtInfoIpfs} from './koios_ipfs.mjs';
 
 // Global vars
 var PrepareLessonsListTemplate;   

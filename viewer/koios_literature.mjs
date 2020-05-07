@@ -1,4 +1,4 @@
-import {publish,subscribe} from './koios_util.mjs';
+import {publish,subscribe} from '../lib/koios_util.mjs';
 
 
 subscribe("playerloading",  InitLiterature);

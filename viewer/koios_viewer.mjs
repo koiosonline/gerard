@@ -1,26 +1,28 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 // https://browserhow.com/how-to-clear-chrome-android-history-cookies-and-cache-data/
  // imports
+ 
+    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfo,SaveVideoSeen,LoadVideoSeen,ForceButton} from '../lib/koios_util.mjs';
+    import {SetupLogWindow} from '../lib/koios_log.mjs';
+    
     import {SetupVideoWindowYouTube,SetVideoTitle} from './koios_playvideo.mjs';
-    import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koios_lessons.mjs';
-    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfo,SaveVideoSeen,LoadVideoSeen,ForceButton} from './koios_util.mjs';
+    import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koios_lessons.mjs';    
     import {GetSubTitlesAndSheets} from './koios_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koios_showtranscript.mjs';
     import {} from './koios_getslides.mjs';
     import {FoundSlides,UpdateSlide} from './koios_showslides.mjs';
-    import {} from './koios_chat.mjs';
+   // import {} from './koios_chat.mjs';
     import {} from './koios_notes.mjs';
     import {SetupSliders /*,ShowTitles*/} from './koios_screenlayout.mjs';
     import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koios_speech.mjs';
-    import {SetupLogWindow} from './koios_log.mjs';
-    import {SetupChat} from './koios_chat.mjs';
+    //import {SetupChat} from './koios_chat.mjs';
     //import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koios_drive.mjs';
     import {} from './koios_test.mjs';
     import {SelectPopup,InitPopup} from './koios_popup.mjs';
     import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koios_messages.mjs';
     import {} from './koios_music.mjs';
     import {} from './koios_literature.mjs';
-    import {} from './koios_about.mjs';
+   // import {} from './koios_about.mjs';
 
 
 export var player=0;

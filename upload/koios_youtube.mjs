@@ -8,7 +8,7 @@ import( "https://apis.google.com/js/api.js");
 //import "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"; // date time conversion
 
 
-import {loadScriptAsync} from './koios_util.mjs';
+import {loadScriptAsync} from '../lib/koios_util.mjs';
 
 loadScriptAsync("https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js")
 

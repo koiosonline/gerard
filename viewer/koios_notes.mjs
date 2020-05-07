@@ -1,4 +1,4 @@
-import {LinkButton,LinkClickButton,subscribe,DomList,GetCidViaIpfsProvider} from './koios_util.mjs';    
+import {LinkButton,LinkClickButton,subscribe,DomList,GetCidViaIpfsProvider} from '../lib/koios_util.mjs';   
 import {DisplayMessage} from './koios_messages.mjs';  
 import {CurrentCourseTitle} from './koios_lessons.mjs'
 

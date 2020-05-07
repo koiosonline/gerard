@@ -1,4 +1,4 @@
-import {sleep,publish,subscribe,MonitorDomid,MonitorVisible,SelectTabBasedOnName,DomList,SelectTabBasedOnNumber,LinkClickButton} from './koios_util.mjs';
+import {sleep,publish,subscribe,MonitorDomid,MonitorVisible,SelectTabBasedOnName,DomList,SelectTabBasedOnNumber,LinkClickButton} from '../lib/koios_util.mjs';
 import {SelectNextLesson,CurrentCourseTitle}  from './koios_lessons.mjs';
 
 var oldtarget;

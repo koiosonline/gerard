@@ -1,8 +1,11 @@
 
 
 import {uploadYtDataToIpfs,getYtInfoIpfs,includeSubtitlesforIpfsExport} from './koios_ipfs.mjs';
-import {LinkClickButton,subscribe} from './koios_util.mjs';
-import {SetupLogWindow,log} from './koios_log.mjs';
+import {LinkClickButton,subscribe} from '../lib/koios_util.mjs';
+import {SetupLogWindow,log} from '../lib/koios_log.mjs'; 
+
+ 
+
 
 
 console.log("Hello koios_upload");

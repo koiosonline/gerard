@@ -1,5 +1,5 @@
-import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep} from './koios_util.mjs';
-import {player} from './koios_video.mjs';
+import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep} from '../lib/koios_util.mjs';
+import {player} from './koios_viewer.mjs';
 
 export async function SetupSliders() {
     var grid=document.getElementById("mainscreen");    

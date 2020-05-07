@@ -2,7 +2,7 @@
 
 //import("https://unpkg.com/itemsjs@latest/dist/itemsjs.min.js")
 
-import {loadScriptAsync,DomList,LinkToggleButton,subscribe} from './koios_util.mjs';
+import {loadScriptAsync,DomList,LinkToggleButton,subscribe} from '../lib/koios_util.mjs';
 
 
  
@@ -226,7 +226,7 @@ function MakeSelection(domid,catid) {
             SelectItems("course-level-id",catid,name,false)
             continue; // skip all tests
         }
-    
+   
         
         var levelitem = LevelList.AddListItem() 
         

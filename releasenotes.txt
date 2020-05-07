@@ -1,15 +1,38 @@
-Version 1.00:
+Version 1.02:
+
+Functional updates:
+
+Technical updates:
+    - added forum 
+    https://koios-final.webflow.io/test/forumcorwin
+    https://www.koios.online/test/forumcorwin
+    https://www.koios.online/test/forum
+    - subdirectories for mjs files
+
+Layout updates:
+
+Version 1.01:
 
 Functional updates:
 
 Technical updates:
 - support for https://koios-final.webflow.io/....
+- fixed bug with browsing video forward/backward in popup
+- moved testversions to 
+https://www.koios.online/test/viewer
+https://www.koios.online/test/browse-links
+https://www.koios.online/test/course-overview
+https://koios-final.webflow.io/test/viewer
+https://koios-final.webflow.io/test/browse-links
+https://koios-final.webflow.io/test/course-overview
+- removed dependancy on gpersoon.com for prod versions
 
 Layout updates:
 - popup yellow arrows not overlapping with rest
 - popup don's show index in index
 - fullscreen icon hidden when popup shows (otherwise interfere with yellow arrows)
 - version info; only shown in popup, small font, topleft corner
+- scrolling in popup enhanced
 
 Version 1.00:
 
@@ -311,3 +334,4 @@ Slides connected to video based on first keyword of the slide title and video ti
 
 Technical updates:
 Slides switched to PNG format (svg layout is sometimes distorted
+

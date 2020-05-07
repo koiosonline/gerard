@@ -1,4 +1,4 @@
-import {sleep,subscribe,publish} from './koios_util.mjs';  
+import {sleep,subscribe,publish} from '../lib/koios_util.mjs'; 
 
 
 export async function DisplayMessage(text) {    

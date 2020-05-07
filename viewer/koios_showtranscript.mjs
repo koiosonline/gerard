@@ -1,4 +1,4 @@
-import {LinkButton} from './koios_util.mjs';
+import {LinkButton} from '../lib/koios_util.mjs';
 import {SetSpeechLang} from './koios_speech.mjs';
 
 var langbtns; // array of all language buttons;
