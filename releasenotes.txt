@@ -1,13 +1,23 @@
+Version 1.03:
+Functional updates:
+
+Technical updates:
+    - updated forum
+Layout updates:
+
 Version 1.02:
 
 Functional updates:
 
 Technical updates:
     - added forum 
+    https://www.koios.online/forum
     https://koios-final.webflow.io/test/forumcorwin
     https://www.koios.online/test/forumcorwin
-    https://www.koios.online/test/forum
+    https://www.koios.online/test/forum    
     - subdirectories for mjs files
+    - renamed koios_merge ->koios_course
+    - renamed koios_video -> koios_viewer
 
 Layout updates:
 
