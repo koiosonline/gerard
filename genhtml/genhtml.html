@@ -1,0 +1,202 @@
+<head>
+<!--   margin: 5px; -->
+<!--style>
+div {
+    border-style: solid;
+    border-width: 1px;    
+}
+</style-->
+
+</head>
+<body>
+
+<h2>Convertor of Figma pages</h2>
+Enter figmakey, pageid and start object below:<br>
+figmakey: <span id="figmakey" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+pageid:&nbsp&nbsp&nbsp&nbsp <span id="pageid" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+objname:&nbsp&nbsp <span id="objname" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+
+
+<!--button onclick="start()">Start</button-->
+<pre id="log" style="height:200px;overflow: scroll;"></pre>
+<span id="output"></span>
+
+<script>
+
+
+function log(s) {
+    var logtext=document.getElementById("log"); 
+    if ((typeof s) !="string")  {
+        console.log("converting to string");
+        s = JSON.stringify(s);
+    }   
+    if (logtext)
+        logtext.innerHTML +=s+"\r";
+    logtext.scrollTop = logtext.scrollHeight; // keep the windows "scrolled down"
+}
+
+function SetupField(id) {
+    var target=document.getElementById(id)    
+    target.contentEditable="true"; // make div editable
+    target.style.whiteSpace = "pre"; //werkt goed in combi met innerText
+    target.innerHTML=localStorage.getItem(id); 
+    if (!target.innerHTML) 
+            target.innerHTML = "........................."
+            
+    target.addEventListener('input',SaveTxt , true); // save the notes    
+    
+    function SaveTxt(txt) { 
+        localStorage.setItem(id, txt.target.innerText);
+        console.log("input");
+        console.log(txt.target.innerText); 
+    }
+}    
+
+
+//const fetch = require('node-fetch');
+
+SetupField("figmakey")
+SetupField("pageid")
+SetupField("objname")
+start();
+
+async function start() {
+   
+log("Retrieving info via figma api");
+    
+    
+    var token=document.getElementById("figmakey").innerHTML.trim();
+    var documentid=document.getElementById("pageid").innerHTML.trim();
+    
+    var objname=document.getElementById("objname").innerHTML.trim();
+    
+    console.log(`Start ${token} ${documentid}`);
+    var url=`https://api.figma.com/v1/files/${documentid}`
+    
+   
+    var x=await fetch(url, { headers: {'X-Figma-Token': token } } );
+    log('Retrieved data');
+    var y=await x.json()
+    
+    
+    log(`Found page: ${y.name}`);
+    
+    var str=""
+    str +=recurse(objname,y.document);
+    
+    document.getElementById("output").innerHTML = str;
+    
+  
+//console.log(str);
+
+}
+
+function recurse(objname,figdata,pb) {
+    var str=""
+    console.log(figdata);
+    //log(`Looking for ${objname} now ${figdata.name}`)
+    if (figdata.name == objname) { // start from here
+        log(`Found ${objname}`);
+        objname = undefined;
+        
+    }    
+    console.log(`${figdata.name}`);    //Type:${figdata.type}
+    var b=figdata.absoluteBoundingBox;    
+    if (pb && b) { // then it start to be relevant 
+     //   console.log(`Parent: x=${pb.x} y=${pb.y} w=${pb.width} h=${pb.height}`);
+     //  console.log(`Own   : x=${b.x} y=${b.y} w=${b.width} h=${b.height}`);
+     //  console.log(`width ${(b.width/pb.width*100).toFixed(2)}% height ${(b.height/pb.height*100).toFixed(2)}%`);
+       var xoffset=b.x-pb.x
+       var yoffset=b.y-pb.y
+     //  console.log(`xoffset ${(xoffset).toFixed(2)} yoffset ${(yoffset).toFixed(2)}`);
+    }    
+    var children=figdata.children;
+    figdata.children=[];    
+    var strtxt=""
+    var strstyle=""    
+    if (b)
+        strstyle +=`width:${b.width};height:${b.height};position: absolute;left:${xoffset};top:${yoffset};`;
+    
+    if (figdata.fills && figdata.fills[0] && figdata.fills[0].color) {               
+        if (figdata.fills[0].type="SOLID") {
+            var a = figdata.fills[0].opacity || 1;
+            var r = _convertFigmaColorToRGB(figdata.fills[0].color.r);
+            var g = _convertFigmaColorToRGB(figdata.fills[0].color.g);
+            var b = _convertFigmaColorToRGB(figdata.fills[0].color.b);
+            var rgba=`rgba(${r},${g},${b},${a})`;
+          }
+      }
+      
+    if (figdata.backgroundColor) {
+        var a = figdata.backgroundColor.a;
+        var r = figdata.backgroundColor.r;
+        var g = figdata.backgroundColor.g;
+        var b = figdata.backgroundColor.b;
+        var backgroundrgba=`rgba(${r},${g},${b},${a})`;
+        }
+    
+    if (figdata.strokes && figdata.strokes[0] && figdata.strokes[0].color) {               
+        if (figdata.strokes[0].type="SOLID") {
+        console.log(figdata.strokes[0].color)
+        
+            var a = _convertFigmaColorToRGB(figdata.strokes[0].color.a);
+            var r = _convertFigmaColorToRGB(figdata.strokes[0].color.r);
+            var g = _convertFigmaColorToRGB(figdata.strokes[0].color.g);
+            var b = _convertFigmaColorToRGB(figdata.strokes[0].color.b);
+            var strokesrgba=`rgba(${r},${g},${b},${a})`;
+          }
+      }
+      var strokeWeight = figdata.strokeWeight
+        
+      
+    
+    switch (figdata.type) {
+       case "TEXT": strtxt +=figdata.characters; 
+            if (figdata.style.textAlignVertical=="CENTER") strstyle +="display: flex;align-items: center; "
+            if (figdata.style.textAlignHorizontal=="CENTER") strstyle +="display: flex; justify-content: center;"
+
+       break;
+       //case "RECTANGLE": { console.log(figdata);                          break; }
+     //  case "GROUP": strstyle +=`position: relative; display:inline-block;`; break;
+       case "FRAME":       break;
+     //  case "COMPONENT":  strstyle +=`position: relative; display:inline-block;`; break;
+      // case "INSTANCE": console.log(figdata);  break;
+    }
+    
+if (figdata.type!="TEXT")
+    backgroundrgba = rgba;    
+    
+ if (backgroundrgba)
+    strstyle+=`background-color:${backgroundrgba};`
+if (rgba)
+    strstyle+=`color:${rgba};`
+if (strokesrgba)
+    strstyle+=`border-color:${strokesrgba};border-style:solid;`
+if(strokeWeight)    
+    strstyle+=`border-width:${strokeWeight};`    
+
+      function _convertFigmaColorToRGB(value) {
+        return Math.ceil(value * 255);
+      }
+    
+    
+   if (!objname) {
+        var insrtstyle=strstyle?`style="${strstyle}"`:""
+        str +=`<div class="${figdata.name} ${figdata.type}" ${insrtstyle} title="${figdata.name}">${strtxt}` //  ${figdata.type}
+    }
+    
+    if (children) 
+        for (var i=0;i<children.length;i++)
+            str +=recurse(objname,children[i],figdata.absoluteBoundingBox);
+    
+    if (!objname)
+        str +=`</div>`
+    return str;
+    
+}    
+
+
+
+
+</script>
+</body>

@@ -27,7 +27,7 @@ async function asyncloaded() {
     log("Starting")
     const KoiosThread="/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline.koiosonline"     
 
-
+    ListThreads() 
     ReadThread(KoiosThread) // start asap
 
     log("wait for authorize")
@@ -43,6 +43,34 @@ async function asyncloaded() {
     
     WriteThread(KoiosThread)
 }
+
+
+function ListThreads() {
+    var GlobalThreadList = new DomList("threadentry")    
+    
+    var target = GlobalThreadList.AddListItem() // make new entry
+    target.getElementsByClassName("threadname")[0].innerHTML = "First thread"
+    var deletebutton=target.getElementsByClassName("threaddelete")[0]
+    SetThreadDeleteButton(deletebutton,"1")   
+    
+    target = GlobalThreadList.AddListItem() // make new entry
+    target.getElementsByClassName("threadname")[0].innerHTML = "Second thread"
+    deletebutton=target.getElementsByClassName("threaddelete")[0]
+    SetThreadDeleteButton(deletebutton,"2")
+    
+}    
+
+function SetThreadDeleteButton(domid,threadid) { // in seperate function to remember state
+    var id=`delete-${threadid}`
+    domid.id=id
+    LinkClickButton(id);subscribe(`${id}click`,DeleteThread); 
+    
+    function DeleteThread() {
+        console.log(`Deleting thread ${threadid}`);
+    }
+} 
+
+
 
 
 var writeThread;
