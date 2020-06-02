@@ -11,7 +11,9 @@ let threads = [];
 let box;
 let space;
 let currentThread;
-var GlobalForumentryList;
+var GlobalForumentryList = new DomList("forumentry");
+var GlobalThreadList = new DomList("threadentry");  
+const Moderator="0xe88cAc4e10C4D316E0d52B82dd54f26ade3f0Bb2";
 
 window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
     console.log("In onerror");
@@ -23,96 +25,83 @@ window.onerror = async function(message, source, lineno, colno, error) {   // es
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
 
 async function asyncloaded() { 
-    SetupLogWindow(false)
+    /*SetupLogWindow(false)
     log("Starting")
-    const KoiosThread="/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline.koiosonline"     
+    const KoiosThread="/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline.corwintest"     
+    //const KoiosThread="TestThread";
+    const SpaceAddress = "/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline";
 
-    ListThreads() 
-    ReadThread(KoiosThread) // start asap
-
-    log("wait for authorize")
-    await authorize()
-
-    box = await Box.openBox(getUserAddress(), getWeb3().givenProvider);
-    console.log(box);
-    FindSender(document.getElementById("myname"),box.DID)  // get and display my own name    
-    space = await box.openSpace('koiosonline');
-    console.log(space);
-
+    //ReadThread(KoiosThread);
+    log("wait for authorize")*/
     
-    
-    WriteThread(KoiosThread)
+    const KoiosSpace="koiosonline";
+    await authorize();
+    box = await Box.openBox(getUserAddress(), getWeb3().givenProvider);    
+    space = await box.openSpace(KoiosSpace);
+      // get and display my own name
+    ReadSpace();
+    //WriteThread("corwintest", Moderator);
 }
 
+async function CreateOpenThread(threadName, firstModerator) {
+  const newThread = await space.joinThread(threadName, {
+    firstModerator: firstModerator,
+    members: false
+  });
+}
 
-function ListThreads() {
-    var GlobalThreadList = new DomList("threadentry")    
-    
-    var target = GlobalThreadList.AddListItem() // make new entry
-    target.getElementsByClassName("threadname")[0].innerHTML = "First thread"
-    var deletebutton=target.getElementsByClassName("threaddelete")[0]
-    SetThreadDeleteButton(deletebutton,"1")   
-    
-    target = GlobalThreadList.AddListItem() // make new entry
-    target.getElementsByClassName("threadname")[0].innerHTML = "Second thread"
-    deletebutton=target.getElementsByClassName("threaddelete")[0]
-    SetThreadDeleteButton(deletebutton,"2")
-    
-}    
-
-function SetThreadDeleteButton(domid,threadid) { // in seperate function to remember state
-    var id=`delete-${threadid}`
-    domid.id=id
-    LinkClickButton(id);subscribe(`${id}click`,DeleteThread); 
-    
-    function DeleteThread() {
-        console.log(`Deleting thread ${threadid}`);
-    }
-} 
-
-
-
-
-var writeThread;
+//var currentThread;
 async function WriteThread(threadAddress) {
-    
+    FindSender(document.getElementById("myname"),box.DID)
     var foruminput = document.getElementById("foruminput");
     foruminput.contentEditable="true"; // make div editable
     LinkClickButton("send");subscribe("sendclick",Send);   
     //const thread = await box.openThread('koiosonline', 'koiosonline', { ghost: true });
-    writeThread = await space.joinThreadByAddress(threadAddress)
-    
+    currentThread = await space.joinThreadByAddress(threadAddress);
+
     async function Send() {
         console.log("Sending");
         var foruminput = document.getElementById("foruminput");
         console.log(foruminput.innerHTML);
-        let postId = await writeThread.post(foruminput.innerHTML); // thread inherited from parent function
+        try {
+          await currentThread.post(foruminput.innerHTML); // thread inherited from parent function
+        } catch (error) {
+          console.log(error);
+        }
     } 
-    
-   
-    writeThread.onUpdate(async  () => {
-        var uposts = await writeThread.getPosts()
-        await ShowPosts(uposts);
+
+    currentThread.onUpdate(async () => {
+      var uposts = await currentThread.getPosts()
+      await ShowPosts(uposts);
     })
-    writeThread.onNewCapabilities((event, did) => console.log(did, event, ' the chat'))
-    let posts = await writeThread.getPosts()
-    console.log(posts)
+    currentThread.onNewCapabilities((event, did) => console.log(did, event, ' the chat'))
+    const posts = await currentThread.getPosts()
+    //console.log(posts)
     await ShowPosts(posts);
-    
-    
-    
 }
 
+async function ReadSpace() {
+  /*var createnewthread = document.getElementById("threadaddinfo");
+  createnewthread.contentEditable="true"; // make div editable
+  LinkClickButton("threadadd");subscribe("sendclick",OpenThread);   
 
-async function ReadThread(threadAddress) {
-    GlobalForumentryList = new DomList("forumentry")
-    const posts = await Box.getThreadByAddress(threadAddress)
-    await ShowPosts(posts);
+  async function OpenThread() {
+      var foruminput = document.getElementById("threadaddinfo");
+      console.log(foruminput.innerHTML);
+      try {
+        await CreateOpenThread(createnewthread.innerHTML, Moderator); // thread inherited from parent function
+      } catch (error) {
+        console.log(error);
+      }
+  }*/
+  const threads = await space.subscribedThreads();
+  await ShowThreads(threads);
 }
 
 
 async function ShowPosts(posts) {
-    console.log(posts);
+  
+  console.log(posts);
     for (var i=0;i<posts.length;i++) {        
         if (!document.getElementById(posts[i].postId) ){ // check if post is already shown
             var did=posts[i].author;           
@@ -132,6 +121,7 @@ async function ShowPosts(posts) {
             SetDeleteButton(deletebutton,posts[i].postId)            
         }
     }
+    
     var postdomids=document.getElementsByClassName("forumentry");
     //console.log(postdomids);
     for (var i=0;i<postdomids.length;i++) {
@@ -143,11 +133,50 @@ async function ShowPosts(posts) {
             if (posts[j].postId == checkpostid) { found=true;break; }
         }
         if (!found)
-            postdomids[i].style.textDecoration="line-through";
-        
-    }    
+            postdomids[i].style.textDecoration="line-through";   
+    }   
+}
+
+async function ShowThreads(threads) {
+  for (var i=0;i<threads.length;i++) {        
+    var target = GlobalThreadList.AddListItem() // make new entry
+    target.getElementsByClassName("threadname")[0].innerHTML = threads[i].name.substr(24);
+    target.getElementsByClassName("firstmoderator")[0].innerHTML = threads[i].firstModerator;
+    var deletebutton=target.getElementsByClassName("threaddelete")[0]
+    var gotobutton=target.getElementsByClassName("threadgoto")[0]
+    SetThreadDeleteButton(deletebutton, threads[i].address)
+    SetGoToThreadButton(gotobutton, threads[i].address)      
+  }
+}    
+
+function SetThreadDeleteButton(domid,threadid) { // in seperate function to remember state
+    var id=`delete-${threadid}`
+    domid.id=id
+    LinkClickButton(id);subscribe(`${id}click`,DeleteThread); 
     
-    
+    function DeleteThread() {
+      try {
+        console.log(`Deleting thread ${threadid}`);
+        space.unsubscribeThread(threadid);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+}
+
+function SetGoToThreadButton(domid,threadid) { // in seperate function to remember state
+  var id=`goto-${threadid}`
+  domid.id=id
+  LinkClickButton(id);subscribe(`${id}click`,GoToThread); 
+  
+  function GoToThread() {
+    try {
+      GlobalThreadList.EmptyList();
+      WriteThread(threadid);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 function SetDeleteButton(domid,postid) { // in seperate function to remember state
@@ -155,10 +184,13 @@ function SetDeleteButton(domid,postid) { // in seperate function to remember sta
     domid.id=id
     LinkClickButton(id);subscribe(`${id}click`,DeleteForumEntry); 
     
-    function DeleteForumEntry() {
-        console.log(writeThread);
-        if (writeThread) // might not be ready
-            writeThread.deletePost(postid)
+    async function DeleteForumEntry() {
+        console.log(currentThread);
+        try {
+          await currentThread.deletePost(postid);
+        } catch (error) {
+          console.log(error);
+        }
     }
 }    
 
@@ -167,90 +199,3 @@ async function FindSender (target,did) {
     var profile = await Box.getProfile(did);
     target.innerHTML = profile.name ? profile.name : did           
 }
-
-
-
-// Get all threads
-export async function getAllThreads() {
-  threads = [];
-
-  // Get thread count from contract
-  let threadCount = await contractInstance.methods.getThreadCount().call();
-
-  for (let i = 0; i < threadCount; i++) {
-    // Get thread name by index from contract
-    let threadName = await contractInstance.methods.threadNames(i).call();
-
-    // Get thread by name from contract
-    let thread = await contractInstance.methods.threads(threadName).call();
-
-    Object.assign(thread, {'name': threadName});
-    threads.push(thread);
-  }
-
-  return threads;
-}
-
-// Open 3box
-// User is promted to give permission
-export async function open3Box() {
-  box = await Box.openBox(getUserAddress(), getWeb3().givenProvider);
-  
-  // Open koiosonline space
-  space = await box.openSpace('koiosonline');
-  
-}
-
-// Get the thread from the space
-export async function selectThread(threadName) {
-  if (!space) throw error('Space not opened');
-  currentThread = await space.joinThread(threadName);
-}
-
-// Start a new thread
-export async function newThread(threadName) {
-  await contractInstance.methods.newThread(threadName, box.DID).send({
-    from: getUserAddress()
-  })
-}
-
-// Get posts of selected thread
-export async function getPosts() {
-  let posts = await currentThread.getPosts();
-  for (post of posts) {
-    // Get the score for each post from the contract
-    let score = await contractInstance.methods.getPostScore(post.postId).call();
-    Object.assign(post, {score: score});
-  }
-  return posts;
-}
-
-// Create new post on selected thread
-export async function newPost(post) {
-  // Add post to selected thread to get postId
-  let postId = await currentThread.post(post);
-  try {
-    // Try to add the post to the contract
-    await contractInstance.methods.newPost(postId, box.DID).send({
-      from: getUserAddress()
-    });
-  } catch {
-    // If contract call fails, delete post from selected thread
-    await currentThread.deletePost(postId);
-  }
-}
-
-// Adds or Subtracts score from post
-export async function votePost(postId, score) {
-  await contractInstance.methods.votePost(box.DID, postId, score).send({from: getUserAddress()});
-  getAllThreads();
-}
-
-// Adds or Subtracts score from thread
-export async function voteThread(threadName, score) {
-  await contractInstance.methods.voteThread(box.DID, threadName, score).send({from: getUserAddress()});
-  getAllThreads();
-}
-
-// TODO: deletePost
-// TODO: deleteThread
