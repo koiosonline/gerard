@@ -10,6 +10,8 @@ div {
 <link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
 
+<script src="https://unpkg.com/ipfs-http-client/dist/index.min.js"></script>
+
 </head>
 <body>
 
@@ -27,6 +29,9 @@ objname:&nbsp&nbsp <span id="objname" style="background-color:yellow;border-styl
 <script>
 
 
+  
+
+
 function log(s) {
     var logtext=document.getElementById("log"); 
     if ((typeof s) !="string")  {
@@ -39,13 +44,17 @@ function log(s) {
 }
 
 function SetupField(id) {
+    let params = (new URL(document.location)).searchParams;
+    let idvalue= params.get(id); 
     var target=document.getElementById(id)    
     target.contentEditable="true"; // make div editable
     target.style.whiteSpace = "pre"; //werkt goed in combi met innerText
-    target.innerHTML=localStorage.getItem(id); 
-    if (!target.innerHTML) 
-            target.innerHTML = "........................."
-            
+    
+    if (!idvalue)
+        idvalue=localStorage.getItem(id); 
+    if (!idvalue) 
+            idvalue = "........................."    
+    target.innerHTML=idvalue    
     target.addEventListener('input',SaveTxt , true); // save the notes    
     
     function SaveTxt(txt) { 
@@ -58,9 +67,12 @@ function SetupField(id) {
 
 //const fetch = require('node-fetch');
 
+
+
 SetupField("figmakey")
 SetupField("pageid")
 SetupField("objname")
+
 start();
 
 
@@ -71,7 +83,25 @@ async function FigmaApiGet(url,token) {
     return y;
 }
 
+
+async function SaveToIPFS(data) {        
+    const ipfs = window.IpfsHttpClient('https://ipfs.infura.io:5001')    
+    //const ipfs = window.IpfsHttpClient('http://diskstation:5002'); 
+    console.log(ipfs);
+    
+    for await (const result of ipfs.add(data) )
+        return result.path;
+}
+
+// http://www.gpersoon.com:8080/ipfs/QmRDDFeTUve2Lxq77t5MqjNNQrGVMYoD5Nje9ai3YPug3U
+
+// http://192.168.0.40:8080/ipfs/QmfQkD8pBSBCBxWEwFSu4XaDVSWK6bjnNuaWZjMyQbyDub/#/welcome
+// http://gpersoon.com:8080/ipfs/QmfQkD8pBSBCBxWEwFSu4XaDVSWK6bjnNuaWZjMyQbyDub/#/welcome
+
 async function start() {
+
+
+
    
 log("Retrieving info via figma api");
     
@@ -93,10 +123,35 @@ log("Retrieving info via figma api");
     var str=""
     str +=await recurse(objname,y.document);
     
-    document.getElementById("output").innerHTML = str;
-    
+var strprefix=""    
+strprefix +='<html>'
+strprefix +='<head>'
+strprefix +='<meta charset="utf-8" />'
+strprefix +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
+strprefix +='<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">'
+strprefix +='<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap" rel="stylesheet">'
+strprefix +='</head>'
+strprefix +='<body>'
+
+var strsuffix="" 
+strsuffix +='</body>'  
+strsuffix +='</html>'
   
-//console.log(str);
+str = strprefix + str + strsuffix
+console.log(str);
+var result=await SaveToIPFS(str)
+console.log(result);
+
+//var url=`http://www.gpersoon.com:8080/ipfs/${result}`
+var url=`http://ipfs.io/ipfs/${result}`
+
+var str2=`<a href="${url}" target="_blank">Click to test: ${url}`
+str2 +="</a>"
+document.getElementById("output").innerHTML = str2;
+
+function _convertFigmaColorToRGB(value) {
+    return Math.ceil(value * 255);
+}
 
 
 
@@ -127,8 +182,10 @@ log("Retrieving info via figma api");
             var strtxt=""
             var strstyle=""    
             var strclass=""
-            if (b)
-                strstyle +=`width:${b.width};height:${b.height};position: absolute;left:${xoffset};top:${yoffset};`;
+            if (b) {
+                strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;left:${xoffset};top:${yoffset};`;
+                console.log(b);console.log(strstyle);
+            }    
             
             if (figdata.fills && figdata.fills[0] && figdata.fills[0].color) {               
                 if (figdata.fills[0].type="SOLID") {
@@ -142,7 +199,7 @@ log("Retrieving info via figma api");
               
             if (figdata.fills && figdata.fills[0] && figdata.fills[0].type == "IMAGE") {
                 console.log(figdata.fills);
-                /*
+                
                 if (figdata.id) { // link to an image??
                     let url = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}`
                     console.log(url)
@@ -153,7 +210,7 @@ log("Retrieving info via figma api");
                     strtxt +=`<img src=${pic.images[figdata.id]}>`
                     strtxt +="</img>"
                 }
-                */ // off: error 500 at figma, maybe overload
+                
             }
               
             if (figdata.backgroundColor) {
@@ -179,8 +236,12 @@ log("Retrieving info via figma api");
                 
             if (figdata.style && figdata.style.fontFamily) 
                 switch (figdata.style.fontFamily) {
+                case "Font Awesome 5 Free":
                 case "FontAwesome": strstyle += "font-family: 'Font Awesome\ 5 Free'; font-weight: 900;";figdata.style.fontWeight=0;break; // note other weights are part of pro plan                
+                case "Font Awesome 5 Brands": strstyle += "font-family: 'Font Awesome\ 5 Brands';";break; 
+                
                 case "Lato":        strstyle += "font-family: 'Lato', sans-serif;"; break;
+                case "Roboto":      strstyle += "font-family: 'Roboto', sans-serif;"; break;
             }
             
             if (figdata.style && figdata.style.fontSize)
@@ -234,9 +295,6 @@ log("Retrieving info via figma api");
             if(strokeWeight)    
                 strstyle+=`border-width:${strokeWeight};`    
 
-                  function _convertFigmaColorToRGB(value) {
-                    return Math.ceil(value * 255);
-                  }
           
             var insrtstyle=strstyle?`style="${strstyle}"`:""
             str +=`<div class="${figdata.name} ${figdata.type} ${strclass}" ${insrtstyle} title="${figdata.name}">${strtxt}` //  ${figdata.type}
