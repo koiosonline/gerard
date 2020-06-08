@@ -17,10 +17,12 @@ div {
 
 <h2>Convertor of Figma pages</h2>
 Enter figmakey, pageid and start object below:<br>
+<pre>
 figmakey: <span id="figmakey" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
-pageid:&nbsp&nbsp&nbsp&nbsp <span id="pageid" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
-objname:&nbsp&nbsp <span id="objname" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
-
+pageid:   <span id="pageid" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+objname:  <span id="objname" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+embed:    <span id="embed" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+</pre>
 
 <!--button onclick="start()">Start</button-->
 <pre id="log" style="height:200px;overflow: scroll;"></pre>
@@ -72,6 +74,7 @@ function SetupField(id) {
 SetupField("figmakey")
 SetupField("pageid")
 SetupField("objname")
+SetupField("embed")
 
 start();
 
@@ -110,6 +113,7 @@ log("Retrieving info via figma api");
     var documentid=document.getElementById("pageid").innerHTML.trim();
     
     var objname=document.getElementById("objname").innerHTML.trim();
+    var embed=document.getElementById("embed").innerHTML.trim();
     
     console.log(`Start ${token} ${documentid}`);
     var url=`https://api.figma.com/v1/files/${documentid}`
@@ -130,6 +134,14 @@ strprefix +='<meta charset="utf-8" />'
 strprefix +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
 strprefix +='<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">'
 strprefix +='<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap" rel="stylesheet">'
+
+ if (embed.replace("/[.]/g",'')) {
+    console.log(`Embedding ${embed}`); 
+    var s="script"
+    strprefix +=`<${s} type="module" src="${embed}">`
+    strprefix +="<"+"/"+"script"+">"
+    }
+
 strprefix +='</head>'
 strprefix +='<body>'
 
@@ -143,7 +155,8 @@ var result=await SaveToIPFS(str)
 console.log(result);
 
 //var url=`http://www.gpersoon.com:8080/ipfs/${result}`
-var url=`http://ipfs.io/ipfs/${result}`
+//var url=`http://ipfs.io/ipfs/${result}`
+var url=`https://ipfs.infura.io/ipfs/${result}`
 
 var str2=`<a href="${url}" target="_blank">Click to test: ${url}`
 str2 +="</a>"
@@ -181,7 +194,7 @@ function _convertFigmaColorToRGB(value) {
 
             var strtxt=""
             var strstyle=""    
-            var strclass=""
+
             if (b) {
                 strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;left:${xoffset};top:${yoffset};`;
                 console.log(b);console.log(strstyle);
@@ -297,7 +310,7 @@ function _convertFigmaColorToRGB(value) {
 
           
             var insrtstyle=strstyle?`style="${strstyle}"`:""
-            str +=`<div class="${figdata.name} ${figdata.type} ${strclass}" ${insrtstyle} title="${figdata.name}">${strtxt}` //  ${figdata.type}
+            str +=`<div class="${figdata.name}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
             //console.log(insrtstyle);
         }
         

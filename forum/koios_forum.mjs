@@ -25,9 +25,9 @@ window.onerror = async function(message, source, lineno, colno, error) {   // es
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
 
 async function asyncloaded() { 
-    /*SetupLogWindow(false)
+    SetupLogWindow(false)
     log("Starting")
-    const KoiosThread="/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline.corwintest"     
+    /*const KoiosThread="/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline.corwintest"     
     //const KoiosThread="TestThread";
     const SpaceAddress = "/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline";
 
@@ -52,8 +52,8 @@ async function CreateOpenThread(threadName, firstModerator) {
 
 //var currentThread;
 async function WriteThread(threadAddress) {
-    FindSender(document.getElementById("myname"),box.DID)
-    var foruminput = document.getElementById("foruminput");
+    FindSender(document.getElementById("myname") || document.getElementsByClassName("myname")[0] ,box.DID)
+    var foruminput = document.getElementById("foruminput") || document.getElementsByClassName("foruminput")[0];
     foruminput.contentEditable="true"; // make div editable
     LinkClickButton("send");subscribe("sendclick",Send);   
     //const thread = await box.openThread('koiosonline', 'koiosonline', { ghost: true });
@@ -61,7 +61,7 @@ async function WriteThread(threadAddress) {
 
     async function Send() {
         console.log("Sending");
-        var foruminput = document.getElementById("foruminput");
+        var foruminput = document.getElementById("foruminput") ||  document.getElementsByClassName("foruminput")[0];
         console.log(foruminput.innerHTML);
         try {
           await currentThread.post(foruminput.innerHTML); // thread inherited from parent function
@@ -103,7 +103,7 @@ async function ShowPosts(posts) {
   
   console.log(posts);
     for (var i=0;i<posts.length;i++) {        
-        if (!document.getElementById(posts[i].postId) ){ // check if post is already shown
+        if (! (document.getElementById(posts[i].postId) ||  document.getElementsByClassName(posts[i].postId)[0]) ){ // check if post is already shown
             var did=posts[i].author;           
             var date = new Date(posts[i].timestamp * 1000);
             console.log(`${i} ${posts[i].message} ${did} ${date.toString() }`)
@@ -138,7 +138,8 @@ async function ShowPosts(posts) {
 }
 
 async function ShowThreads(threads) {
-  for (var i=0;i<threads.length;i++) {        
+  for (var i=0;i<threads.length;i++) { 
+console.log(`ShowThreads ${i} ${threads[i].name}`);
     var target = GlobalThreadList.AddListItem() // make new entry
     target.getElementsByClassName("threadname")[0].innerHTML = threads[i].name.substr(24);
     target.getElementsByClassName("firstmoderator")[0].innerHTML = threads[i].firstModerator;
