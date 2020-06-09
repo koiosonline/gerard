@@ -18,16 +18,17 @@ div {
 <h2>Convertor of Figma pages</h2>
 Enter figmakey, pageid and start object below:<br>
 <pre>
-figmakey: <span id="figmakey" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
-pageid:   <span id="pageid" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
-objname:  <span id="objname" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
-embed:    <span id="embed" style="background-color:yellow;border-style: solid;border-width: 1px; "></span><br>
+figmakey: <span id="figmakey" style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+pageid:   <span id="pageid"   style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+objname:  <span id="objname"  style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+embed:    <span id="embed"    style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+pin:      <span id="pin"      style="background-color:yellow;border-style: solid;border-width: 1px; ">https://ipfs.infura.io:5001</span>  (https://ipfs.infura.io:5001)<br>
 </pre>
 
 <!--button onclick="start()">Start</button-->
 <pre id="log" style="height:200px;overflow: scroll;"></pre>
-<span id="output"></span>
-
+<pre id="output"></pre>
+<button id="SaveOnIpfs" onclick="SaveOnIpfs()"></button>
 <script>
 
 
@@ -55,7 +56,7 @@ function SetupField(id) {
     if (!idvalue)
         idvalue=localStorage.getItem(id); 
     if (!idvalue) 
-            idvalue = "........................."    
+            idvalue = target.innerHTML   
     target.innerHTML=idvalue    
     target.addEventListener('input',SaveTxt , true); // save the notes    
     
@@ -75,6 +76,7 @@ SetupField("figmakey")
 SetupField("pageid")
 SetupField("objname")
 SetupField("embed")
+SetupField("pin")
 
 start();
 
@@ -87,8 +89,8 @@ async function FigmaApiGet(url,token) {
 }
 
 
-async function SaveToIPFS(data) {        
-    const ipfs = window.IpfsHttpClient('https://ipfs.infura.io:5001')    
+async function SaveToIPFS(data,pinlocation) {        
+    const ipfs = window.IpfsHttpClient(pinlocation); // 'https://ipfs.infura.io:5001'
     //const ipfs = window.IpfsHttpClient('http://diskstation:5002'); 
     console.log(ipfs);
     
@@ -100,6 +102,28 @@ async function SaveToIPFS(data) {
 
 // http://192.168.0.40:8080/ipfs/QmfQkD8pBSBCBxWEwFSu4XaDVSWK6bjnNuaWZjMyQbyDub/#/welcome
 // http://gpersoon.com:8080/ipfs/QmfQkD8pBSBCBxWEwFSu4XaDVSWK6bjnNuaWZjMyQbyDub/#/welcome
+
+var globalstr;
+var globalpinlocation;
+
+async function SaveOnIpfs() {
+console.log(`in SaveOnIpfs ${globalpinlocation}`);
+console.log(globalstr);
+document.getElementById("SaveOnIpfs").innerHTML=""
+    var result=await SaveToIPFS(globalstr,globalpinlocation)
+    console.log(result);
+
+    var str2=""
+    str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`);
+    str2 +="IPFS link 2: "+MakeUrl(`http://ipfs.io/ipfs/${result}`);
+    str2 +="IPFS link 3: "+MakeUrl(`http://www.gpersoon.com:8080/ipfs/${result}`);
+    document.getElementById("output").innerHTML += str2;
+}
+
+function MakeUrl(url) {
+    return `<a href="${url}" target="_blank"> ${url}` + "</a><br>"
+}
+
 
 async function start() {
 
@@ -114,6 +138,9 @@ log("Retrieving info via figma api");
     
     var objname=document.getElementById("objname").innerHTML.trim();
     var embed=document.getElementById("embed").innerHTML.trim();
+    globalpinlocation=document.getElementById("pin").innerHTML.trim();
+    
+      
     
     console.log(`Start ${token} ${documentid}`);
     var url=`https://api.figma.com/v1/files/${documentid}`
@@ -135,7 +162,7 @@ strprefix +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css
 strprefix +='<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">'
 strprefix +='<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap" rel="stylesheet">'
 
- if (embed.replace("/[.]/g",'')) {
+ if (embed.replace("/\./",'')) {
     console.log(`Embedding ${embed}`); 
     var s="script"
     strprefix +=`<${s} type="module" src="${embed}">`
@@ -149,18 +176,25 @@ var strsuffix=""
 strsuffix +='</body>'  
 strsuffix +='</html>'
   
-str = strprefix + str + strsuffix
-console.log(str);
-var result=await SaveToIPFS(str)
-console.log(result);
+globalstr = strprefix + str + strsuffix
+console.log(globalstr);
 
-//var url=`http://www.gpersoon.com:8080/ipfs/${result}`
-//var url=`http://ipfs.io/ipfs/${result}`
-var url=`https://ipfs.infura.io/ipfs/${result}`
 
-var str2=`<a href="${url}" target="_blank">Click to test: ${url}`
-str2 +="</a>"
-document.getElementById("output").innerHTML = str2;
+
+
+
+function MakeBlock(html) {
+        var blob = new Blob([html], {type: 'text/html'});
+        var url = URL.createObjectURL(blob);      
+        return MakeUrl(url);
+    }    
+
+
+
+document.getElementById("SaveOnIpfs").innerHTML="Save on IPFS"
+document.getElementById("output").innerHTML += "Open in seperate tab: "+MakeBlock(globalstr)
+
+
 
 function _convertFigmaColorToRGB(value) {
     return Math.ceil(value * 255);
