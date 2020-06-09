@@ -106,6 +106,13 @@ async function SaveToIPFS(data,pinlocation) {
 var globalstr;
 var globalpinlocation;
 
+
+let globalmediastyles = []
+
+
+
+
+
 async function SaveOnIpfs() {
 console.log(`in SaveOnIpfs ${globalpinlocation}`);
 console.log(globalstr);
@@ -151,8 +158,27 @@ log("Retrieving info via figma api");
     
     log(`Found page: ${y.name}`);
     
+    
+    
     var str=""
     str +=await recurse(objname,y.document);
+    
+    var stylestr="";   
+    console.log(globalmediastyles);            
+    var keys = Object.keys(globalmediastyles);
+    
+    stylestr +="<style>\n"
+    if (keys.length > 0) {
+        console.log(keys);    
+        for (var i = 0; i < keys.length; i++) {
+            var key=keys[i];
+            var val = globalmediastyles[key];
+            stylestr +=`.${key} \{ display: none; \} \n`
+            stylestr +=`@media only screen and  ${val} \{  .${key}  \{ display: block; \} \} \n`
+        }
+        stylestr +="</style>\n"
+        console.log(stylestr);
+    }
     
 var strprefix=""    
 strprefix +='<html>'
@@ -168,6 +194,8 @@ strprefix +='<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@40
     strprefix +=`<${s} type="module" src="${embed}">`
     strprefix +="<"+"/"+"script"+">"
     }
+
+strprefix +=stylestr;
 
 strprefix +='</head>'
 strprefix +='<body>'
@@ -344,7 +372,19 @@ function _convertFigmaColorToRGB(value) {
 
           
             var insrtstyle=strstyle?`style="${strstyle}"`:""
-            str +=`<div class="${figdata.name}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
+            
+            var classname=figdata.name;
+            var mediapos=classname.indexOf("@media");
+            console.log(mediapos)
+            if (mediapos >=0) {
+                var rest=classname.substring(mediapos + "@media".length).toLowerCase();
+                console.log(rest);
+                var key = rest.replace(/[^A-Za-z0-9]/g, '');
+                globalmediastyles[key]=rest;
+                classname=classname.substring(0,mediapos) + " " + key;
+                console.log(classname);
+            }            
+            str +=`<div class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
             //console.log(insrtstyle);
         }
         
