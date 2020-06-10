@@ -167,8 +167,9 @@ log("Retrieving info via figma api");
     console.log(globalmediastyles);            
     var keys = Object.keys(globalmediastyles);
     
-    stylestr +="<style>\n"
+    
     if (keys.length > 0) {
+        stylestr +="<style>\n"
         console.log(keys);    
         for (var i = 0; i < keys.length; i++) {
             var key=keys[i];
@@ -375,7 +376,7 @@ function _convertFigmaColorToRGB(value) {
             
             var classname=figdata.name;
             var mediapos=classname.indexOf("@media");
-            console.log(mediapos)
+            //console.log(mediapos)
             if (mediapos >=0) {
                 var rest=classname.substring(mediapos + "@media".length).toLowerCase();
                 console.log(rest);
