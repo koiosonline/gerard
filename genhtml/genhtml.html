@@ -259,7 +259,7 @@ function _convertFigmaColorToRGB(value) {
             var strstyle=""    
 
             if (b) {
-                strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;left:${xoffset};top:${yoffset};`;
+                strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;left:${xoffset}px;top:${yoffset}px;`;
                 console.log(b);console.log(strstyle);
             }    
             
@@ -309,6 +309,8 @@ function _convertFigmaColorToRGB(value) {
                   }
               }
               var strokeWeight = figdata.strokeWeight
+                
+
                 
             if (figdata.style && figdata.style.fontFamily) 
                 switch (figdata.style.fontFamily) {
@@ -366,11 +368,17 @@ function _convertFigmaColorToRGB(value) {
                 strstyle+=`background-color:${backgroundrgba};`
             if (rgba)
                 strstyle+=`color:${rgba};`
-            if (strokesrgba)
+            if (strokesrgba) {
                 strstyle+=`border-color:${strokesrgba};border-style:solid;`
+                switch (figdata.strokeAlign) {
+                    case "INSIDE": strstyle += "box-sizing: border-box;";break;
+                    
+                }   
+             }   
             if(strokeWeight)    
-                strstyle+=`border-width:${strokeWeight};`    
+                strstyle+=`border-width:${strokeWeight}px;`    
 
+        
           
             var insrtstyle=strstyle?`style="${strstyle}"`:""
             
