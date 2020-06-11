@@ -29,6 +29,18 @@ pin:      <span id="pin"      style="background-color:yellow;border-style: solid
 <pre id="log" style="height:200px;overflow: scroll;"></pre>
 <pre id="output"></pre>
 <button id="SaveOnIpfs" onclick="SaveOnIpfs()"></button>
+
+<script>
+window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
+console.log("In onerror");
+    var str=`Error: ${message} ${source}, ${lineno}, ${colno}  `;
+    if (error && error.stack) str = str.concat('\n').concat(error.stack);    
+    console.log(str);    
+    document.getElementById("log").innerHTML=str;    
+} 
+</script>
+
+
 <script>
 
 
@@ -108,6 +120,7 @@ var globalpinlocation;
 
 
 let globalmediastyles = []
+let globalfonts = []
 
 
 
@@ -150,7 +163,7 @@ log("Retrieving info via figma api");
       
     
     console.log(`Start ${token} ${documentid}`);
-    var url=`https://api.figma.com/v1/files/${documentid}`
+    var url=`https://api.figma.com/v1/files/${documentid}`  // to export the vectors: ?geometry=paths
     
     var y=await FigmaApiGet(url,token)
 
@@ -164,10 +177,11 @@ log("Retrieving info via figma api");
     str +=await recurse(objname,y.document);
     
     var stylestr="";   
+    var fontstr="";
     console.log(globalmediastyles);            
-    var keys = Object.keys(globalmediastyles);
     
-    
+    var keys
+    keys = Object.keys(globalmediastyles);
     if (keys.length > 0) {
         stylestr +="<style>\n"
         console.log(keys);    
@@ -181,15 +195,34 @@ log("Retrieving info via figma api");
         console.log(stylestr);
     }
     
+    keys = Object.keys(globalfonts);
+    if (keys.length > 0) {
+        for (var i = 0; i < keys.length; i++) {
+            var key=keys[i];
+            
+            if (key.includes("FontAwesome"))
+                fontstr +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
+            else            
+                fontstr +=`<link href="https://fonts.googleapis.com/css2?family=${key}&display=swap" rel="stylesheet">`
+        }
+        console.log(fontstr);
+    }
+    
+    
+    
+    
+    
 var strprefix=""    
 strprefix +='<html>'
 strprefix +='<head>'
 strprefix +='<meta charset="utf-8" />'
-strprefix +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
-strprefix +='<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">'
-strprefix +='<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&display=swap" rel="stylesheet">'
+//strprefix +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
+//strprefix +='<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">'
+//strprefix +='<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">'
+//strprefix +='<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">'
+strprefix += fontstr;
 
- if (embed.replace("/\./",'')) {
+ if (embed.replace(/\./g,'')) {
     console.log(`Embedding ${embed}`); 
     var s="script"
     strprefix +=`<${s} type="module" src="${embed}">`
@@ -233,6 +266,7 @@ function _convertFigmaColorToRGB(value) {
 
     async function recurse(objname,figdata,pb) { // objname is the object we are looking for; if it's undefined: show everything
         var str=""
+        var fvector=false;
         
         //console.log(`Looking for ${objname}`) 
         
@@ -245,6 +279,11 @@ function _convertFigmaColorToRGB(value) {
         if (!objname) { // show everything
             console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
             console.log(figdata);
+            
+            var fsvg= figdata.name.includes("@svg")
+            console.log(`fsvg=${fsvg}`)
+            
+            
             var b=figdata.absoluteBoundingBox;    
             if (pb && b) { // then it start to be relevant 
              //   console.log(`Parent: x=${pb.x} y=${pb.y} w=${pb.width} h=${pb.height}`);
@@ -256,16 +295,22 @@ function _convertFigmaColorToRGB(value) {
             }    
 
             var strtxt=""
-            var strstyle=""    
+            var strstyle=""
+            var image=""
 
             if (b) {
-                strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;left:${xoffset}px;top:${yoffset}px;`;
-                console.log(b);console.log(strstyle);
+                strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;`;
+                if (xoffset != undefined) strstyle +=`left:${xoffset}px;`
+                if (yoffset != undefined) strstyle +=`top:${yoffset}px;`
+                
+                console.log(b);console.log(pb);console.log(strstyle);
             }    
             
             if (figdata.fills && figdata.fills[0] && figdata.fills[0].color) {               
                 if (figdata.fills[0].type="SOLID") {
-                    var a = figdata.fills[0].opacity || 1;
+                    var a = figdata.fills[0].opacity;
+                    if (a == undefined)
+                        a = _convertFigmaColorToRGB(figdata.fills[0].color.a);
                     var r = _convertFigmaColorToRGB(figdata.fills[0].color.r);
                     var g = _convertFigmaColorToRGB(figdata.fills[0].color.g);
                     var b = _convertFigmaColorToRGB(figdata.fills[0].color.b);
@@ -281,10 +326,8 @@ function _convertFigmaColorToRGB(value) {
                     console.log(url)
                     var pic=await FigmaApiGet(url,token);
                     console.log(pic);
-                    console.log(pic.images[figdata.id]);
-                    
-                    strtxt +=`<img src=${pic.images[figdata.id]}>`
-                    strtxt +="</img>"
+                    console.log(pic.images[figdata.id]);                   
+                    image +=pic.images[figdata.id]
                 }
                 
             }
@@ -310,16 +353,15 @@ function _convertFigmaColorToRGB(value) {
               }
               var strokeWeight = figdata.strokeWeight
                 
-
+           
                 
-            if (figdata.style && figdata.style.fontFamily) 
+            if (figdata.style && figdata.style.fontFamily) {
                 switch (figdata.style.fontFamily) {
-                case "Font Awesome 5 Free":
-                case "FontAwesome": strstyle += "font-family: 'Font Awesome\ 5 Free'; font-weight: 900;";figdata.style.fontWeight=0;break; // note other weights are part of pro plan                
-                case "Font Awesome 5 Brands": strstyle += "font-family: 'Font Awesome\ 5 Brands';";break; 
-                
-                case "Lato":        strstyle += "font-family: 'Lato', sans-serif;"; break;
-                case "Roboto":      strstyle += "font-family: 'Roboto', sans-serif;"; break;
+                    case "FontAwesome":             figdata.style.fontFamily = "Font Awesome 5 Free"; // and continue to next line
+                    case "Font Awesome 5 Free":     strstyle += "font-weight: 900;";figdata.style.fontWeight=0;break; // note other weights are part of pro plan                
+                }
+               strstyle += `font-family: '${figdata.style.fontFamily}', sans-serif;`;
+               globalfonts[figdata.style.fontFamily] = true;
             }
             
             if (figdata.style && figdata.style.fontSize)
@@ -332,6 +374,7 @@ function _convertFigmaColorToRGB(value) {
             
             if (figdata.style && figdata.style.lineHeightPx)
                 strstyle += `font-height:${figdata.style.lineHeightPx}px;`;
+            
             
             switch (figdata.type) {
                case "TEXT": strtxt +=figdata.characters;
@@ -352,32 +395,50 @@ function _convertFigmaColorToRGB(value) {
              //  case "GROUP": strstyle +=`position: relative; display:inline-block;`; break;
                case "FRAME":       break;
              //  case "COMPONENT":  strstyle +=`position: relative; display:inline-block;`; break;
-              // case "INSTANCE": console.log(figdata);  break;
+              
               case "ELLIPSE": strstyle +="border-radius: 50%;";break; // circle for now
+             // case "INSTANCE": // do same as vector
+             // case "COMPONENT": // do same as vector
+              case "VECTOR": {
+                    let urlvector = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+                    var picvector=await FigmaApiGet(urlvector,token);
+                    console.log(picvector)                
+                    image +=picvector.images[figdata.id]
+                    
+                    fvector=true;
+                    
+                   break;
+                }
             }
+            
+            if (fsvg) { // then make this into an svg
+                    let urlsvg = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+                    var picsvg=await FigmaApiGet(urlsvg,token);
+                    console.log(picsvg)                
+                    image +=picsvg.images[figdata.id]
+            }
+            
             
             if (figdata.rectangleCornerRadii) {
                 let r=figdata.rectangleCornerRadii;
                 strstyle +=`border-radius: ${r[0]}px ${r[1]}px ${r[2]}px ${r[3]}px;`; // (first value applies to top-left corner, second value applies to top-right corner, third value applies to bottom-right corner, and fourth value applies to bottom-left corner)
             }
             
-            if (figdata.type!="TEXT")
-                backgroundrgba = rgba;    
-                
-             if (backgroundrgba)
-                strstyle+=`background-color:${backgroundrgba};`
-            if (rgba)
-                strstyle+=`color:${rgba};`
-            if (strokesrgba) {
-                strstyle+=`border-color:${strokesrgba};border-style:solid;`
+            if (!fsvg && !fvector) {  // don't draw boxed for svgs and for vector images
+                if (figdata.type!="TEXT")
+                    backgroundrgba = rgba;    
+                if (backgroundrgba)
+                    strstyle+=`background-color:${backgroundrgba};`
+                if (rgba)
+                    strstyle+=`color:${rgba};`
+                if (strokesrgba) 
+                    strstyle+=`border-color:${strokesrgba};border-style:solid;`
                 switch (figdata.strokeAlign) {
-                    case "INSIDE": strstyle += "box-sizing: border-box;";break;
-                    
+                   case "INSIDE": strstyle += "box-sizing: border-box;";break;
                 }   
-             }   
-            if(strokeWeight)    
-                strstyle+=`border-width:${strokeWeight}px;`    
-
+                if(strokeWeight)    
+                    strstyle+=`border-width:${strokeWeight}px;`    
+            }
         
           
             var insrtstyle=strstyle?`style="${strstyle}"`:""
@@ -392,19 +453,28 @@ function _convertFigmaColorToRGB(value) {
                 globalmediastyles[key]=rest;
                 classname=classname.substring(0,mediapos) + " " + key;
                 console.log(classname);
-            }            
-            str +=`<div class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
+            }      
+        
+            
+            var imagestr=""
+            if (image)
+                imagestr=`src="${image}" `
+
+            var domelement=image?"image":"div"
+            
+            str +=`<${domelement} ${imagestr} class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
+
             //console.log(insrtstyle);
         }
         
         var children=figdata.children;
         figdata.children=[];     
-        if (children) // allways recurso to try and find the intended object
+        if (children && !fsvg ) // allways recurse to try and find the intended object // don't recurse when @svg is shown
             for (var i=0;i<children.length;i++)
                 str +=await recurse(objname,children[i],figdata.absoluteBoundingBox);
         
         if (!objname)
-            str +=`</div>`
+            str +=`</${domelement}>`
         return str;
         
     }    
@@ -412,5 +482,20 @@ function _convertFigmaColorToRGB(value) {
 }
 
 
+/*
+var svg=""
+svg +=`<svg width="${figdata.size.x}" height="${figdata.size.y}" viewBox="0 0 ${figdata.size.x} ${figdata.size.y}" fill="none" xmlns="http://www.w3.org/2000/svg">`
+                
+for (var i=0;i<figdata.strokeGeometry.length;i++) {
+    console.log(figdata.strokeGeometry[i].path);
+    console.log(figdata.strokeGeometry[i].windingRule);
+    svg +=`<path d="${figdata.strokeGeometry[i].path}" stroke="#FF206E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+}
+svg +="</svg>"
+*/
+
+
 </script>
 </body>
+
+
