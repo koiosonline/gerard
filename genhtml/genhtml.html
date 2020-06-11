@@ -299,7 +299,9 @@ function _convertFigmaColorToRGB(value) {
             var image=""
 
             if (b) {
-                strstyle +=`width:${b.width}px;height:${b.height}px;position: absolute;`;
+                strstyle +=`position: absolute;`;
+                if (parseFloat(b.width) * 100 > 1) strstyle +=`width:${b.width}px;`;
+                if (parseFloat(b.height) * 100 > 1) strstyle +=`height:${b.height}px;`;
                 if (xoffset != undefined) strstyle +=`left:${xoffset}px;`
                 if (yoffset != undefined) strstyle +=`top:${yoffset}px;`
                 
@@ -396,9 +398,14 @@ function _convertFigmaColorToRGB(value) {
                case "FRAME":       break;
              //  case "COMPONENT":  strstyle +=`position: relative; display:inline-block;`; break;
               
-              case "ELLIPSE": strstyle +="border-radius: 50%;";break; // circle for now
+            //  case "ELLIPSE": strstyle +="border-radius: 50%;";break; // circle for now
              // case "INSTANCE": // do same as vector
              // case "COMPONENT": // do same as vector
+             
+              case "REGULAR_POLYGON":
+              case "ELLIPSE":
+              case "STAR":
+              case "LINE":   // same as vector
               case "VECTOR": {
                     let urlvector = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
                     var picvector=await FigmaApiGet(urlvector,token);
