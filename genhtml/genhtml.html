@@ -199,11 +199,13 @@ log("Retrieving info via figma api");
     if (keys.length > 0) {
         for (var i = 0; i < keys.length; i++) {
             var key=keys[i];
-            
-            if (key.includes("FontAwesome"))
-                fontstr +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
-            else            
-                fontstr +=`<link href="https://fonts.googleapis.com/css2?family=${key}&display=swap" rel="stylesheet">`
+            switch (key) {
+                case "Arial": break; // standard font                
+                case "FontAwesome":             
+                case "Font Awesome 5 Free":  
+                case "Font Awesome 5 Brands":   fontstr +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'; break;
+                default:                        fontstr +=`<link href="https://fonts.googleapis.com/css2?family=${key}&display=swap" rel="stylesheet">`;
+            }
         }
         console.log(fontstr);
     }
@@ -289,24 +291,65 @@ function _convertFigmaColorToRGB(value) {
              //   console.log(`Parent: x=${pb.x} y=${pb.y} w=${pb.width} h=${pb.height}`);
              //  console.log(`Own   : x=${b.x} y=${b.y} w=${b.width} h=${b.height}`);
              //  console.log(`width ${(b.width/pb.width*100).toFixed(2)}% height ${(b.height/pb.height*100).toFixed(2)}%`);
-               var xoffset=b.x-pb.x
-               var yoffset=b.y-pb.y
              //  console.log(`xoffset ${(xoffset).toFixed(2)} yoffset ${(yoffset).toFixed(2)}`);
             }    
 
             var strtxt=""
             var strstyle=""
             var image=""
+            var surroundingdiv=""
 
             if (b) {
-                strstyle +=`position: absolute;`;
-                if (parseFloat(b.width) * 100 > 1) strstyle +=`width:${b.width}px;`;
-                if (parseFloat(b.height) * 100 > 1) strstyle +=`height:${b.height}px;`;
-                if (xoffset != undefined) strstyle +=`left:${xoffset}px;`
-                if (yoffset != undefined) strstyle +=`top:${yoffset}px;`
-                
-                console.log(b);console.log(pb);console.log(strstyle);
+                strstyle +=`position: absolute;`;                
+                if (!pb) 
+                    strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values
+                else { // now pb is present
+                    console.log("pb-b");
+                    console.log(pb)
+                    console.log(b);
+                    var xoffset=b.x-pb.x
+                    var yoffset=b.y-pb.y	                    
+                    console.log(xoffset, yoffset);
+                    switch(figdata.constraints ? figdata.constraints.horizontal : "default") {
+                        case "SCALE":
+                            strstyle +=`width:${(parseFloat(b.width)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            break;
+                        case "CENTER":                              
+                            strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            strstyle +=`width:${b.width}px;`;
+                            //surroundingdiv +="display: flex; justify-content: center;";
+                            //strstyle +=`left:1%;`
+                            break;                        
+                        default:
+                            strstyle +=`left:${xoffset}px;`
+                            if (parseFloat(b.width) * 100 > 1) 
+                                strstyle +=`width:${b.width}px;`;
+                    }
+                    console.log(strstyle);
+                    switch(figdata.constraints ? figdata.constraints.vertical : "default") {
+                        case "SCALE":                       
+                            strstyle +=`height:${(parseFloat(b.height)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                            strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                            break;
+                        case "CENTER":                            
+                            strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                            strstyle +=`height:${b.height}px;`;                            
+                            //strstyle +=`top:1%`
+                            //surroundingdiv +="display: flex;align-items: center; ";
+                            break;
+                        default:
+                            strstyle +=`top:${yoffset}px;`
+                            if (parseFloat(b.height) * 100 > 1) 
+                                strstyle +=`height:${b.height}px;`;                            
+                    }
+                    console.log(strstyle);
+                }
             }    
+            
+            
+            if (figdata.clipsContent)
+                strstyle +="overflow: hidden;"
             
             if (figdata.fills && figdata.fills[0] && figdata.fills[0].color) {               
                 if (figdata.fills[0].type="SOLID") {
@@ -469,8 +512,13 @@ function _convertFigmaColorToRGB(value) {
 
             var domelement=image?"image":"div"
             
+                       
+            if (surroundingdiv)
+                str +=`<div style="${surroundingdiv};width:100%;height:100%;">`
             str +=`<${domelement} ${imagestr} class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
-
+            
+            if (surroundingdiv)
+                str +="</div>"
             //console.log(insrtstyle);
         }
         
