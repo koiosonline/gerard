@@ -217,6 +217,7 @@ log("Retrieving info via figma api");
 var strprefix=""    
 strprefix +='<html>'
 strprefix +='<head>'
+strprefix +='<meta name="viewport" content="width=1440, initial-scale=1.0">'
 strprefix +='<meta charset="utf-8" />'
 //strprefix +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'
 //strprefix +='<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">'
@@ -275,15 +276,19 @@ function _convertFigmaColorToRGB(value) {
         if (figdata.name == objname) { // start from here
             console.log(`Found ${objname}`);
             objname = undefined;        
-        }
+        }        
+        if (figdata.visible==false) return "";        
+        
         //if (objname)
         //    console.log(`Skipping ${figdata.name}`)
-        if (!objname) { // show everything
+        if (!objname ) { // show everything  (except stuff that's made invisible)
             console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
             console.log(figdata);
             
             var fsvg= figdata.name.includes("@svg")
             console.log(`fsvg=${fsvg}`)
+            var faspect= figdata.name.includes("@aspect")
+            console.log(`faspect=${faspect}`)
             
             
             var b=figdata.absoluteBoundingBox;    
@@ -302,18 +307,22 @@ function _convertFigmaColorToRGB(value) {
             if (b) {
                 strstyle +=`position: absolute;`;                
                 if (!pb) 
-                    strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values
+                    strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values // 
                 else { // now pb is present
                     console.log("pb-b");
                     console.log(pb)
                     console.log(b);
                     var xoffset=b.x-pb.x
-                    var yoffset=b.y-pb.y	                    
-                    console.log(xoffset, yoffset);
+                    var xoffsetright=-(b.x+b.width-pb.x-pb.width);
+                    var yoffset=b.y-pb.y	     
+                    var yoffsetbottom=-(b.y+b.height-pb.y-pb.height); 
+                    console.log(xoffset, xoffsetright,yoffset,yoffsetbottom);
                     switch(figdata.constraints ? figdata.constraints.horizontal : "default") {
                         case "SCALE":
-                            strstyle +=`width:${(parseFloat(b.width)/parseFloat(pb.width)*100).toFixed(2)}%;`;
                             strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            //strstyle +=`right:${(parseFloat(xoffsetright)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            strstyle +=`width:${(parseFloat(b.width)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            
                             break;
                         case "CENTER":                              
                             strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
@@ -329,8 +338,20 @@ function _convertFigmaColorToRGB(value) {
                     console.log(strstyle);
                     switch(figdata.constraints ? figdata.constraints.vertical : "default") {
                         case "SCALE":                       
-                            strstyle +=`height:${(parseFloat(b.height)/parseFloat(pb.height)*100).toFixed(2)}%;`;
                             strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                            
+                         if (faspect) {
+                            strstyle +=`padding-bottom:${ (parseFloat(b.height)/parseFloat(b.width) ) * (parseFloat(b.width)/parseFloat(pb.width)*100)}%;`;
+                            
+                            
+                            
+                            //strstyle +=`height:${(parseFloat(b.height)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                            }
+                         else   
+                            strstyle +=`bottom:${(parseFloat(yoffsetbottom)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                         
+                            
+                            
                             break;
                         case "CENTER":                            
                             strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
@@ -351,7 +372,7 @@ function _convertFigmaColorToRGB(value) {
             if (figdata.clipsContent)
                 strstyle +="overflow: hidden;"
             
-            if (figdata.fills && figdata.fills[0] && figdata.fills[0].color) {               
+            if (figdata.fills && figdata.fills[0] && figdata.fills[0].color && (figdata.fills[0].visible != false)) {               
                 if (figdata.fills[0].type="SOLID") {
                     var a = figdata.fills[0].opacity;
                     if (a == undefined)
@@ -514,11 +535,10 @@ function _convertFigmaColorToRGB(value) {
             
                        
             if (surroundingdiv)
-                str +=`<div style="${surroundingdiv};width:100%;height:100%;">`
+                str +=`<div style="${surroundingdiv};width:100%;height:100%;border-style:solid;border-width:1px;border-color:red;">`
             str +=`<${domelement} ${imagestr} class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
             
-            if (surroundingdiv)
-                str +="</div>"
+            
             //console.log(insrtstyle);
         }
         
@@ -528,8 +548,13 @@ function _convertFigmaColorToRGB(value) {
             for (var i=0;i<children.length;i++)
                 str +=await recurse(objname,children[i],figdata.absoluteBoundingBox);
         
-        if (!objname)
+        
+        
+        if (!objname) {
+            if (surroundingdiv)
+                str +="</div>"
             str +=`</${domelement}>`
+        }
         return str;
         
     }    
