@@ -43,9 +43,9 @@ console.log("In onerror");
 
 <script>
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+
+  
+
 
 function log(s) {
     var logtext=document.getElementById("log"); 
@@ -95,29 +95,10 @@ start();
 
 async function FigmaApiGet(url,token) {
     var x=await fetch(url, { headers: {'X-Figma-Token': token } } );
-    //log('Retrieved data');
+    log('Retrieved data');
     var y=await x.json()
-    return y;   
+    return y;
 }
-
-async function FigmaApiGetImageSrc(url,token) {
-    for (var i=0;i<8;i++) {
-        if (i > 0)
-            console.log(`Retry ${i} for ${url}`); 
-        await sleep(Math.random() * 10000); // some extra time to prevent rate limits
-        var obj=await FigmaApiGet(url,token); 
-                            
-        if (!obj || obj.err || !obj.images) continue; // try again
-        
-        var keys = Object.keys(obj.images);
-        var key=keys[0];
-        var str=obj.images[key];       
-        log(`Retrieved ${str}`);
-        return str; // also end for loop
-    }
-}
-
-
 
 
 async function SaveToIPFS(data,pinlocation) {        
@@ -193,16 +174,11 @@ log("Retrieving info via figma api");
     
     
     var str=""
-    var htmlobj = recurse(objname,y.document);
-   // console.log(htmlobj);
-    log(`Retrieve figma data, generate HTML`);
-    
-    str +=  await recursehtml(htmlobj);
-    log(`HTML ready`);
+    str +=await recurse(objname,y.document);
     
     var stylestr="";   
     var fontstr="";
-   // console.log(globalmediastyles);            
+    console.log(globalmediastyles);            
     
     var keys
     keys = Object.keys(globalmediastyles);
@@ -266,7 +242,7 @@ strsuffix +='</body>'
 strsuffix +='</html>'
   
 globalstr = strprefix + str + strsuffix
-//console.log(globalstr);
+console.log(globalstr);
 
 
 
@@ -290,45 +266,13 @@ function _convertFigmaColorToRGB(value) {
 }
 
 
-async function  recursehtml(htmlobjpromise) {
-    var str=""
-//    console.log("In recursehtml")
-//    console.log(htmlobjpromise)
-    if (typeof(htmlobjpromise) == "string")
-        return htmlobjpromise;
-        
-    var htmlobj = await htmlobjpromise;
-    if (!htmlobj) return ""
-//    console.log(htmlobj)
-   if (typeof(htmlobj) == "string")
-        return htmlobj;
-//    console.log(typeof(htmlobj))
-    if (htmlobj.length > 0)
-        for (var i=0;i<htmlobj.length;i++) {
-            var part=htmlobj[i]
-            var objtype=typeof(part)
-          //  console.log(objtype)
-            switch (objtype ) {
-                case "string": str +=part;break;
-                default: {
-                    var obj= await recursehtml(part);
-//                    console.log(obj)
-                    str +=  obj;
-                }
-            }
-    }    
-    
-    //console.log("Returning from recursehtml");
-   // console.log(str);
-   return str;
-}
 
- 
     async function recurse(objname,figdata,pb) { // objname is the object we are looking for; if it's undefined: show everything
-        //console.log(`Looking for ${objname}`) 
-        var htmlobjects=[]        
+        var str=""
+        var fvector=false;
         
-     //   console.log(figdata);
+        //console.log(`Looking for ${objname}`) 
+        
         if (figdata.name == objname) { // start from here
             console.log(`Found ${objname}`);
             objname = undefined;        
@@ -342,9 +286,9 @@ async function  recursehtml(htmlobjpromise) {
             console.log(figdata);
             
             var fsvg= figdata.name.includes("@svg")
-           // console.log(`fsvg=${fsvg}`)
+            console.log(`fsvg=${fsvg}`)
             var faspect= figdata.name.includes("@aspect")
-          //  console.log(`faspect=${faspect}`)
+            console.log(`faspect=${faspect}`)
             
             
             var b=figdata.absoluteBoundingBox;    
@@ -391,7 +335,7 @@ async function  recursehtml(htmlobjpromise) {
                             if (parseFloat(b.width) * 100 > 1) 
                                 strstyle +=`width:${b.width}px;`;
                     }
-                    //console.log(strstyle);
+                    console.log(strstyle);
                     switch(figdata.constraints ? figdata.constraints.vertical : "default") {
                         case "SCALE":                       
                             strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
@@ -441,9 +385,17 @@ async function  recursehtml(htmlobjpromise) {
               }
               
             if (figdata.fills && figdata.fills[0] && figdata.fills[0].type == "IMAGE") {
-                console.log(figdata.fills);                
-                if (figdata.id)  // link to an image??
-                    image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}`
+                console.log(figdata.fills);
+                
+                if (figdata.id) { // link to an image??
+                    let url = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}`
+                    console.log(url)
+                    var pic=await FigmaApiGet(url,token);
+                    console.log(pic);
+                    console.log(pic.images[figdata.id]);                   
+                    image +=pic.images[figdata.id]
+                }
+                
             }
               
             if (figdata.backgroundColor) {
@@ -518,20 +470,34 @@ async function  recursehtml(htmlobjpromise) {
               case "ELLIPSE":
               case "STAR":
               case "LINE":   // same as vector
-              case "VECTOR": fsvg=true;break; // get object as an svg
+              case "VECTOR": {
+                    let urlvector = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+                    var picvector=await FigmaApiGet(urlvector,token);
+                    console.log(picvector)                
+                    image +=picvector.images[figdata.id]
+                    
+                    fvector=true;
+                    
+                   break;
+                }
             }
             
-            if (fsvg)  // then make this into an svg
-                image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+            if (fsvg) { // then make this into an svg
+                    let urlsvg = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+                    var picsvg=await FigmaApiGet(urlsvg,token);
+                    console.log(picsvg)                
+                    image +=picsvg.images[figdata.id]
+            }
+            
             
             if (figdata.rectangleCornerRadii) {
                 let r=figdata.rectangleCornerRadii;
                 strstyle +=`border-radius: ${r[0]}px ${r[1]}px ${r[2]}px ${r[3]}px;`; // (first value applies to top-left corner, second value applies to top-right corner, third value applies to bottom-right corner, and fourth value applies to bottom-left corner)
             }
             
-            if (!fsvg) {  // don't draw boxed for svgs and for vector images
+            if (!fsvg && !fvector) {  // don't draw boxed for svgs and for vector images
                 if (figdata.type!="TEXT")
-                    backgroundrgba = rgba;
+                    backgroundrgba = rgba;    
                 if (backgroundrgba)
                     strstyle+=`background-color:${backgroundrgba};`
                 if (rgba)
@@ -543,7 +509,8 @@ async function  recursehtml(htmlobjpromise) {
                 }   
                 if(strokeWeight)    
                     strstyle+=`border-width:${strokeWeight}px;`    
-            }        
+            }
+        
           
             var insrtstyle=strstyle?`style="${strstyle}"`:""
             
@@ -558,48 +525,41 @@ async function  recursehtml(htmlobjpromise) {
                 classname=classname.substring(0,mediapos) + " " + key;
                 console.log(classname);
             }      
-                    
-            //console.log(insrtstyle);
-            
-            if (surroundingdiv)
-                htmlobjects.push( `<div style="${surroundingdiv};width:100%;height:100%;border-style:solid;border-width:1px;border-color:red;">` );
-                
-            if (image) {
-                htmlobjects.push(`<image src="`)
-                log(`Getting image ${image}`);
-                //await sleep(500); // avoid rate limit on figma                
-                htmlobjects.push(FigmaApiGetImageSrc(image,token))
-                htmlobjects.push(`"  class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
-                htmlobjects.push('</image>');
-            }
-            else 
-                htmlobjects.push(`<div class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
-
         
+            
+            var imagestr=""
+            if (image)
+                imagestr=`src="${image}" `
+
+            var domelement=image?"image":"div"
+            
+                       
+            if (surroundingdiv)
+                str +=`<div style="${surroundingdiv};width:100%;height:100%;border-style:solid;border-width:1px;border-color:red;">`
+            str +=`<${domelement} ${imagestr} class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n` //  ${figdata.type}
+            
+            
+            //console.log(insrtstyle);
         }
         
         var children=figdata.children;
         figdata.children=[];     
         if (children && !fsvg ) // allways recurse to try and find the intended object // don't recurse when @svg is shown
             for (var i=0;i<children.length;i++)
-                htmlobjects.push( recurse(objname,children[i],figdata.absoluteBoundingBox) )
+                str +=await recurse(objname,children[i],figdata.absoluteBoundingBox);
+        
+        
         
         if (!objname) {
-            if (!image) // close the div
-                htmlobjects.push('</div>');
-
             if (surroundingdiv)
-                htmlobjects.push("</div>") // close the surrounding div
+                str +="</div>"
+            str +=`</${domelement}>`
         }
-       // console.log("Returning from recurse");
-       // console.log(htmlobjects);
-        return htmlobjects;
+        return str;
         
     }    
 
 }
-
-
 
 
 /*
