@@ -1,0 +1,649 @@
+<head>
+<!--   margin: 5px; -->
+<!--style>
+div {
+    border-style: solid;
+    border-width: 1px;    
+}
+</style-->
+
+<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/ipfs-http-client/dist/index.min.js"></script>
+
+</head>
+<body>
+
+<h2>Convertor of Figma pages</h2>
+Enter figmakey, pageid and start object below:<br>
+<pre>
+figmakey: <span id="figmakey" style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+pageid:   <span id="pageid"   style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+objname:  <span id="objname"  style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+embed:    <span id="embed"    style="background-color:yellow;border-style: solid;border-width: 1px; ">...</span><br>
+pin:      <span id="pin"      style="background-color:yellow;border-style: solid;border-width: 1px; ">https://ipfs.infura.io:5001</span>  (https://ipfs.infura.io:5001)<br>
+</pre>
+
+<!--button onclick="start()">Start</button-->
+<pre id="log" style="height:200px;overflow: scroll;"></pre>
+<pre id="output"></pre>
+<button id="SaveOnIpfs" onclick="SaveOnIpfs()"></button>
+
+<script>
+window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
+console.log("In onerror");
+    var str=`Error: ${message} ${source}, ${lineno}, ${colno}  `;
+    if (error && error.stack) str = str.concat('\n').concat(error.stack);    
+    console.log(str);    
+    document.getElementById("log").innerHTML=str;    
+} 
+</script>
+
+
+<script>
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function log(s) {
+    var logtext=document.getElementById("log"); 
+    if ((typeof s) !="string")  {
+        console.log("converting to string");
+        s = JSON.stringify(s);
+    }   
+    if (logtext)
+        logtext.innerHTML +=s+"\r";
+    logtext.scrollTop = logtext.scrollHeight; // keep the windows "scrolled down"
+}
+
+function SetupField(id) {
+    let params = (new URL(document.location)).searchParams;
+    let idvalue= params.get(id); 
+    var target=document.getElementById(id)    
+    target.contentEditable="true"; // make div editable
+    target.style.whiteSpace = "pre"; //werkt goed in combi met innerText
+    
+    if (!idvalue)
+        idvalue=localStorage.getItem(id); 
+    if (!idvalue) 
+            idvalue = target.innerHTML   
+    target.innerHTML=idvalue    
+    target.addEventListener('input',SaveTxt , true); // save the notes    
+    
+    function SaveTxt(txt) { 
+        localStorage.setItem(id, txt.target.innerText);
+        console.log("input");
+        console.log(txt.target.innerText); 
+    }
+}    
+
+
+//const fetch = require('node-fetch');
+
+
+
+SetupField("figmakey")
+SetupField("pageid")
+SetupField("objname")
+SetupField("embed")
+SetupField("pin")
+
+start();
+
+
+async function FigmaApiGet(url,token) {
+    var x=await fetch(url, { headers: {'X-Figma-Token': token } } );
+    //log('Retrieved data');
+    var y=await x.json()
+    return y;   
+}
+
+async function FigmaApiGetImageSrc(url,token) {
+    for (var i=0;i<8;i++) {
+        if (i > 0)
+            console.log(`Retry ${i} for ${url}`); 
+        await sleep(Math.random() * 10000); // some extra time to prevent rate limits
+        var obj=await FigmaApiGet(url,token); 
+                            
+        if (!obj || obj.err || !obj.images) continue; // try again
+        
+        var keys = Object.keys(obj.images);
+        var key=keys[0];
+        var str=obj.images[key];       
+        //log(`Retrieved ${str}`);
+        return str; // also end for loop
+    }
+}
+
+
+
+
+async function SaveToIPFS(data,pinlocation) {        
+    const ipfs = window.IpfsHttpClient(pinlocation); // 'https://ipfs.infura.io:5001'
+    //const ipfs = window.IpfsHttpClient('http://diskstation:5002'); 
+    console.log(ipfs);
+    
+    for await (const result of ipfs.add(data) )
+        return result.path;
+}
+
+// http://www.gpersoon.com:8080/ipfs/QmRDDFeTUve2Lxq77t5MqjNNQrGVMYoD5Nje9ai3YPug3U
+
+// http://192.168.0.40:8080/ipfs/QmfQkD8pBSBCBxWEwFSu4XaDVSWK6bjnNuaWZjMyQbyDub/#/welcome
+// http://gpersoon.com:8080/ipfs/QmfQkD8pBSBCBxWEwFSu4XaDVSWK6bjnNuaWZjMyQbyDub/#/welcome
+
+
+var globalpinlocation;
+
+
+let globalmediastyles = []
+let globalfonts = []
+let connectto=[]
+
+
+
+
+async function SaveOnIpfs() {
+console.log(`in SaveOnIpfs ${globalpinlocation}`);
+console.log(globalstr);
+document.getElementById("SaveOnIpfs").innerHTML=""
+    var result=await SaveToIPFS(globalstr,globalpinlocation)
+    console.log(result);
+
+    var str2=""
+    str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`);
+    str2 +="IPFS link 2: "+MakeUrl(`http://ipfs.io/ipfs/${result}`);
+    str2 +="IPFS link 3: "+MakeUrl(`http://www.gpersoon.com:8080/ipfs/${result}`);
+    document.getElementById("output").innerHTML += str2;
+}
+
+
+
+
+function FindObject(objname,figdata) {
+//console.log(figdata);
+    if (figdata.name == objname || figdata.id==objname) 
+        return figdata;
+    var children=figdata.children;
+    if (children)
+        for (var i=0;i<children.length;i++) {
+            var child=FindObject(objname,children[i] )
+            if (child) return child;
+        }
+    return undefined; // not found        
+}
+
+
+
+async function start() {
+    log("Retrieving info via figma api");
+    var token=document.getElementById("figmakey").innerHTML.trim();
+    var documentid=document.getElementById("pageid").innerHTML.trim();    
+    var objname=document.getElementById("objname").innerHTML.trim();
+    var embed=document.getElementById("embed").innerHTML.trim();
+    
+    if (embed.replace(/\./g,'')=="") embed=undefined; // if only ..., then no embed
+    
+    globalpinlocation=document.getElementById("pin").innerHTML.trim();
+    console.log(`Start ${token} ${documentid}`);
+    var url=`https://api.figma.com/v1/files/${documentid}`  // to export the vectors: ?geometry=paths    
+    var y=await FigmaApiGet(url,token)
+    var figmadocument=y.document;
+    console.log(figmadocument);
+    log(`Found page: ${figmadocument.name} ${figmadocument.id}`);    
+    var fo=FindObject(objname,figmadocument)
+    log(`Converting ${objname} id: ${fo.id}`);
+    
+    var todo=fo.id;  
+    var limit=0;
+    do {        
+        
+        var htmlrecord=await ConvertToHTML(todo,figmadocument,documentid,token,embed); 
+        connectto[todo]=MakeBlob(htmlrecord.html);       
+        console.log(connectto);
+        document.getElementById("output").innerHTML += `Open ${todo} ${htmlrecord.name} in seperate tab: ${MakeUrl(connectto[todo])}`            
+        log("After ConvertToHTML");
+
+        todo=undefined;
+        var keys = Object.keys(connectto);
+        if (keys.length > 0) {
+            for (var i = 0; i < keys.length; i++) {                
+                var key=keys[i];
+                log(`Check ${i} ${key}`);
+                var val = connectto[key];
+                if (val == "@retrieve") {
+                    todo=key;
+                    log (`todo=${todo}`)
+                    break; // stop for loop
+                }
+            }
+        }        
+        limit++;
+        if (limit >=10) break;
+    } while (todo);
+    document.getElementById("SaveOnIpfs").innerHTML="Save on IPFS"  
+}    
+    
+function GetMediaStyles() {
+    var stylestr=""
+    var keys = Object.keys(globalmediastyles);
+    if (keys.length > 0) {
+        stylestr +="<style>\n"
+        console.log(keys);    
+        for (var i = 0; i < keys.length; i++) {
+            var key=keys[i];
+            var val = globalmediastyles[key];
+            stylestr +=`.${key} \{ display: none; \} \n`
+            stylestr +=`@media only screen and  ${val} \{  .${key}  \{ display: block; \} \} \n`
+        }
+        stylestr +="</style>\n"
+        console.log(stylestr);
+    }
+    return stylestr;
+}
+        
+
+function GetFonts() { 
+    var fontstr=""
+    var keys = Object.keys(globalfonts);
+    if (keys.length > 0) {
+        for (var i = 0; i < keys.length; i++) {
+            var key=keys[i];
+            switch (key) {
+                case "Arial": break; // standard font                
+                case "FontAwesome":             
+                case "Font Awesome 5 Free":  
+                case "Font Awesome 5 Brands":   fontstr +='<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">'; break;
+                default:                        fontstr +=`<link href="https://fonts.googleapis.com/css2?family=${key}&display=swap" rel="stylesheet">`;
+            }
+        }
+        console.log(fontstr);
+    }
+    return fontstr;
+}    
+            
+function MakeHeader(embed) {   
+    var strprefix=""    
+    
+    strprefix +='<head>'
+    strprefix +='<meta name="viewport" content="width=1440, initial-scale=1.0">'
+    strprefix +='<meta charset="utf-8" />'
+    strprefix += GetFonts();
+     if (embed) {
+        console.log(`Embedding ${embed}`); 
+        var s="script"
+        strprefix +=`<${s} type="module" src="${embed}">`
+        strprefix +="<"+"/"+"script"+">"
+    }
+    strprefix += GetMediaStyles();
+    strprefix +='</head>'
+    return strprefix;
+}
+    
+function MakePage(str,embed) {
+    var globalstr;
+    var strprefix="" 
+    strprefix +='<html>'
+    strprefix += MakeHeader(embed)    
+    strprefix +=`<body>${str}`
+    var strsuffix ='</body>'
+    strsuffix +='</html>'
+    globalstr = strprefix + str + strsuffix
+    
+    return globalstr;
+}   
+        
+    
+async function ConvertToHTML(objid,figmadocument,documentid,token,embed) {    
+    log(`ConvertToHTML ${objid}`);
+    console.log(figmadocument);
+    var currentobject=FindObject(objid,figmadocument)
+    log(`Processing ${currentobject.name}`);
+    console.log(currentobject)
+    var str=""
+    var htmlobj = recurse(currentobject,documentid,token); // retrieve the found object
+    log(`Retrieve figma data, generate HTML`);
+    str +=  await recursehtml(htmlobj);
+    log(`HTML ready`);    
+    return { html:MakePage(str,embed),name:currentobject.name }
+}
+
+
+function MakeBlob(html) {
+        var blob = new Blob([html], {type: 'text/html'});
+        var url = URL.createObjectURL(blob);      
+        return url;
+}    
+    
+function MakeUrl(url) {
+    return `<a href="${url}" target="_blank"> ${url}` + "</a><br>"
+}
+
+
+
+
+
+function _convertFigmaColorToRGB(value) {
+    return Math.ceil(value * 255);
+}
+
+
+async function  recursehtml(htmlobjpromise) {
+    var str=""
+//    console.log("In recursehtml")
+//    console.log(htmlobjpromise)
+    if (typeof(htmlobjpromise) == "string")
+        return htmlobjpromise;
+        
+    var htmlobj = await htmlobjpromise;
+    if (!htmlobj) return ""
+//    console.log(htmlobj)
+   if (typeof(htmlobj) == "string")
+        return htmlobj;
+//    console.log(typeof(htmlobj))
+    if (htmlobj.length > 0)
+        for (var i=0;i<htmlobj.length;i++) {
+            var part=htmlobj[i]
+            var objtype=typeof(part)
+          //  console.log(objtype)
+            switch (objtype ) {
+                case "string": str +=part;break;
+                default: {
+                    var obj= await recursehtml(part);
+//                    console.log(obj)
+                    str +=  obj;
+                }
+            }
+    }    
+    
+    //console.log("Returning from recursehtml");
+   // console.log(str);
+   return str;
+}
+
+
+async function recurse(figdata,documentid,token,pb) { // pb is (optional) parent boundingbox
+    var htmlobjects=[]                
+    console.log(figdata);
+    console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
+    
+    if (figdata.visible==false) return "";        
+    var fsvg= figdata.name.includes("@svg")            // console.log(`fsvg=${fsvg}`)
+    var faspect= figdata.name.includes("@aspect")      //  console.log(`faspect=${faspect}`)
+    
+    var b=figdata.absoluteBoundingBox;
+    var strtxt=""
+    var strstyle=""
+    var image=""
+    var surroundingdiv=""
+
+
+if (figdata.transitionNodeID) {
+    log(`Connect: to ${figdata.transitionNodeID}`);
+    if (!connectto[figdata.transitionNodeID])
+        connectto[figdata.transitionNodeID]="@retrieve"
+}
+
+
+    if (b) {
+        strstyle +=`position: absolute;`;                
+        if (!pb) 
+            strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values // 
+        else { // now pb is present
+            console.log("pb-b");
+            console.log(pb)
+            console.log(b);
+            var xoffset=b.x-pb.x
+            var xoffsetright=-(b.x+b.width-pb.x-pb.width);
+            var yoffset=b.y-pb.y	     
+            var yoffsetbottom=-(b.y+b.height-pb.y-pb.height); 
+            console.log(xoffset, xoffsetright,yoffset,yoffsetbottom);
+            switch(figdata.constraints ? figdata.constraints.horizontal : "default") {
+                case "SCALE":
+                    strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                    //strstyle +=`right:${(parseFloat(xoffsetright)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                    strstyle +=`width:${(parseFloat(b.width)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                    
+                    break;
+                case "CENTER":                              
+                    strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                    strstyle +=`width:${b.width}px;`;
+                    //surroundingdiv +="display: flex; justify-content: center;";
+                    //strstyle +=`left:1%;`
+                    break;                        
+                default:
+                    strstyle +=`left:${xoffset}px;`
+                    if (parseFloat(b.width) * 100 > 1) 
+                        strstyle +=`width:${b.width}px;`;
+            }
+            //console.log(strstyle);
+            switch(figdata.constraints ? figdata.constraints.vertical : "default") {
+                case "SCALE":                       
+                    strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                    
+                 if (faspect) {
+                    strstyle +=`padding-bottom:${ (parseFloat(b.height)/parseFloat(b.width) ) * (parseFloat(b.width)/parseFloat(pb.width)*100)}%;`;
+                    
+                    
+                    
+                    //strstyle +=`height:${(parseFloat(b.height)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                    }
+                 else   
+                    strstyle +=`bottom:${(parseFloat(yoffsetbottom)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                 
+                    
+                    
+                    break;
+                case "CENTER":                            
+                    strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                    strstyle +=`height:${b.height}px;`;                            
+                    //strstyle +=`top:1%`
+                    //surroundingdiv +="display: flex;align-items: center; ";
+                    break;
+                default:
+                    strstyle +=`top:${yoffset}px;`
+                    if (parseFloat(b.height) * 100 > 1) 
+                        strstyle +=`height:${b.height}px;`;                            
+            }
+            console.log(strstyle);
+        }
+    }    
+    
+    
+    if (figdata.clipsContent)
+        strstyle +="overflow: hidden;"
+    
+    if (figdata.fills && figdata.fills[0] && figdata.fills[0].color && (figdata.fills[0].visible != false)) {               
+        if (figdata.fills[0].type="SOLID") {
+            var a = figdata.fills[0].opacity;
+            if (a == undefined)
+                a = _convertFigmaColorToRGB(figdata.fills[0].color.a);
+            var r = _convertFigmaColorToRGB(figdata.fills[0].color.r);
+            var g = _convertFigmaColorToRGB(figdata.fills[0].color.g);
+            var b = _convertFigmaColorToRGB(figdata.fills[0].color.b);
+            var rgba=`rgba(${r},${g},${b},${a})`;
+          }
+      }
+      
+    if (figdata.fills && figdata.fills[0] && figdata.fills[0].type == "IMAGE") {
+        console.log(figdata.fills);                
+        if (figdata.id)  // link to an image??
+            image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}`
+    }
+      
+    if (figdata.backgroundColor) {
+        var a = figdata.backgroundColor.a;
+        var r = figdata.backgroundColor.r;
+        var g = figdata.backgroundColor.g;
+        var b = figdata.backgroundColor.b;
+        var backgroundrgba=`rgba(${r},${g},${b},${a})`;
+        }
+    
+    if (figdata.strokes && figdata.strokes[0] && figdata.strokes[0].color) {               
+        if (figdata.strokes[0].type="SOLID") {
+        console.log(figdata.strokes[0].color)
+        
+            var a = _convertFigmaColorToRGB(figdata.strokes[0].color.a);
+            var r = _convertFigmaColorToRGB(figdata.strokes[0].color.r);
+            var g = _convertFigmaColorToRGB(figdata.strokes[0].color.g);
+            var b = _convertFigmaColorToRGB(figdata.strokes[0].color.b);
+            var strokesrgba=`rgba(${r},${g},${b},${a})`;
+          }
+      }
+      var strokeWeight = figdata.strokeWeight
+        
+   
+        
+    if (figdata.style && figdata.style.fontFamily) {
+        switch (figdata.style.fontFamily) {
+            case "FontAwesome":             figdata.style.fontFamily = "Font Awesome 5 Free"; // and continue to next line
+            case "Font Awesome 5 Free":     strstyle += "font-weight: 900;";figdata.style.fontWeight=0;break; // note other weights are part of pro plan                
+        }
+       strstyle += `font-family: '${figdata.style.fontFamily}', sans-serif;`;
+       globalfonts[figdata.style.fontFamily] = true;
+    }
+    
+    if (figdata.style && figdata.style.fontSize)
+        strstyle += `font-size:${figdata.style.fontSize}px;`;
+    
+    
+    if (figdata.style && figdata.style.fontWeight)
+        strstyle += `font-weight:${figdata.style.fontWeight};`;
+    
+    
+    if (figdata.style && figdata.style.lineHeightPx)
+        strstyle += `font-height:${figdata.style.lineHeightPx}px;`;
+    
+    
+    switch (figdata.type) {
+       case "TEXT": strtxt +=figdata.characters;
+       
+            switch(figdata.style.textAlignVertical) {
+               case "TOP": strstyle +="display: flex;align-items: flex-start; ";break
+               case "CENTER": strstyle +="display: flex;align-items: center; ";break
+               case "BOTTOM": strstyle +="display: flex;align-items: flex-end; ";break                   
+            }                
+            switch(figdata.style.textAlignHorizontal) {
+               case "LEFT": strstyle +="display: flex; justify-content: flex-start;";break;
+               case "CENTER": strstyle +="display: flex; justify-content: center;";break;
+               case "RIGHT": strstyle +="display: flex; justify-content: flex-end;";break;
+            }    
+            // console.log(strstyle);
+       break;
+       //case "RECTANGLE": { console.log(figdata);                          break; }
+     //  case "GROUP": strstyle +=`position: relative; display:inline-block;`; break;
+       case "FRAME":       break;
+     //  case "COMPONENT":  strstyle +=`position: relative; display:inline-block;`; break;
+      
+    //  case "ELLIPSE": strstyle +="border-radius: 50%;";break; // circle for now
+     // case "INSTANCE": // do same as vector
+     // case "COMPONENT": // do same as vector
+     
+      case "REGULAR_POLYGON":
+      case "ELLIPSE":
+      case "STAR":
+      case "LINE":   // same as vector
+      case "VECTOR": fsvg=true;break; // get object as an svg
+    }
+    
+    if (fsvg)  // then make this into an svg
+        image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+    
+    if (figdata.rectangleCornerRadii) {
+        let r=figdata.rectangleCornerRadii;
+        strstyle +=`border-radius: ${r[0]}px ${r[1]}px ${r[2]}px ${r[3]}px;`; // (first value applies to top-left corner, second value applies to top-right corner, third value applies to bottom-right corner, and fourth value applies to bottom-left corner)
+    }
+    
+    if (!fsvg) {  // don't draw boxed for svgs and for vector images
+        if (figdata.type!="TEXT")
+            backgroundrgba = rgba;
+        if (backgroundrgba)
+            strstyle+=`background-color:${backgroundrgba};`
+        if (rgba)
+            strstyle+=`color:${rgba};`
+        if (strokesrgba) 
+            strstyle+=`border-color:${strokesrgba};border-style:solid;`
+        switch (figdata.strokeAlign) {
+           case "INSIDE": strstyle += "box-sizing: border-box;";break;
+        }   
+        if(strokeWeight)    
+            strstyle+=`border-width:${strokeWeight}px;`    
+    }        
+  
+    var insrtstyle=strstyle?`style="${strstyle}"`:""
+    
+    var classname=figdata.name;
+    var mediapos=classname.indexOf("@media");
+    //console.log(mediapos)
+    if (mediapos >=0) {
+        var rest=classname.substring(mediapos + "@media".length).toLowerCase();
+        console.log(rest);
+        var key = rest.replace(/[^A-Za-z0-9]/g, '');
+        globalmediastyles[key]=rest;
+        classname=classname.substring(0,mediapos) + " " + key;
+        console.log(classname);
+    }      
+            
+    //console.log(insrtstyle);
+    
+    if (surroundingdiv)
+        htmlobjects.push( `<div style="${surroundingdiv};width:100%;height:100%;border-style:solid;border-width:1px;border-color:red;">` );
+        
+    if (image) {
+        htmlobjects.push(`<image src="`)
+        //log(`Getting image ${image}`);
+        //await sleep(500); // avoid rate limit on figma                
+        htmlobjects.push(FigmaApiGetImageSrc(image,token))
+        htmlobjects.push(`"  class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+        htmlobjects.push('</image>');
+    }
+    else 
+        htmlobjects.push(`<div class="${classname}" ${insrtstyle} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+
+
+
+    
+    var children=figdata.children;
+//    figdata.children=[];     (why was this done?)
+    if (children && !fsvg ) // allways recurse to try and find the intended object // don't recurse when @svg is shown
+        for (var i=0;i<children.length;i++)
+            htmlobjects.push( recurse(children[i],documentid,token,figdata.absoluteBoundingBox) )
+    
+   // if (!objname) 
+   {
+        if (!image) // close the div
+            htmlobjects.push('</div>');
+
+        if (surroundingdiv)
+            htmlobjects.push("</div>") // close the surrounding div
+    }
+   // console.log("Returning from recurse");
+   // console.log(htmlobjects);
+    return htmlobjects;
+    
+}    
+
+
+
+
+
+
+/*
+var svg=""
+svg +=`<svg width="${figdata.size.x}" height="${figdata.size.y}" viewBox="0 0 ${figdata.size.x} ${figdata.size.y}" fill="none" xmlns="http://www.w3.org/2000/svg">`
+                
+for (var i=0;i<figdata.strokeGeometry.length;i++) {
+    console.log(figdata.strokeGeometry[i].path);
+    console.log(figdata.strokeGeometry[i].windingRule);
+    svg +=`<path d="${figdata.strokeGeometry[i].path}" stroke="#FF206E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+}
+svg +="</svg>"
+*/
+
+
+</script>
+</body>
+
+
