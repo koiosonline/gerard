@@ -108,7 +108,7 @@ function MakeBlob(html) {
 }    
 
 
-var sleeptimer=0;
+
 
 async function FigmaApiGetImageSrc(url,token) {
 
@@ -118,9 +118,7 @@ async function FigmaApiGetImageSrc(url,token) {
     for (var i=0;i<8;i++) {
         if (i > 0)
             console.log(`Retry ${i} for ${url}`); 
-sleeptimer +=500;            
-            
-        await sleep(Math.random() * sleeptimer); // some extra time to prevent rate limits
+        await sleep(Math.random() * 50000); // some extra time to prevent rate limits
         var obj=await FigmaApiGet(url,token); 
                             
         if (!obj || obj.err || !obj.images) continue; // try again
@@ -128,10 +126,9 @@ sleeptimer +=500;
         var keys = Object.keys(obj.images);
         var key=keys[0];
         var str=obj.images[key];       
-        log(`Loading ${str}`);
+        console.log(`Retrieved ${str}`);
         
         var blob=await (await fetch(str)).blob()
-        log(`Loaded ${str}`);
         var url= URL.createObjectURL(blob)
          
          
@@ -236,8 +233,8 @@ async function start() {
     
 
     globalconnectto[fo.id] = ConvertToHTML(fo.id,figmadocument,documentid,token)
-    log("After ConvertToHTML");
-    console.log(globalconnectto);
+    //log("After ConvertToHTML");
+    //console.log(globalconnectto);
     
     
     var url=await RenderAllPages(globalconnectto,false,globalobjname);
@@ -272,19 +269,19 @@ async function SaveAlsoOnIpfs() {
     
     
 async function RenderAllPages(globalconnectto,fIPFS,objname) {
-    log("RenderAllPages");
+    
     var completepage=""
     
     var keys = Object.keys(globalconnectto);
     if (keys.length > 0) {
         for (var i = 0; i < keys.length; i++) {                
             var key=keys[i];
-            log(`Wait for ${i} ${key}`);
+            //log(`Wait for ${i} ${key}`);
             //console.log(globalconnectto[key]);
             var val = await globalconnectto[key];
             //console.log(val);
             if (val) {
-                log(`recursehtml for ${i} ${key}`);
+            
                 var html= await recursehtml(val.htmlobj,fIPFS);    
             
             
@@ -323,7 +320,7 @@ async function ConvertToHTML(foid,figmadocument,documentid,token) {
     var currentobject=FindObject(foid,figmadocument)
     log(`Processing ${currentobject.name}`);
     //console.log(currentobject)
-    var htmlobj=await recurse(currentobject,figmadocument,documentid,token,false,undefined); // retrieve the found object
+    var htmlobj=await recurse(currentobject,figmadocument,documentid,token); // retrieve the found object
     
     var returnset={ name:currentobject.name, id: foid, htmlobj: htmlobj }    
     //log(`Exit ConvertToHTML ${foid} name: ${currentobject.name}`);    
@@ -413,7 +410,7 @@ var loadimagescript=`
         // later convert this to native ipfs
         var data=await fetch(src)
         var text=await data.text()
-        //console.log(text);
+        console.log(text);
         
         
         var blob2 = new Blob([text], { type: "image/svg+xml" });
@@ -534,38 +531,27 @@ console.log(  htmlobj)
 }
 
 
-function GetAtParam(figdata,name) {
-    var pos=figdata.name.indexOf(name);
-    if (pos < 0) return undefined;
-    
-    var rest=figdata.name.substring(pos + name.length).toLowerCase();
-    rest = rest.split(" ")[0]  // take the part before a space
-    rest = rest.replace(/[^0-9\-]/g, ''); // only keep numbers (includeing - sign)
-    console.log(`GetAtParam ${name} ${rest}`)
-    return rest.length==0?true:rest;
-}
 
 
 
-
-    async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,pb) { // pb is (optional) parent boundingbox
+    async function recurse(figdata,figmadocument,documentid,token,pb) { // pb is (optional) parent boundingbox
         var htmlobjects=[]                
         console.log(figdata);
         console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
         
         if (figdata.visible==false) return "";        
         
-        var zindex=GetAtParam(figdata,"@zindex");        
+        var zindexpos=figdata.name.indexOf("@zindex");        
+        if (zindexpos >=0) {
+            var restzindex=figdata.name.substring(zindexpos + "@zindex".length).toLowerCase();
+            restzindex = restzindex.split(" ")[0]  // take the part before a space
+            var zindex = restzindex.replace(/[^0-9]/g, ''); // only keep numbers
+            
+            console.log(`zindex ${zindex}`);
+        }
         
-        
-        var fsvg=    GetAtParam(figdata,"@svg")            // console.log(`fsvg=${fsvg}`)
-        var faspect= GetAtParam(figdata,"@aspect")      //  console.log(`faspect=${faspect}`)
-        
-        var gridcol=   GetAtParam(figdata,"@gridcol")
-        var gridrow=   GetAtParam(figdata,"@gridrow")
-        var fgrid = gridcol || gridrow
-        
-        var frelative=   GetAtParam(figdata,"@relative")
+        var fsvg= figdata.name.includes("@svg")            // console.log(`fsvg=${fsvg}`)
+        var faspect= figdata.name.includes("@aspect")      //  console.log(`faspect=${faspect}`)
         
         var b=figdata.absoluteBoundingBox;
         var strtxt=""
@@ -584,18 +570,15 @@ function GetAtParam(figdata,name) {
         var onclick=figdata.transitionNodeID;
     }
 
-        if (fpartofgrid)
-           strstyle += "grid-area: auto;" // autolayout the childeren on the grid
-        else 
+
         if (b) {
-            strstyle +=`position: ${frelative?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
+            strstyle +=`position: absolute;`;                
             if (!pb) {
                 strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values // 
                 strstyle +="display:none;"; // initially hidden (relevant when there are more pages)
                 
             }
-            else  // now pb is present
-               {
+            else { // now pb is present
                 console.log("pb-b");
                 console.log(pb)
                 console.log(b);
@@ -625,13 +608,20 @@ function GetAtParam(figdata,name) {
                 //console.log(strstyle);
                 switch(figdata.constraints ? figdata.constraints.vertical : "default") {
                     case "SCALE":                       
-                        strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;                        
+                        strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                        
                      if (faspect) {
                         strstyle +=`padding-bottom:${ (parseFloat(b.height)/parseFloat(b.width) ) * (parseFloat(b.width)/parseFloat(pb.width)*100)}%;`;
+                        
+                        
+                        
                         //strstyle +=`height:${(parseFloat(b.height)/parseFloat(pb.height)*100).toFixed(2)}%;`;
                         }
                      else   
                         strstyle +=`bottom:${(parseFloat(yoffsetbottom)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                     
+                        
+                        
                         break;
                     case "CENTER":                            
                         strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
@@ -648,13 +638,6 @@ function GetAtParam(figdata,name) {
             }
         }    
         
-        if (fgrid)
-            strstyle +="display: grid;"
-        if (gridcol)
-            strstyle +=`grid-template-columns: repeat(${gridcol}, 1fr);`
-        if (gridrow)
-            strstyle +=`grid-template-rows: repeat(${gridrow}, 1fr);`                
-                
         
         if (figdata.clipsContent)
             strstyle +="overflow: hidden;"
@@ -827,7 +810,7 @@ function GetAtParam(figdata,name) {
     //    figdata.children=[];     (why was this done?)
         if (children && !fsvg ) // allways recurse to try and find the intended object // don't recurse when @svg is shown
             for (var i=0;i<children.length;i++)
-                htmlobjects.push( recurse(children[i],figmadocument,documentid,token,fgrid,figdata.absoluteBoundingBox) )
+                htmlobjects.push( recurse(children[i],figmadocument,documentid,token,figdata.absoluteBoundingBox) )
         
        // if (!objname) 
        {

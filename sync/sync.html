@@ -1,0 +1,30 @@
+<!DOCTYPE html> <!-- run from browser/ SimpleHTTPServer ; ipfs server must have: daemon --enable-pubsub-experiment   swarm .... "/ip4/0.0.0.0/tcp/4003/ws" 
+remove db: (after change in ipfs lib), goto to differen page; goto dev console/appl/indexeddb
+
+-->
+<!-- https://gpersoon.com/koios/gerard/sync/sync.html -->
+<html>
+    <head>       
+        <script src="https://unpkg.com/ipfs@0.41.0/dist/index.min.js"></script>  <!-- https://github.com/orbitdb/orbit-db/pull/767  -->
+        <script src="https://www.unpkg.com/orbit-db@0.24.1/dist/orbitdb.min.js"></script>        
+        <script type="module" src="./sync_main.mjs"></script>        
+     </head>
+    <body>
+        <h1>Sync v0.1</h1>        
+        <pre>
+        Name     : <span id="name" style="background-color:yellow;border-style: solid;border-width: 1px;  ">{put your name here}</span><br>
+        Question : <span id="question" style="background-color:yellow;border-style: solid;border-width: 1px;  ">{put your question here}</span><br>
+        #Entries : <span id="entries"></span>
+        Connected: <span id="connected"></span>
+        Loaded   : <span id="loaded"></span>%
+        </pre>
+        <button id="send"  >Send</button>
+        <button id="delete"  >Delete</button>
+        <button id="peers"  >Peers</button>
+        <button id="connect"  >Connect</button>
+        <button id="disconnect"  >Disconnect</button>
+        <button id="info"  >Info</button>
+        <pre id="records" style="width:100%;height:200px;border-style: solid;border-width: 1px; "></pre>
+        <pre id="log" style="width:100%;height:200px;border-style: solid;border-width: 1px; "></pre>       
+    </body>
+</html>
