@@ -616,7 +616,11 @@ function GetAtParam(figdata,name) {
                         strstyle +=`width:${b.width}px;`;
                         //surroundingdiv +="display: flex; justify-content: center;";
                         //strstyle +=`left:1%;`
-                        break;                        
+                        break;
+                    case "RIGHT":
+                        strstyle +=`right:${-xoffsetright}px;`; // negative number
+                        strstyle +=`width:${b.width}px;`;
+                        break;
                     default:
                         strstyle +=`left:${xoffset}px;`
                         if (parseFloat(b.width) * 100 > 1) 
@@ -661,13 +665,10 @@ function GetAtParam(figdata,name) {
         
         if (figdata.fills && figdata.fills[0] && figdata.fills[0].color && (figdata.fills[0].visible != false)) {               
             if (figdata.fills[0].type="SOLID") {
-                var a = figdata.fills[0].opacity;
-                if (a == undefined)
-                    a = _convertFigmaColorToRGB(figdata.fills[0].color.a);
-                var r = _convertFigmaColorToRGB(figdata.fills[0].color.r);
-                var g = _convertFigmaColorToRGB(figdata.fills[0].color.g);
-                var b = _convertFigmaColorToRGB(figdata.fills[0].color.b);
-                var rgba=`rgba(${r},${g},${b},${a})`;
+                var color=figdata.fills[0].color
+                if (figdata.fills[0].opacity)
+                    color.a=figdata.fills[0].opacity
+                var rgba=ConvertColor(color)
               }
           }
           
@@ -677,27 +678,37 @@ function GetAtParam(figdata,name) {
                 image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`
         }
           
-        if (figdata.backgroundColor) {
-            var a = figdata.backgroundColor.a;
-            var r = figdata.backgroundColor.r;
-            var g = figdata.backgroundColor.g;
-            var b = figdata.backgroundColor.b;
-            var backgroundrgba=`rgba(${r},${g},${b},${a})`;
-            }
+          
+function ConvertColor(color) {
+    var a = _convertFigmaColorToRGB(color.a);
+    var r = _convertFigmaColorToRGB(color.r);
+    var g = _convertFigmaColorToRGB(color.g);
+    var b = _convertFigmaColorToRGB(color.b);
+    return `rgba(${r},${g},${b},${a})`;
+}
+          
+        if (figdata.backgroundColor) 
+           var backgroundrgba=ConvertColor(figdata.backgroundColor)
+
         
-        if (figdata.strokes && figdata.strokes[0] && figdata.strokes[0].color) {               
-            if (figdata.strokes[0].type="SOLID") {
-            console.log(figdata.strokes[0].color)
-            
-                var a = _convertFigmaColorToRGB(figdata.strokes[0].color.a);
-                var r = _convertFigmaColorToRGB(figdata.strokes[0].color.r);
-                var g = _convertFigmaColorToRGB(figdata.strokes[0].color.g);
-                var b = _convertFigmaColorToRGB(figdata.strokes[0].color.b);
-                var strokesrgba=`rgba(${r},${g},${b},${a})`;
-              }
-          }
+        if (figdata.strokes && figdata.strokes[0] && figdata.strokes[0].color) 
+            if (figdata.strokes[0].type="SOLID") 
+                var strokesrgba=ConvertColor(figdata.strokes[0].color)
+             
           var strokeWeight = figdata.strokeWeight
             
+        if (figdata.effects) {
+            for (var i=0;i<figdata.effects.length;i++) {
+                var effect = figdata.effects[i];
+                if (effect.visible)
+                    switch (effect.type) {
+                        case "DROP_SHADOW": {
+                            strstyle +=`box-shadow: ${effect.offset.x}px ${effect.offset.y}px ${effect.radius}px ${ConvertColor(effect.color)};`
+                        }
+                }
+            }
+        }
+       
        
             
         if (figdata.style && figdata.style.fontFamily) {

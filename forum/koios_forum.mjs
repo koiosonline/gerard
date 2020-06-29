@@ -34,6 +34,10 @@ async function asyncloaded() {
     //ReadThread(KoiosThread);
     log("wait for authorize")*/
     
+    
+    
+    
+    
     const KoiosSpace="koiosonline";
     await authorize();
     box = await Box.openBox(getUserAddress(), getWeb3().givenProvider);    
