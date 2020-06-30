@@ -44,7 +44,7 @@ async function asyncloaded() {
     space = await box.openSpace(KoiosSpace);
       // get and display my own name
     ReadSpace();
-    //WriteThread("corwintest", Moderator);
+    WriteThread("corwintest", Moderator);
 }
 
 async function CreateOpenThread(threadName, firstModerator) {
@@ -56,6 +56,7 @@ async function CreateOpenThread(threadName, firstModerator) {
 
 //var currentThread;
 async function WriteThread(threadAddress) {
+    console.log("in WriteThread");
     FindSender(document.getElementById("myname") || document.getElementsByClassName("myname")[0] ,box.DID)
     var foruminput = document.getElementById("foruminput") || document.getElementsByClassName("foruminput")[0];
     foruminput.contentEditable="true"; // make div editable

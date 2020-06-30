@@ -1,4 +1,4 @@
- import {getElement,DomList} from '../lib/koios_util.mjs';
+ import {getElement,DomList,LinkClickButton,subscribe} from '../lib/koios_util.mjs';
  
  
  
@@ -20,8 +20,16 @@
         }
     }
      
+         var target=getElement("input")    
+    target.contentEditable="true"; // make div editable
+    target.style.whiteSpace = "pre"; //werkt goed in combi met innerText
+     LinkClickButton("input");subscribe("sendinput",Input);  
      
-    
+     
+     function Input() {
+         var target=getElement("input")    
+         console.log(target.innerHTML);
+     }    
      
      function ShowBlock(x,y,txt) {
          var pb = ParagraphboxList.AddListItem() 

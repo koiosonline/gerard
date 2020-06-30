@@ -29,6 +29,8 @@ pin:      <span id="pin"      style="background-color:yellow;border-style: solid
 <pre id="log" style="height:200px;overflow: scroll;"></pre>
 <pre id="output"></pre>
 <button id="SaveOnIpfs" onclick="SaveAlsoOnIpfs()"></button>
+<!--button id="RunHere" onclick="main()">Run here</button-->
+<div id="inject"></div>
 
 <script>
 window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
@@ -296,7 +298,7 @@ async function RenderAllPages(globalconnectto,fIPFS,objname) {
     }        
     //console.log(completepage);
     var html=MakePage(completepage,globalembed,globalfonts,globalmediastyles,objname)    
-    
+    //document.getElementById("inject").innerHTML=html;
     var url
     if (fIPFS)
         return SaveOnIpfs(html)
@@ -432,7 +434,9 @@ var loadimagescript=`
     }
 
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", main)
+    
+    function main() {
       console.log("DOMContentLoaded");
       
       
@@ -471,7 +475,7 @@ var loadimagescript=`
       } else {
         // Possibly fall back to event handlers here
       }
-    });
+    }
 `
 // end ==========================================================================        
     
@@ -493,7 +497,7 @@ function MakePage(strinput,embed,globalfonts,globalmediastyles,firstpage) {
 
     
 function MakeUrl(url) {
-    return `<a href="${url}" target="_blank"> ${url}` + "</a><br>"
+    return `<a href="${url}" target="_blank"> ${url}` + " in new page</a><br>"
 }
 
 
