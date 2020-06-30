@@ -23,7 +23,9 @@
          var target=getElement("input")    
     target.contentEditable="true"; // make div editable
     target.style.whiteSpace = "pre"; //werkt goed in combi met innerText
-     LinkClickButton("input");subscribe("sendinput",Input);  
+    
+    console.log("link");
+     LinkClickButton("addbutton");subscribe("addbuttonclick",Input);  
      
      
      function Input() {

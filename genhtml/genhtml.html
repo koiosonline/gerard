@@ -29,7 +29,7 @@ pin:      <span id="pin"      style="background-color:yellow;border-style: solid
 <pre id="log" style="height:200px;overflow: scroll;"></pre>
 <pre id="output"></pre>
 <button id="SaveOnIpfs" onclick="SaveAlsoOnIpfs()"></button>
-<!--button id="RunHere" onclick="main()">Run here</button-->
+<button id="RunHere" onclick="main()">Run here</button>
 <div id="inject"></div>
 
 <script>
@@ -482,12 +482,24 @@ var loadimagescript=`
 function MakePage(strinput,embed,globalfonts,globalmediastyles,firstpage) {
     var str="" 
     str +='<html>'
-    str += MakeHeader(embed,globalfonts,globalmediastyles)    
+    
+    var head=MakeHeader(embed,globalfonts,globalmediastyles)   
+    str += head;
+
+//document.getElementsByTagName('head')[0].innerHTML = head;
+//[0].appendChild(head);
+    
     str +='<body>'
-    str += `<div class="firstpage" data-firstpage="${firstpage}">`
-    str += "</div>"
-    str +=MakeScriptTag(false,undefined,loadimagescript);    
-    str += strinput
+    
+    var body=""
+    body += `<div class="firstpage" data-firstpage="${firstpage}">`
+    body += "</div>"
+    body +=MakeScriptTag(false,undefined,loadimagescript);    
+    body += strinput
+    
+    
+    str += body;
+    //document.getElementsByTagName('body')[0].innerHTML = body;
     str +='</body>'
     str +='</html>'    
     return str;
