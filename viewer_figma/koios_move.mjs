@@ -1,5 +1,5 @@
 
-import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement} from '../lib/koios_util.mjs';
+import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,Toggle} from '../lib/koios_util.mjs';
 
 
 
@@ -65,11 +65,25 @@ console.log("After    DragItem");
 }
 
 
-function ToggleMainLayout() {}
+var displaywinbuttons=new Toggle(false)
+function ToggleMainLayout() {
+    var newval=displaywinbuttons.Toggle()?"block":"none"
+     getElement("selectliterature").style.display=newval
+     getElement("selectnotes").style.display=newval
+     getElement("selectvideo").style.display=newval
+     getElement("selectslides").style.display=newval
+    
+}
 
 function loaded() {
       console.log("load in koios_move.mjs");
       SetupSliders()
+      
+      
+      var tb=getElement("testbutton");
+      console.log(tb);
+      
+      
 }    
 document.addEventListener("DOMContentLoaded", loaded )
       

@@ -22,9 +22,15 @@ window.onerror = async function(message, source, lineno, colno, error) {   // es
     log(str);    
 } 
 
+
+console.log("Start script forum");
+
+//setTimeout(asyncloaded,1000);
+
 window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
 
 async function asyncloaded() { 
+console.log("In asyncloaded");
     SetupLogWindow(false)
     log("Starting")
     /*const KoiosThread="/orbitdb/zdpuAvoxmpwZxT5bpMiuKSBAucpRzTy8hC2tBU9v2NhDxtCMX/3box.thread.koiosonline.corwintest"     
