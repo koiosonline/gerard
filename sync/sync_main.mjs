@@ -1,25 +1,82 @@
  
  import {getElement,loadScriptAsync} from '../lib/koios_util.mjs';
  
-        function log(logstr) {   
-            getElement("log").innerHTML +=logstr+"\n";
-        }
+function log(logstr) {   
+    getElement("log").innerHTML +=logstr+"\n";
+}
+
+var globaldb;
+var globalipfs;
+const globalserverid='QmaXQNNLvMo6vNYuwxD86AxNx757FoUJ3qaDoQ58PY2bxz'
+
+async function GetChoiceItems(source) {            
+    var f=await fetch(source)
+    var Items=await f.json();            
+    console.log(JSON.stringify(Items))
+    return Items;    
+}            
+
         
-        var globaldb;
-        var globalipfs;
-        const globalserverid='QmaXQNNLvMo6vNYuwxD86AxNx757FoUJ3qaDoQ58PY2bxz'
+async function main() {
+        console.log("Main");           
+        await loadScriptAsync("https://unpkg.com/ipfs@0.41.0/dist/index.min.js");
+        await loadScriptAsync("https://www.unpkg.com/orbit-db@0.24.1/dist/orbitdb.min.js");
         
-        
-        
-        
-        async function main() {
-            console.log("Main");           
-            await loadScriptAsync("https://unpkg.com/ipfs@0.41.0/dist/index.min.js");
-            await loadScriptAsync("https://www.unpkg.com/orbit-db@0.24.1/dist/orbitdb.min.js");
-            
-            window.LOG='Verbose' // 'debug'
-            SetupField("question")
-            SetupField("name")               
+        window.LOG='Verbose' // 'debug'
+        //SetupField("question1")
+        SetupField("name")               
+
+        await GetChoiceItems("https://gpersoon.com/koios/gerard/sync/beroepsproducten.json");
+
+
+
+        var typeprovide=getElement("type-provide")
+            typeprovide.innerHTML=`
+        <select id="typeprovide" >
+                    <option value="none">--select--</option> 
+                    <option value="Advies">Advies</option>
+                    <option value="Handeling">Handeling</option>
+                    <option value="Onderzoek">Onderzoek</option>
+                    <option value="Ontwerp">Ontwerp</option>   
+                    </select>
+        `
+
+        var productprovide=getElement("product-provide")
+            productprovide.innerHTML=`
+        <select id="productprovide" >
+                    <option value="none">--select--</option> 
+                    <option value="Bedrijfswaardering">Bedrijfswaardering</option>
+                    <option value="Adviesgesprek">Adviesgesprek</option>
+                    <option value="Benchmarkonderzoek">Benchmarkonderzoek</option>
+                    <option value="Dashboard">Dashboard</option>   
+                    </select>
+        `
+
+
+        var typesearch=getElement("type-search")
+            typesearch.innerHTML=`
+        <select id="typesearch" >
+                    <option value="none">--select--</option> 
+                    <option value="Advies">Advies</option>
+                    <option value="Handeling">Handeling</option>
+                    <option value="Onderzoek">Onderzoek</option>
+                    <option value="Ontwerp">Ontwerp</option>   
+                    </select>
+        `
+
+        var productsearch=getElement("product-search") // onchange=...
+            productsearch.innerHTML=`
+        <select id="productsearch" >
+                    <option value="none">--select--</option> 
+                    <option value="Bedrijfswaardering">Bedrijfswaardering</option>
+                    <option value="Adviesgesprek">Adviesgesprek</option>
+                    <option value="Benchmarkonderzoek">Benchmarkonderzoek</option>
+                    <option value="Dashboard">Dashboard</option>   
+                    </select>
+        `
+
+
+
 
 
         getElement("send").addEventListener("click", Send);
@@ -93,8 +150,9 @@ async function ShowRecords() {
         //console.log(result);        
         getElement("entries").innerHTML=result.length;
         //log(`Number of entries: ${result.length}`)   
-        for (var i=0;i<result.length;i++)
-            str += `Name: ${result[i].name} Question: ${result[i].question}<br>`;
+        str=JSON.stringify(result)
+      //  for (var i=0;i<result.length;i++)
+        //    str += `Name: ${result[i].name} Question: ${result[i].question}<br>`;
 
         getElement("records").innerHTML=str;
 }          
@@ -105,11 +163,27 @@ async function Send() {
     var namefield=getElement("name")
     var name=namefield.innerHTML.trim();
     var questionfield=getElement("question")
-    var question=questionfield.innerHTML.trim();
-    log(`Send ${name} ${question}`);
-    console.log(question);
     
-     var h1=await globaldb.put({ _id: new Date().getTime(), name:name, question:question })   
+    var e1 = document.getElementById("typesearch");
+    console.log(e1.selectedIndex)
+    console.log(e1.options)
+    var typesearch = e1.options[e1.selectedIndex].value;
+    console.log(typesearch);
+    
+    
+    var e2 = document.getElementById("productsearch");
+    console.log(e2.selectedIndex)
+    console.log(e2.options)
+    var productsearch = e2.options[e2.selectedIndex].value;
+    console.log(productsearch);
+    
+    
+    
+    //var question=questionfield.innerHTML.trim();
+  //  log(`Send ${name} ${question}`);
+  //  console.log(question);
+    
+     var h1=await globaldb.put({ _id: new Date().getTime(), name:name, typesearch:typesearch, productsearch:productsearch })   
     
 }        
         
@@ -182,5 +256,5 @@ function SetupField(id) {
 }
         
         
-        
-   document.addEventListener("DOMContentLoaded", main)
+window.onload=main()        
+   //document.addEventListener("DOMContentLoaded", main)

@@ -1,0 +1,6 @@
+[
+ { "type": "Advies",	"description": "Bedrijfswaardering" },
+ { "type": "Handeling", "description": "Adviesgesprek"      },
+ { "type": "Onderzoek", "description": "Benchmarkonderzoek" },
+ { "type": "Ontwerp",	"description": "Dashboard"          }
+]

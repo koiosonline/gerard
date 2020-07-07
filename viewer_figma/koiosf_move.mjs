@@ -1,5 +1,5 @@
 
-import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,Toggle} from '../lib/koios_util.mjs';
+import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,Toggle} from '../lib/koiosf_util.mjs';
 
 
 
@@ -27,7 +27,7 @@ var SetMiddlev1="10px"
 XYUpdate(0.5,0.5);
 
 
-    function XYUpdate(percx,percy) {
+    async function XYUpdate(percx,percy) {
         //console.log(percx,percy)
         const snap = 0.01;
         //var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
@@ -56,7 +56,7 @@ XYUpdate(0.5,0.5);
         var a=window.getComputedStyle(grid).getPropertyValue("grid-template-columns")
         var b=window.getComputedStyle(grid).getPropertyValue("grid-template-rows")
         //console.log(`${a} ///  ${b}`);
-        
+        //await sleep(10)
         
     }
 console.log("Before    DragItem"); 
@@ -76,7 +76,7 @@ function ToggleMainLayout() {
 }
 
 function loaded() {
-      console.log("load in koios_move.mjs");
+      console.log("load in koiosf_move.mjs");
       SetupSliders()
       
       

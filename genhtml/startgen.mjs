@@ -22,69 +22,113 @@
 */    
 
 
-function SwapObjects(obj1,obj2) {
-    var temp = document.createElement("div"); // create marker element     
-    console.log('swapping');
-    console.log(obj1);
-    console.log(obj2);
-    obj1.parentNode.insertBefore(temp, obj1); // and insert it where obj1 is   
-    obj2.parentNode.insertBefore(obj1, obj2); // move obj1 to right before obj2
-    temp.parentNode.insertBefore(obj2, temp); // move obj2 to right before where obj1 used to be    
-    temp.parentNode.removeChild(temp); // remove temporary marker node
-    // temp should be carbage collected
-}   
+async function onhoverhandler(info) {   
+    console.log('onhoverhandler');
 
-
-function onhoverhandler(info) {   
-    var btnclass=info.this.classList[0]
-    console.log(`onhoverhandler ${info.hover} ${btnclass}`)
-    
-    var buttons=document.getElementById("buttons");
-    var hover=buttons.getElementsByClassName(`${btnclass}--hover`);
-    if (hover && hover[0]) {        
-        var cln = hover[0].cloneNode(true);
-        cln.style.display="block"
-        cln.style.width=info.this.style.width
-        cln.style.height=info.this.style.height
-        cln.style.left=info.this.style.left
-        cln.style.top=info.this.style.top       
-        
-        
-        var labelsdest=cln.getElementsByClassName("__label")
-        var labelssource=info.this.getElementsByClassName("__label")
-        
-        console.log(labelssource)
-        console.log(labelsdest);
-        
-        if (labelssource && labelssource[0] && labelsdest && labelsdest[0])
-            labelsdest[0].innerHTML = labelssource[0].innerHTML
-        
-        cln.addEventListener("mouseout", x=> { 
-            console.log("mouseout");
-            info.this.style.display="block" // enable previous object again
-            cln.parentNode.removeChild(cln); // remove the hover object
-        } )
-        info.this.parentNode.insertBefore(cln, info.this)        
-        info.this.style.display="none"; // hide during the hoover        
-    }    
+    console.log(info);    
+    var found=await SwitchTo(info.this,"--hover") 
+    if (found) {
+        found.addEventListener("mouseleave", MouseLeave)
+        async function MouseLeave() {
+            found.removeEventListener("mouseleave",  MouseLeave);
+            console.log("mouseleave");
+            await SwitchBack(info.this,found)        
+        }
+    }
 }
 
-    function onclickhandler(info) {
-        console.log(`In onclickhandler, target=${info.dest}`);
+async function SwitchBack(domid,found) {   
+    var main=domid.firstChild; 
+    main.style.opacity="1";  
+    found.style.opacity="0";
+    window.getComputedStyle(found).opacity;
+    await sleep(200);
+    found.style.display="none"; // so the original button is in front again
+    main.style.display="block" // enable previous object again
+}
+
+async function SwitchTo(domid,divtype) {
+    var main=domid.firstChild;
+    var btnclass=main.classList[0]
+    console.log(`SwitchTo ${btnclass}${divtype}`)    
+    var found=domid.getElementsByClassName(`${btnclass}${divtype}`)[0]    
+    if (found) {        
+        found.style.display="block"
+        found.style.width=main.style.width
+        found.style.height=main.style.height
+        found.style.left=main.style.left
+        found.style.top=main.style.top       
+        found.style.right=main.style.right       
+        found.style.bottom=main.style.bottom      
+        found.style.position=main.style.position              
+        found.style.transitionDelay="0s"        
+        found.style.opacity="0";        
+        found.style.transition="all 200 ease-in-out";
+        window.getComputedStyle(found).opacity; // delay to prevent the browser optimizing (so you don't see the transition)
+
+        var labelsdest=found.getElementsByClassName("__label")
+        var labelssource=main.getElementsByClassName("__label")        
+        if (labelssource && labelssource[0] && labelsdest && labelsdest[0])
+            labelsdest[0].innerHTML = labelssource[0].innerHTML
+        main.style.transition="all 200 ease-in-out";
+        main.style.transitionDelay="0s"        
+        main.style.opacity="0"; // start the transition
+        found.style.opacity="1"; // start the transition
+        await sleep(200);
+        main.display="none";
+        return found;
+    }    
+    return undefined;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+function SwitchPage(newpage) {    
+    console.log(`SwitchPage to ${newpage}`)
+    if (newpage) {
+            var destdomid=document.getElementsByClassName(newpage)[0];
+            if (!destdomid) { console.error(`Page not found ${newpage}`);return; }
+            destdomid.style.display="block"
+            console.log(destdomid);
+            
+            if (destdomid.classList.contains("@overlay")) {
+                console.log("overlay found");
+                destdomid.style.zIndex="2"
+            } else {
+                document.getElementsByClassName(globalprevpage)[0].style.display="none"
+                console.log(document.getElementsByClassName(globalprevpage)[0]);
+            }         
+            // info.event.preventDefault(); // prevent click on lower laying object // doesn't make a difference            
+            globalprevpage=newpage
+    }
+}    
+
+
+    async function onclickhandler(info) {
+        console.log(`In onclickhandler, target=${info.dest?info.dest:""} prev=${globalprevpage}`);
         console.log(info)
-        var destdomid=document.getElementsByClassName(info.dest)[0];
-        destdomid.style.display="block"
-        console.log(destdomid);
         
-        if (destdomid.classList.contains("@overlay")) {
-            console.log("overlay found");
-            destdomid.style.zIndex="2"
-        } else {
-            document.getElementsByClassName(globalprevpage)[0].style.display="none"
-        }         
-        // info.event.preventDefault(); // prevent click on lower laying object // doesn't make a difference
-        
-        globalprevpage=info.dest
+        var ftoggle=info.this.getElementsByClassName("@toggle").length > 0
+        if (ftoggle) {
+            if (!info.this.dataset.toggle)
+                info.this.dataset.toggle="false"
+            info.this.dataset.toggle = (info.this.dataset.toggle=="true")?"false":"true"
+            console.log(`Toggle=${info.this.dataset.toggle}`)
+            if (info.this.dataset.toggle=="true")
+                SwitchTo(info.this,"--active") 
+            else 
+                SwitchTo(info.this,"") 
+        } else {        
+            var found=await SwitchTo(info.this,"--active") 
+            if (found) {
+                await sleep(200)        
+                await SwitchBack(info.this,found)        
+            }
+            SwitchPage(info.dest)
+        }
     }
 
 

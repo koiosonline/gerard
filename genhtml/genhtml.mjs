@@ -210,7 +210,7 @@ function FindRelated(components,object) {
 function IsButton(name) {
     return name.includes("btn-")
 }    
-
+/*
 async function GetComponents(componentsid,token) {
     var componentlist=[];
     if (componentsid) {
@@ -246,50 +246,50 @@ async function GetComponents(componentsid,token) {
         }
         var res=await RenderAllPages(componentlist,false)
         console.log(res);
-        return res;
-
-
-
-           
-
-/*                
-                ages.find(checkAdult);
-                btn-secondary--lg
-genhtml.mjs:208 btn-secondary--lg--focus
-genhtml.mjs:208 btn-secondary--lg--hover
-genhtml.mjs:208 btn-secondary--lg--active
-genhtml.mjs:208 btn-secondary--lg--disabled
-                */
-                
-                
-        }
+        return res;               
+    }
 }
+*/
 
- var globalbuttons;
+ //var globalbuttons;
+ var globalcomponentsdocument=undefined;
+var globalcompletepage;
 
 async function start() {
-    log("Pass 1");
+    
     var token=document.getElementById("figmakey").innerHTML.trim();
     var documentid=document.getElementById("pageid").innerHTML.trim();    
     var componentsid=document.getElementById("components").innerHTML.trim();    
     globalobjname=document.getElementById("objname").innerHTML.trim();
     globalembed=document.getElementById("embed").innerHTML.trim();
     
+    
+    if (token.replace(/\./g,'')=="") { log("Figma token missing");return;}
+    if (documentid.replace(/\./g,'')=="") { log("Document id missing");return;}
     if (globalembed.replace(/\./g,'')=="") globalembed=undefined; // if only ..., then no embed
     if (componentsid.replace(/\./g,'')=="") componentsid=undefined; // if only ..., then no embed
     
+    
+    log("Pass 1");
     globalpinlocation=document.getElementById("pin").innerHTML.trim();
     console.log(`Start ${token} ${documentid}`);
     
-    globalbuttons=await GetComponents(componentsid,token)
-    
+    //globalbuttons=await GetComponents(componentsid,token)
+    if (componentsid) {
+        var components=(await FigmaApiGet(`https://api.figma.com/v1/files/${componentsid}`,token));
+        if (components.err) {log(`Error retrieving figma info: ${components.status} ${components.err} `);return;}
+        
+        globalcomponentsdocument=components.document
+    }
     
     var url=`https://api.figma.com/v1/files/${documentid}`  // to export the vectors: ?geometry=paths    
     var documentpart=await FigmaApiGet(url,token)
+    
+    if (documentpart.err) {log(`Error retrieving figma info: ${documentpart.status} ${documentpart.err} `);return;}
     console.log(documentpart);
           
     
-    
+ 
     
     
     
@@ -311,9 +311,9 @@ async function start() {
     log("Pass 2");
     //console.log(globalconnectto);
     
-    var completepage=await RenderAllPages(globalconnectto,false);
+     globalcompletepage=await RenderAllPages(globalconnectto,false);
     //console.log(completepage);
-    var html=await MakePage(completepage,globalembed,globalfonts,globalmediastyles,globalbuttons,globalobjname,false)    
+    var html=await MakePage(globalcompletepage,globalembed,globalfonts,globalmediastyles,globalobjname,false)    
     
     var url=MakeBlob(html);    
     
@@ -332,21 +332,27 @@ async function start() {
     }
 */
     document.getElementById("SaveOnIpfs").innerHTML="Save on IPFS"  
+    document.getElementById("AlsoInject").innerHTML="Inject in current page"  
 }    
     
     
 export async function SaveAlsoOnIpfs() {
     console.log(`SaveAlsoOnIpfs firstpage=${globalobjname}`);
     var completepage=await RenderAllPages(globalconnectto,true);
-    var html=await MakePage(completepage,globalembed,globalfonts,globalmediastyles,globalbuttons,globalobjname,true)    
-    var result=SaveOnIpfs(html)
+    var html=await MakePage(completepage,globalembed,globalfonts,globalmediastyles,globalobjname,true)    
+    var result=await SaveOnIpfs(html)
     var str2=""
     str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`);
     str2 +="IPFS link 2: "+MakeUrl(`https://ipfs.io/ipfs/${result}`);
     str2 +="IPFS link 3: "+MakeUrl(`http://www.gpersoon.com:8080/ipfs/${result}`);
     document.getElementById("output").innerHTML += str2;
 }
-    
+ 
+export async function AlsoInject() {
+    InjectPage(globalcompletepage,globalembed,globalfonts,globalmediastyles,globalobjname,false)
+}
+
+ 
     
 async function RenderAllPages(globalconnectto,fIPFS) {
     //log("RenderAllPages");
@@ -393,6 +399,7 @@ let globalfonts = []
     
 async function ConvertToHTML(foid,figmadocument,documentid,token) {  
     var currentobject=FindObject(foid,figmadocument)
+    if (!currentobject) return undefined;
     log(`Page ${globalpagesfirstpass++} ${currentobject.name} ${currentobject.id}`);
     //console.log(currentobject)
     var htmlobj=await recurse(currentobject,figmadocument,documentid,token,false,false,false,undefined); // retrieve the found object
@@ -477,64 +484,51 @@ function MakeHeader(embed,globalfonts,globalmediastyles) {
 var loadimagescript= "./startgen.mjs"
 // end ==========================================================================        
     
-async function MakePage(strinput,embed,globalfonts,globalmediastyles,buttons,firstpage,fIPFS) {
+async function MakePage(strinput,embed,globalfonts,globalmediastyles,firstpage,fIPFS) {
     var str="" 
-    str +='<html>'
-    
+    str +='<html>'   
     var head=MakeHeader(embed,globalfonts,globalmediastyles)   
-    str += head;
-
-// document.getElementsByTagName('head')[0].innerHTML = 
-
-    
+    str += head;    
     str +='<body>'    
     var body=""
     body += `<div class="firstpage" data-firstpage="${firstpage}">`
     body += "</div>"    
-    body += strinput
-    
-    
-    body +=`<div id="buttons">${buttons}`
-    body += "</div>"    
-    
-    if (!fIPFS) document.getElementById('inject').innerHTML +=body;
+    body += strinput    
     var x=await fetch(loadimagescript);
-    var y=await x.text()
-    
-    var scriptwithtag=MakeScriptTag(false,undefined,y); // not as a module: function's have to be exported & imported then
-    
-    
-    var myscript = document.createElement('script');
-    myscript.innerHTML=y;
-    document.body.appendChild(myscript);
-    
-    body +=scriptwithtag;
-    
+    var y=await x.text()    
+    var scriptwithtag=MakeScriptTag(false,undefined,y); // not as a module: function's have to be exported & imported then    
+    body +=scriptwithtag;    
     str += body;
-
-
-    console.log("after inject")
-    
-  if (!fIPFS) {  
-    if (embed) {
-        console.log(`Loading ${embed}`);
-        var mod=await import(embed);
-        console.log(mod)
-    }
-    //await import(loadimagescript);
-    
-    document.getElementById('buttons').innerHTML =buttons;
-    var event = new Event('DOMContentLoaded',{  bubbles: true,  cancelable: true});
-    window.document.dispatchEvent(event);
-    
-    
-  }
-    
     str +='</body>'
     str +='</html>'    
     return str;
 }   
         
+
+async function InjectPage(strinput,embed,globalfonts,globalmediastyles,firstpage,fIPFS) {
+    var head=MakeHeader(embed,globalfonts,globalmediastyles)       
+    var body=""
+    body += `<div class="firstpage" data-firstpage="${firstpage}">`
+    body += "</div>"    
+    body += strinput
+    
+    document.getElementById('inject').innerHTML +=body;
+    var x=await fetch(loadimagescript);
+    var y=await x.text()
+    var myscript = document.createElement('script');
+    myscript.innerHTML=y;
+    document.body.appendChild(myscript);
+
+    if (embed) {
+        console.log(`Loading ${embed}`);
+        var mod=await import(embed);
+        console.log(mod)
+    }
+    var event = new Event('DOMContentLoaded',{  bubbles: true,  cancelable: true});
+    window.document.dispatchEvent(event);    
+}   
+        
+
  
 
     
@@ -586,7 +580,9 @@ function GetAtParam(figdata,name) {
     
     var rest=figdata.name.substring(pos + name.length).toLowerCase();
     rest = rest.split(" ")[0]  // take the part before a space
-    rest = rest.replace(/[^0-9\-]/g, ''); // only keep numbers (includeing - sign)
+    //rest = rest.replace(/[^0-9\-]/g, ''); // only keep numbers (includeing - sign)
+    rest = rest.replace(/[:]/g, ''); // remove :
+    
     console.log(`GetAtParam ${name} ${rest}`)
     return rest.length==0?true:rest;
 }
@@ -594,7 +590,7 @@ function GetAtParam(figdata,name) {
 
 
 
-    async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fpartofbutton,fpartofflex,pb) { // pb is (optional) parent boundingbox
+async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fpartofbutton,fpartofflex,pb) { // pb is (optional) parent boundingbox
         var htmlobjects=[]                        
         console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
         console.log(figdata);
@@ -608,7 +604,8 @@ function GetAtParam(figdata,name) {
         var faspect= GetAtParam(figdata,"@aspect")      //  console.log(`faspect=${faspect}`)
         var fhidden= GetAtParam(figdata,"@hidden")      //  console.log(`faspect=${faspect}`)
         
-        var fthisisabutton=GetAtParam(figdata,"@click") || GetAtParam(figdata,"@toggle")
+        var clickdest=GetAtParam(figdata,"@click");
+        var fthisisabutton= clickdest || GetAtParam(figdata,"@toggle")
         
         var gridcol=   GetAtParam(figdata,"@gridcol")
         var gridrow=   GetAtParam(figdata,"@gridrow")
@@ -624,9 +621,30 @@ function GetAtParam(figdata,name) {
         var display=""
         var width=""
         var height=""
+        var left=""
+        var top=""
+        var right=""
+        var bottom=""
+        var paddingbottom=""
         var fflex=false;
+        var dimensions=""
+        var objecttype="div" // standard type
+        var strhref=""
+        var urllocation=""
 
 
+      if (clickdest && clickdest!=true) {
+        //log(`Connect: ${clickdest}`);
+        if (!globalconnectto[clickdest]) {
+            globalconnectto[clickdest]=true; // prevent recursing too fast
+            globalconnectto[clickdest]=ConvertToHTML(clickdest,figmadocument,documentid,token,embed) // = promise, so executed in parallel
+        }        
+        var onclick=clickdest;
+    }    
+
+
+
+/*
     if (figdata.transitionNodeID) {
         //log(`Connect: to ${figdata.transitionNodeID}`);
         if (!globalconnectto[figdata.transitionNodeID]) {
@@ -636,12 +654,22 @@ function GetAtParam(figdata,name) {
         
         var onclick=figdata.transitionNodeID;
     }
+*/
+
+    //if (figdata.type=="INSTANCE") {
+//        console.log("Searching mastercomponent");
+//        var mastercomponent=FindObject(figdata.componentId,figmadocument)   
+//        console.log(mastercomponent);
+//    }
+
+
+
 
         if (fpartofgrid)
            strstyle += "grid-area: auto;" // autolayout the childeren on the grid
         else 
         if (b) { //|| figdata.layoutMode
-            strstyle +=`position: ${(frelative || fpartofflex )?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
+            dimensions +=`position: ${(frelative || fpartofflex )?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
             if (!pb) {
                 strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values // 
                 if (figdata.name != globalobjname)
@@ -660,34 +688,35 @@ function GetAtParam(figdata,name) {
                 var yoffsetbottom=-(b.y+b.height-pb.y-pb.height); 
                 
                 console.log(`pb:${JSON.stringify(pb)} b:${JSON.stringify(b)} l:${xoffset} r:${xoffsetright} t:${yoffset} b:${yoffsetbottom}`);
-                if (!fpartofflex) {
+              /* if (!fpartofflex) */{
                     switch(figdata.constraints ? figdata.constraints.horizontal : "default") {
                         case "SCALE":
-                            strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            left =`${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%`;
                             //strstyle +=`right:${(parseFloat(xoffsetright)/parseFloat(pb.width)*100).toFixed(2)}%;`;
                             width=`${(parseFloat(b.width)/parseFloat(pb.width)*100).toFixed(2)}%`;
                             
                             break;
                         case "CENTER":                              
-                            strstyle +=`left:${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%;`;
+                            //left =`${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%`;
+                            left =`calc(50% - ${b.width/2}px)`;  // There must be spaces surrounding the math operator. 
                             width=`${b.width}px`;
                             //surroundingdiv +="display: flex; justify-content: center;";
                             //strstyle +=`left:1%;`
                             break;
                         case "RIGHT":
-                            strstyle +=`right:${xoffsetright}px;`; // negative number
+                            right=`${xoffsetright}px`; // negative number
                             width=`${b.width}px`;
                             break;
                         default:
-                            strstyle +=`left:${xoffset}px;`
+                            left =`${xoffset}px`
                             if (parseFloat(b.width) * 100 > 1) 
                                 width=`${b.width}px`;
                     }
                     switch(figdata.constraints ? figdata.constraints.vertical : "default") {
                         case "SCALE":                       
-                            strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;                        
+                            top =`${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%`;
                          if (faspect) {
-                            strstyle +=`padding-bottom:${ (parseFloat(b.height)/parseFloat(b.width) ) * (parseFloat(b.width)/parseFloat(pb.width)*100)}%;`;
+                            paddingbottom =`${ (parseFloat(b.height)/parseFloat(b.width) ) * (parseFloat(b.width)/parseFloat(pb.width)*100)}%`;
                             
                             }
                          else   
@@ -695,42 +724,64 @@ function GetAtParam(figdata,name) {
                             //strstyle +=`bottom:${(parseFloat(yoffsetbottom)/parseFloat(pb.height)*100).toFixed(2)}%;`;
                             break;
                         case "CENTER":                            
-                            strstyle +=`top:${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%;`;
+                            // top =`${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%`;
+                            top =`calc(50% - ${b.height/2}px)`;  // There must be spaces surrounding the math operator. 
                             height =`${b.height}px`;
                             //strstyle +=`top:1%`
                             //surroundingdiv +="display: flex;align-items: center; ";
                             break;
                         case "BOTTOM":
-                            strstyle +=`bottom:${yoffsetbottom}px;`; // negative number
+                            bottom =`${yoffsetbottom}px`; // negative number
                             height =`${b.height}px`;
                             break;                                                                                
                         default:
-                            strstyle +=`top:${yoffset}px;`
+                            top =`${yoffset}px`
                             if (parseFloat(b.height) * 100 > 1) 
                                 height =`${b.height}px`;
                     }
                 }
                  if (fpartofflex) {
-                    width=undefined; 
-                    height=undefined;
-                    if (fpartofflex!==true)
-                        strstyle +=fpartofflex; // contains the margin values
+                     console.log(width,height,left,right,bottom,top,paddingbottom)
+                    if (figdata.type=="TEXT") {
+                        width=undefined; 
+                        height=undefined;
+                    }                
+                    left=undefined
+                    right=undefined
+                    bottom=undefined
+                    top=undefined
+                    paddingbottom=undefined
+                    
+                    console.log("fpartofflex");
+                    console.log(width,height,left,right,bottom,top,paddingbottom)
                 }
+                    
+                
+                
+                if (fpartofflex && (fpartofflex!==true)) {
+                    console.log(`Adding ${fpartofflex}`)
+                    dimensions +=fpartofflex; // contains the margin values                    
+                }
+                
                 if (figdata.layoutMode) {
                     width=undefined; // determined by underlying divs
                     height=undefined; // determined by underlying divs
                     display="flex"
-                    strstyle +=`padding: ${figdata.verticalPadding?figdata.verticalPadding:""}px ${figdata.horizontalPadding?figdata.horizontalPadding:""}px;`
+                    dimensions +=`padding: ${figdata.verticalPadding?figdata.verticalPadding:0}px ${figdata.horizontalPadding?figdata.horizontalPadding:0}px;`
                     switch (figdata.layoutMode) {
-                        case "VERTICAL": strstyle+="flex-direction: column;";fflex=`margin: ${figdata.itemSpacing?figdata.itemSpacing:0}px 0px;`; break;
-                        case "HORIZONTAL": strstyle +="flex-direction: row;";fflex=`margin: 0px ${figdata.itemSpacing?figdata.itemSpacing:0}px;`; break;
+                        case "VERTICAL": dimensions+="flex-direction: column;";fflex=`margin-bottom: ${figdata.itemSpacing?figdata.itemSpacing:0}px;`; break;
+                        case "HORIZONTAL": dimensions +="flex-direction: row;";fflex=`margin-right: ${figdata.itemSpacing?figdata.itemSpacing:0}px;`; break;
                     }
                 }
-                if (width)
-                    strstyle +=`width:${width};`;
-                if (height)
-                    strstyle +=`height:${height};`;    
-                console.log(strstyle);
+                if (width)         dimensions +=`width:${width};`;
+                if (height)        dimensions +=`height:${height};`;    
+                if (left)          dimensions +=`left:${left};`;    
+                if (right)         dimensions +=`right:${right};`;  
+                if (bottom)        dimensions +=`bottom:${bottom};`;  
+                if (top)           dimensions +=`top:${top};`;  
+                if (paddingbottom) dimensions +=`padding-bottom:${paddingbottom};`;  
+                
+                console.log(dimensions);
             }
         }    
                 
@@ -756,8 +807,10 @@ function GetAtParam(figdata,name) {
           
         if (figdata.fills && figdata.fills[0] && figdata.fills[0].type == "IMAGE") {
             console.log(figdata.fills);                
-            if (figdata.id)  // link to an image??
+            if (figdata.id) {  // link to an image??
                 image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`
+                objecttype="image"
+            }
         }
           
           
@@ -818,6 +871,15 @@ function ConvertColor(color) {
             strstyle += `font-height:${figdata.style.lineHeightPx}px;`;
         
         
+        if (figdata.style && figdata.style.hyperlink) {
+            objecttype="a"
+            urllocation=figdata.style.hyperlink.url;
+            console.log(`Found url ${urllocation}`);
+        }    
+        
+
+        
+        
         switch (figdata.type) {
            case "TEXT": strtxt +=figdata.characters;
            
@@ -852,8 +914,10 @@ function ConvertColor(color) {
         if (zindex)
             strstyle +=`z-index:${zindex};`
         
-        if (fsvg)  // then make this into an svg
+        if (fsvg) { // then make this into an svg {            
             image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`                
+            objecttype="image"
+        }    
         
         if (figdata.rectangleCornerRadii) {
             let r=figdata.rectangleCornerRadii;
@@ -888,15 +952,26 @@ function ConvertColor(color) {
             strstyle +=`display:${display};`;
 console.log(display);        
       
-        var insrtstyle=strstyle?`style="${strstyle}"`:""
         
-        var eventhandlers=onclick?`onClick="onclickhandler({event:event,this:this,dest:'${onclick}'})" `:""
         
+        var eventhandlers=""
         
         if (fthisisabutton  && !fpartofbutton) { // don't do event on nested parts of the button
-             eventhandlers+='onmouseover="onhoverhandler({event:event,this:this,hover:true});" '
-             //eventhandlers+='onmouseout="onhoverhandler({event:event,this:this,hover:false});" '
+        
+        surroundingdiv=";"
+        
+             eventhandlers+='onmouseenter="onhoverhandler({event:event,this:this,hover:true})" ' //mouseover
+             if (!onclick) onclick="somewhere"
         }
+        
+        
+        if (onclick) {
+             surroundingdiv=";"
+            eventhandlers +=`onClick="onclickhandler({event:event,this:this,dest:'${onclick}'})" `
+        }
+        
+        
+  
         
         var classname=figdata.name;
         var mediapos=classname.indexOf("@media");
@@ -914,25 +989,36 @@ console.log(display);
                 
         //console.log(insrtstyle);
         
-        if (surroundingdiv)
-            htmlobjects.push( `<div style="${surroundingdiv};width:100%;height:100%;border-style:solid;border-width:1px;border-color:red;">` );
-            
-        if (image) {
-            htmlobjects.push('<image src='+'"') // data-src= 
-            //log(`Getting image ${image}`);
-            //await sleep(500); // avoid rate limit on figma       
-
-            if (!imagelist[image]) {
-                imagelist[image]=true;
-                imagelist[image]=FigmaApiGetImageSrc(image,token)
-            }
-            classname+=" lazy "
-            htmlobjects.push(imagelist[image])
-            htmlobjects.push(`"  class="${classname}" ${insrtstyle} ${eventhandlers} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
-            htmlobjects.push('</image>');
+        if (surroundingdiv) {
+            var strstyle2 = strstyle + dimensions;
+            var insrtstyle2=strstyle2?`style="${strstyle2}"`:""
+            htmlobjects.push( `<div class="${classname}" ${insrtstyle2} class="surround" style="${surroundingdiv};border-style:solid;border-width:1px;border-color:red;" ${eventhandlers}>` ); // width:100%;height:100%;
+            dimensions=""; // dimensions are part of surroundingdiv
         }
-        else 
-            htmlobjects.push(`<div class="${classname}" ${insrtstyle} ${eventhandlers} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+            
+            
+        strstyle +=dimensions;
+            
+        var insrtstyle=strstyle?`style="${strstyle}"`:""
+            
+        switch (objecttype) {
+            case "image":   
+                htmlobjects.push(`<${objecttype} src=`)
+                htmlobjects.push('"') // data-src= 
+                if (!imagelist[image]) {
+                    imagelist[image]=true;
+                    imagelist[image]=FigmaApiGetImageSrc(image,token)
+                }
+                classname+=" lazy " // for lazy evaluatation/retrieval of images, see startgen.mjs
+                htmlobjects.push(imagelist[image])
+                htmlobjects.push(`"  class="${classname}" ${insrtstyle}  title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+                htmlobjects.push('</image>');
+                break;
+            
+                case "a":  strhref=`href="{urllocation}" `;
+                case "div": htmlobjects.push(`<${objecttype} class="${classname}" ${insrtstyle} ${strhref} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+                            break;
+        }
 
 
 
@@ -943,29 +1029,63 @@ console.log(display);
             for (var i=0;i<children.length;i++) {
                 
                 if (fflex) {
-                    var fflextopass=(i==0 || (i==children.length-1) )?true:fflex; // for first & last item, no margins, so just pass true
+                    var fflextopass=fflex; // goed afjust margin here, depending on child#, but with dynamicly duplicted items not useful
                     
                 } else fflextopass=fflex;
                 htmlobjects.push( recurse(children[i],figmadocument,documentid,token,fgrid,fthisisabutton,fflextopass,figdata.absoluteBoundingBox) )
             }    
-        
-       // if (!objname) 
-       {
-            if (!image) // close the div
-                htmlobjects.push('</div>');
+       
+            //if (!image) // close the div
+                htmlobjects.push(`</${objecttype}>`);
 
+
+ 
+        if (fthisisabutton) { // this is a button so also get all other instance of a button 
+           htmlobjects.push(GetOtherButton(figdata.name,"--hover"))
+           htmlobjects.push(GetOtherButton(figdata.name,"--active"))
+           htmlobjects.push(GetOtherButton(figdata.name,"--focus"))
+           htmlobjects.push(GetOtherButton(figdata.name,"--disabled"))
+        }
+  
+
+       
+       
+       
             if (surroundingdiv)
                 htmlobjects.push("</div>") // close the surrounding div
-        }
+       
+        
+        
+    
+        
+        
        // console.log("Returning from recurse");
        // console.log(htmlobjects);
         return htmlobjects;
-        
+       
+
+    async function GetOtherButton(name,subselect) {    
+        var firstpart=name.split(" ")[0]
+        console.log(firstpart);
+        if (!globalcomponentsdocument) return ""
+        var fo=FindObject(`${firstpart}${subselect}`,globalcomponentsdocument)
+        if (!fo) return ""
+        var button=await recurse(fo,figmadocument,documentid,token,fgrid,fthisisabutton,fflextopass,undefined) // no bounding=> hidden &max width            
+        console.log("button info is:")
+        console.log(button);
+        return button;
+    }
+
+       
     }    
+
+
+        
 
 
 
 document.getElementById("SaveOnIpfs").addEventListener("click", SaveAlsoOnIpfs)
+document.getElementById("AlsoInject").addEventListener("click", AlsoInject)
 
 
 

@@ -33,6 +33,7 @@ images:     <span id="images"></span>
 <pre id="log" style="height:200px;overflow: scroll;"></pre>
 <pre id="output"></pre>
 <button id="SaveOnIpfs" ></button>
+<button id="AlsoInject" ></button>
 <div id="inject"></div>
 
 <script>
@@ -41,7 +42,7 @@ console.log("In onerror");
     var str=`Error: ${message} ${source}, ${lineno}, ${colno}  `;
     if (error && error.stack) str = str.concat('\n').concat(error.stack);    
     console.log(str);    
-    document.getElementById("log").innerHTML=str;    
+    getElement("log").innerHTML=str;    
 } 
 </script>
 
