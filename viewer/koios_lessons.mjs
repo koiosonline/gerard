@@ -55,7 +55,7 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
 */
 
 
-  //  console.log(videoinfo);
+   console.log(videoinfo);
     
     var items = await ipfsgetjson(videoinfo)
     

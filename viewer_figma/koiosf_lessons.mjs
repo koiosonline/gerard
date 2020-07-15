@@ -1,8 +1,9 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 //import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koiosf_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetCourseInfo,ipfsgetjson, getElement } from '../lib/koiosf_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,ipfsgetjson, getElement,FitOneLine } from '../lib/koiosf_util.mjs';
 import {player} from './koiosf_viewer.mjs';
+import {GetCourseInfo} from './koiosf_course.mjs';
 //import {getYtInfoIpfs} from './koiosf_ipfs.mjs';
 
 // Global vars
@@ -43,7 +44,14 @@ export async function DisplayLessons(LoadVideoCB) {
 //   var items=await GetYouTubePlayListItems()
 
 
-var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R"  //intro
+
+
+
+var videoinfo=await GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R"  //intro
+
+
+
+
 //"QmNYqXqdj6zVNup7iGnk9zC2crkaXEJihPpAqGLkgW2x14" // level3
 
 /*
@@ -53,7 +61,7 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
 //    "QmaamPoDLEhTa9fYC9c6ec7F4gng94zQsw3fWFGAyR8kMe" // "QmPZpwKA1fZWkeRofm8qEbu9AJYydBjD3BfobBtAv1SP4p"
 
 */
-
+ console.log("videoinfo");
 
    console.log(videoinfo);
     
@@ -160,7 +168,18 @@ PrepareLessonsAndChapterList();
     //cln.getElementsByTagName("img")[0].src=vidinfo.thumbnail;    
     
 
-    cln.getElementsByClassName("lesson-name")[0].innerHTML=`${vidinfo.txt} (${vidinfo.duration} s)`;
+    getElement("lesson-name",cln).innerHTML=vidinfo.txt;
+    
+    FitOneLine(getElement("lesson-name",cln))
+    
+    
+    
+    var date = new Date(null);
+date.setSeconds(vidinfo.duration); // specify value for SECONDS here
+var result = date.toISOString().substr(11, 8);
+    
+    getElement("videolength",cln).innerHTML=result
+    
  //   cln.getElementsByClassName("lesson-image")[0].src=vidinfo.thumbnail; 
     
     cln.id=`lesson-${index}`;
@@ -172,6 +191,10 @@ PrepareLessonsAndChapterList();
 //        SelectLesson(index)
 //    });
     //GetProgressInfo(cln);
+    
+    
+    SetClickPlay(getElement("playbuttonfromlist",cln),index)
+    
     
     var canvasloc=cln.getElementsByClassName("pi-lesson")[0]
     
@@ -190,6 +213,20 @@ PrepareLessonsAndChapterList();
 } 
 
 
+function SetClickPlay(domid,index) { // seperate function to remember state
+    console.log(`SetClickPlay ${index}`);
+    console.log(domid);
+    
+    domid.addEventListener('click', e=> {
+        console.log("Click event in SetClickPlay");
+        console.log(e);    
+        console.log(index);       
+          
+        SelectLesson(index)
+        }
+     );
+}   
+  
 
 
 function AddChapter(txt) {

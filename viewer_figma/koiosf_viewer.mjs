@@ -23,9 +23,10 @@
     import {} from './koiosf_music.mjs';
     import {} from './koiosf_literature.mjs';
    // import {} from './koiosf_about.mjs';
+    import {} from './koiosf_course.mjs';
    
    
-   import {} from './koiosf_move.mjs';
+  // import {} from './koiosf_move.mjs';
     import {} from './koiosf_browse.mjs';
 
 
@@ -101,7 +102,7 @@ async function VideoLocation() {
     }    
     SaveVideoSeen(seeninfo,currentvidinfo)
     
-    CanvasProgressInfo(getElement("videoprogressbar"),true,seeninfo)
+    //CanvasProgressInfo(getElement("videoprogressbar"),true,seeninfo)
 }  
  
  
@@ -309,14 +310,19 @@ function IsVideoPaused(){
 //    HideButton("pause",fpaused);
 //}
 export async function startVideo() {
-   // console.log("In startVideo");
+    console.log("In startVideo");
    //         console.log(player.getDebugText());
    //     console.log(player.getVideoData());
     
+    var ev = new CustomEvent("hide");
+    getElement("StartButton").dispatchEvent(ev);
+    
+      
+    
     
 //    ShowTitles(false)
-    ForceButton("start",true);
-    HideButton("largestart",true)
+   // ForceButton("start",true);
+  //  HideButton("largestart",true)
     
     if (video) {
         video.play();
@@ -387,7 +393,7 @@ var signs=0;
 async function PlayerLoaded() {
     console.log("In PlayerLoaded");
     signs++;
-    if (signs >=2) 
+    if (signs ==2) // only at exactly 2
         publish("playerloaded");
 }    
 
@@ -466,6 +472,9 @@ async function asyncloaded() {
     
     playerpromise =SetupVideoWindowYouTube("realvideoplayer");   
     //LinkButton("start",startVideo);
+    
+    
+getElement("StartButton").addEventListener('animatedclick',startVideo)    
     
     
 //    LinkClickButton("largestart");subscribe("largestartclick",startVideo);

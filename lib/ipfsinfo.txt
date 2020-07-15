@@ -1,0 +1,13 @@
+added QmUcWas94BL65rJzmBw2MZL9fP7V3qA9brbB7XZL6i2kJ4 W:\gpersoon\koios\gerard\lib/add.cmd
+added QmPCTvu7hZJ7nfGUSiYUTYN9hqqzJED8gqnQqb2pDFv9cV W:\gpersoon\koios\gerard\lib/get.cmd
+added Qmev3J7jnQjAzJZFAkUwyXU5rnGGrs2Asgk9RPyLgHC9AX W:\gpersoon\koios\gerard\lib/index.min.js
+added QmVDSmiqESNE1pGAQByP2EcbdAjnd973tJA7FZRSCaSDjt W:\gpersoon\koios\gerard\lib/ipfs.cmd
+added Qmeigun79nKUaxP6vqW88S3JhiLvGWt6eVv9MUTpiCnEpP W:\gpersoon\koios\gerard\lib/ipfs41.js
+added Qma39ZHWNwQYjeHxYHL6P3KMZgo3FPCWyLwFSD7mbVFL33 W:\gpersoon\koios\gerard\lib/ipfsinfo.txt
+added QmRvFE8FmMhSztWDNHV3GVtTwv1LBgNWQxDXdn9KLFNu2K W:\gpersoon\koios\gerard\lib/itemsjs.min.js
+added Qme9uVFnQmUm5z5cF6iR8R9bJqZxsTwvWjeohjpAwtFupp W:\gpersoon\koios\gerard\lib/koios_log.mjs
+added QmUKCnpA5ScEWxTuf3EmTwNyL1MRFrekfdZTehLyo4p9ME W:\gpersoon\koios\gerard\lib/koios_util.mjs
+added QmPC6mYgriwTpfBy8oDUtVpxW1n4ChsMG3vX9fD4wAdVuy W:\gpersoon\koios\gerard\lib/koiosf_log.mjs
+added Qmc1NYkrvyFGoZCvNWLqCbTuHUF8nxfib5TxeEyL8vFeBg W:\gpersoon\koios\gerard\lib/koiosf_util.mjs
+added QmQjf6j2zphmojaCZESZYHmNRrV16vX8FK3FHhHEt89oHD W:\gpersoon\koios\gerard\lib/orbitdb24.js
+added QmYoa8Ln1rHf55vaoWs8L58uQ9NvmS1mG3DpE7uPmKvj2Y W:\gpersoon\koios\gerard\lib

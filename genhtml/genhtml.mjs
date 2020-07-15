@@ -66,6 +66,38 @@ async function FigmaApiGet(url,token) { // cache to prevent rate limit errors by
     return obj;    
 }
 
+async function FigmaGetImage(url) {
+        console.log(`FigmaApiGetImage Loading ${url}`);
+        var p1=await fetch(url)
+        console.log(p1);
+        var blob=await (p1).blob()
+        console.log(blob)
+        
+        //if (blob.type=="image/svg+xml") // then its text   // also stored by diskcache
+        //    localStorage.setItem(url, await blob.text());
+        return blob;
+    
+}    
+
+
+async function ClearCache() {
+console.log("In ClearCache")
+console.log(localStorage);
+var keys = Object.keys(localStorage);
+        if (keys.length > 0) {
+            for (var j=0;j< keys.length;j++) {
+                var id=keys[j]
+                var val=localStorage[id];                
+                console.log(id,val)
+                 if (val.includes("figma"))                
+                    localStorage.removeItem(id);
+            }
+        } 
+
+
+
+}
+
 
 function MakeBlob(html) {
     var blob = new Blob([html], {type: 'text/html'});
@@ -80,10 +112,6 @@ var retry=0;
 var imagesloaded=0;
 
 async function FigmaApiGetImageSrc(url,token) {
-
-
-
-
     for (var i=0;i<8;i++) {
         if (i > 0) {
             console.log(`Retry ${i} for ${url}`); 
@@ -91,23 +119,30 @@ async function FigmaApiGetImageSrc(url,token) {
             retry++;
             document.getElementById("retry").innerHTML=retry;
         }
-            
+
+console.log(`FigmaApiGetImageSrc check url ${url}`);
+        
         await sleep(Math.random() * sleeptimer); // some extra time to prevent rate limits
         var obj=await FigmaApiGet(url,token); 
                             
         if (!obj || obj.err || !obj.images) continue; // try again
-        
+
+console.log(`FigmaApiGetImageSrc check url ${url}`);
+console.log(obj);
+
         var keys = Object.keys(obj.images);
         var key=keys[0];
         var str=obj.images[key];       
-        //log(`Loading ${str}`);
         
-        var blob=await (await fetch(str)).blob()
+        
+        var blob=await FigmaGetImage(str)
+        
+
         imagesloaded++;
         document.getElementById("images").innerHTML=imagesloaded;
         //log(`Loaded ${str}`);
-        var url= URL.createObjectURL(blob)
-         
+        var url2= URL.createObjectURL(blob)
+        console.log(`In FigmaApiGetImageSrc url=${url2}`);
          
         //var picturedata=await fetch(str);
         //console.log(picturedata);
@@ -124,7 +159,7 @@ async function FigmaApiGetImageSrc(url,token) {
         // readAsDataURL
         
         
-        return { type: "image", blob:blob, url:url }; // also end for loop
+        return { type: "image", blob:blob, url:url2 }; // also end for loop
     }
 }
 
@@ -176,7 +211,9 @@ document.getElementById("SaveOnIpfs").innerHTML=""
 
 function FindObject(objname,figdata) {
 //console.log(figdata);
-    if (figdata.name == objname || figdata.id==objname) 
+
+    var firstpart = figdata.name.split(" ")[0]
+    if (firstpart == objname || figdata.id==objname) 
         return figdata;
     var children=figdata.children;
     if (children)
@@ -254,12 +291,13 @@ async function GetComponents(componentsid,token) {
  //var globalbuttons;
  var globalcomponentsdocument=undefined;
 var globalcompletepage;
+var globalcomponentsid;
 
 async function start() {
     
     var token=document.getElementById("figmakey").innerHTML.trim();
     var documentid=document.getElementById("pageid").innerHTML.trim();    
-    var componentsid=document.getElementById("components").innerHTML.trim();    
+    globalcomponentsid=document.getElementById("components").innerHTML.trim();    
     globalobjname=document.getElementById("objname").innerHTML.trim();
     globalembed=document.getElementById("embed").innerHTML.trim();
     
@@ -267,7 +305,7 @@ async function start() {
     if (token.replace(/\./g,'')=="") { log("Figma token missing");return;}
     if (documentid.replace(/\./g,'')=="") { log("Document id missing");return;}
     if (globalembed.replace(/\./g,'')=="") globalembed=undefined; // if only ..., then no embed
-    if (componentsid.replace(/\./g,'')=="") componentsid=undefined; // if only ..., then no embed
+    if (globalcomponentsid.replace(/\./g,'')=="") globalcomponentsid=undefined; // if only ..., then no embed
     
     
     log("Pass 1");
@@ -275,10 +313,10 @@ async function start() {
     console.log(`Start ${token} ${documentid}`);
     
     //globalbuttons=await GetComponents(componentsid,token)
-    if (componentsid) {
-        var components=(await FigmaApiGet(`https://api.figma.com/v1/files/${componentsid}`,token));
+    if (globalcomponentsid) {
+        var components=(await FigmaApiGet(`https://api.figma.com/v1/files/${globalcomponentsid}`,token));
         if (components.err) {log(`Error retrieving figma info: ${components.status} ${components.err} `);return;}
-        
+        console.log(components);
         globalcomponentsdocument=components.document
     }
     
@@ -366,8 +404,8 @@ async function RenderAllPages(globalconnectto,fIPFS) {
             //console.log(globalconnectto[key]);
             var val = await globalconnectto[key];
             //console.log(val);
-            if (val) {
-                log(`Page ${i+1} of ${keys.length}  ${val.name} (${key})`);
+            log(`Page ${i+1} of ${keys.length}  ${val?val.name:"(not found)"} (${key})`);
+            if (val) {                
                 var html= await recursehtml(val.htmlobj,fIPFS);    
             
             
@@ -399,8 +437,12 @@ let globalfonts = []
     
 async function ConvertToHTML(foid,figmadocument,documentid,token) {  
     var currentobject=FindObject(foid,figmadocument)
+    
+    log(`Page ${globalpagesfirstpass} ${foid} ${currentobject?currentobject.name:"(not found)"} ${currentobject?currentobject.id:""}`);
+    
     if (!currentobject) return undefined;
-    log(`Page ${globalpagesfirstpass++} ${currentobject.name} ${currentobject.id}`);
+    globalpagesfirstpass++ // only increase if a page is really present
+    
     //console.log(currentobject)
     var htmlobj=await recurse(currentobject,figmadocument,documentid,token,false,false,false,undefined); // retrieve the found object
     
@@ -463,6 +505,21 @@ function MakeScriptTag(fModule,src,content) { // string trick to prevent confusi
 }
 
 
+var errorscript=`<script>
+
+window.onerror = function(message, source, lineno, colno, error) {   // especially for ios
+    console.log("In onerror");
+    var str="Error: "+message+" "+source+" "+lineno+" "+colno+" ";
+    if (error && error.stack) str += error.stack;
+    
+    //console.log(error.stack);
+    
+    alert(str)
+    
+} 
+</script>
+`
+
             
 function MakeHeader(embed,globalfonts,globalmediastyles) {   
     var strprefix=""    
@@ -470,6 +527,7 @@ function MakeHeader(embed,globalfonts,globalmediastyles) {
     strprefix +='<head>'
     strprefix +='<meta name="viewport" content="width=1440, initial-scale=1.0">'
     strprefix +='<meta charset="utf-8" />'
+    strprefix +=errorscript;
     strprefix += GetFonts(globalfonts);
     if (embed) {
         console.log(`Embedding ${embed}`); 
@@ -604,12 +662,24 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
         var faspect= GetAtParam(figdata,"@aspect")      //  console.log(`faspect=${faspect}`)
         var fhidden= GetAtParam(figdata,"@hidden")      //  console.log(`faspect=${faspect}`)
         
-        var clickdest=GetAtParam(figdata,"@click");
-        var fthisisabutton= clickdest || GetAtParam(figdata,"@toggle")
+        var click=GetAtParam(figdata,"@click");
+        var dest=GetAtParam(figdata,"@dest");
+        var toggle=GetAtParam(figdata,"@toggle")
+        
+        var fthisisabutton= click || toggle
+        
+        var gridcols=   GetAtParam(figdata,"@gridcols")
+        var gridrows=   GetAtParam(figdata,"@gridrows")
+        
         
         var gridcol=   GetAtParam(figdata,"@gridcol")
         var gridrow=   GetAtParam(figdata,"@gridrow")
-        var fgrid = gridcol || gridrow
+        
+        
+  
+        
+        
+        var fgrid = gridcols || gridrows
         
         var frelative=   GetAtParam(figdata,"@relative")
         
@@ -631,16 +701,16 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
         var objecttype="div" // standard type
         var strhref=""
         var urllocation=""
+        var insdata=""
 
 
-      if (clickdest && clickdest!=true) {
-        //log(`Connect: ${clickdest}`);
-        if (!globalconnectto[clickdest]) {
-            globalconnectto[clickdest]=true; // prevent recursing too fast
-            globalconnectto[clickdest]=ConvertToHTML(clickdest,figmadocument,documentid,token,embed) // = promise, so executed in parallel
-        }        
-        var onclick=clickdest;
-    }    
+      if (dest) {
+        log(`Connect: ${dest}`);
+        if (!globalconnectto[dest]) {
+            globalconnectto[dest]=true; // prevent recursing too fast
+            globalconnectto[dest]=ConvertToHTML(dest,figmadocument,documentid,token,embed) // = promise, so executed in parallel
+        }                
+     }    
 
 
 
@@ -665,9 +735,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
 
 
 
-        if (fpartofgrid)
-           strstyle += "grid-area: auto;" // autolayout the childeren on the grid
-        else 
+       
         if (b) { //|| figdata.layoutMode
             dimensions +=`position: ${(frelative || fpartofflex )?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
             if (!pb) {
@@ -752,9 +820,34 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     top=undefined
                     paddingbottom=undefined
                     
+                    
+                     switch(figdata.layoutAlign) {
+                        case "MIN":      strstyle +="align-self: flex-start;";break;
+                        case "CENTER":   strstyle +="align-self: center;";    break;
+                        case "MAX":      strstyle +="align-self: flex-end;";  break;
+                        case "STRETCH":  break; // no style needed
+                   } 
+                    
+                    
                     console.log("fpartofflex");
                     console.log(width,height,left,right,bottom,top,paddingbottom)
                 }
+                if (fpartofgrid) {
+                        ;//strstyle += "grid-area: auto;" // autolayout the childeren on the grid
+                    strstyle += "position:relative;" // to be a reference point for further div; don't calculate the sizes, this is done by the grid
+                    dimensions =`position: relative;`;      
+                    width=undefined; 
+                    height=undefined;
+                   
+                    left=undefined
+                    right=undefined
+                    bottom=undefined
+                    top=undefined
+                    paddingbottom=undefined
+                    
+                    
+                }    
+                    
                     
                 
                 
@@ -763,14 +856,32 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     dimensions +=fpartofflex; // contains the margin values                    
                 }
                 
-                if (figdata.layoutMode) {
-                    width=undefined; // determined by underlying divs
-                    height=undefined; // determined by underlying divs
+                if (figdata.layoutMode) { // autolayout
+                    
+                    
                     display="flex"
                     dimensions +=`padding: ${figdata.verticalPadding?figdata.verticalPadding:0}px ${figdata.horizontalPadding?figdata.horizontalPadding:0}px;`
                     switch (figdata.layoutMode) {
-                        case "VERTICAL": dimensions+="flex-direction: column;";fflex=`margin-bottom: ${figdata.itemSpacing?figdata.itemSpacing:0}px;`; break;
-                        case "HORIZONTAL": dimensions +="flex-direction: row;";fflex=`margin-right: ${figdata.itemSpacing?figdata.itemSpacing:0}px;`; break;
+                        case "VERTICAL": {
+                                    dimensions+="flex-direction: column;";
+                                    fflex=`margin-bottom: ${figdata.itemSpacing?figdata.itemSpacing:0}px;`;
+                                    height=undefined; // determined by underlying divs
+                                    if (figdata.counterAxisSizingMode && figdata.counterAxisSizingMode=="FIXED") {
+                                        // keep width
+                                    } else    
+                                        width=undefined; // determined by underlying divs
+                                    break;
+                        } 
+                        case "HORIZONTAL": {
+                                    dimensions +="flex-direction: row;";
+                                    fflex=`margin-right: ${figdata.itemSpacing?figdata.itemSpacing:0}px;`; 
+                                    if (figdata.counterAxisSizingMode && figdata.counterAxisSizingMode=="FIXED") {
+                                        // keep height 
+                                    } else 
+                                        height=undefined; // determined by underlying divs                                    
+                                    width=undefined; // determined by underlying divs
+                        }
+                        break;
                     }
                 }
                 if (width)         dimensions +=`width:${width};`;
@@ -787,14 +898,26 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 
         if (fgrid)
             display="grid"
-        if (gridcol)
-            strstyle +=`grid-template-columns: repeat(${gridcol}, 1fr);`
-        if (gridrow)
-            strstyle +=`grid-template-rows: repeat(${gridrow}, 1fr);`                
-                
+        if (gridcols)
+            strstyle +=`grid-template-columns: repeat(${gridcols}, 1fr);`
+        if (gridrows)
+            strstyle +=`grid-template-rows: repeat(${gridrows}, 1fr);`                
+  
+        if (gridcol) strstyle +=`grid-column-start: ${gridcol};grid-col-end: span 1;`
+        if (gridrow) strstyle +=`grid-row-start: ${gridrow};grid-row-end: span 1;`
         
-        if (figdata.clipsContent)
-            strstyle +="overflow: hidden;"
+  
+        
+        if (figdata.clipsContent) {
+            switch (figdata.overflowDirection) {
+                case "VERTICAL_SCROLLING":   strstyle +="overflow-y: scroll;";break;
+                case "HORIZONTAL_SCROLLING": strstyle +="overflow-x: scroll;";break;
+                case "HORIZONTAL_AND_VERTICAL_SCROLLING": strstyle +="overflow: scroll;";break;
+             default: // includes figdata.overflowDirection == undefined
+                    strstyle +="overflow: hidden;"              
+            }
+        }    
+            
         
         if (figdata.fills && figdata.fills[0] && figdata.fills[0].color && (figdata.fills[0].visible != false)) {               
             if (figdata.fills[0].type="SOLID") {
@@ -960,14 +1083,19 @@ console.log(display);
         
         surroundingdiv=";"
         
-             eventhandlers+='onmouseenter="onhoverhandler({event:event,this:this,hover:true})" ' //mouseover
-             if (!onclick) onclick="somewhere"
+             //eventhandlers+='onmouseenter="onhoverhandler({event:event,this:this,hover:true})" ' //mouseover
+             if (!onclick) onclick=true;
         }
         
         
+        if (dest) {
+            insdata=`data-dest="${dest}"`
+            console.log(`insdata : ${insdata}`);
+        }
+        
         if (onclick) {
              surroundingdiv=";"
-            eventhandlers +=`onClick="onclickhandler({event:event,this:this,dest:'${onclick}'})" `
+          //  eventhandlers +=`onClick="onclickhandler({event:event,this:this,dest:'${onclick?onclick:""}'})" `
         }
         
         
@@ -992,8 +1120,14 @@ console.log(display);
         if (surroundingdiv) {
             var strstyle2 = strstyle + dimensions;
             var insrtstyle2=strstyle2?`style="${strstyle2}"`:""
-            htmlobjects.push( `<div class="${classname}" ${insrtstyle2} class="surround" style="${surroundingdiv};border-style:solid;border-width:1px;border-color:red;" ${eventhandlers}>` ); // width:100%;height:100%;
+            htmlobjects.push( `<div class="${classname}" ${insrtstyle2} class="surround" ${insdata} style="${surroundingdiv};border-style:solid;border-width:1px;border-color:red;" ${eventhandlers}>` ); // width:100%;height:100%;
             dimensions=""; // dimensions are part of surroundingdiv
+            insdata="" // don't put it on buttons itself anymore
+            //classname="nested" // remove the previous classname to prevent confusion
+            
+             classname = classname.replace("@click", ""); // remove the click from childbutton; its prevent in surroundingdiv
+             classname = classname.replace("@toggle", "");
+            
         }
             
             
@@ -1011,12 +1145,12 @@ console.log(display);
                 }
                 classname+=" lazy " // for lazy evaluatation/retrieval of images, see startgen.mjs
                 htmlobjects.push(imagelist[image])
-                htmlobjects.push(`"  class="${classname}" ${insrtstyle}  title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+                htmlobjects.push(`"  class="${classname}" ${insrtstyle} ${insdata} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
                 htmlobjects.push('</image>');
                 break;
             
                 case "a":  strhref=`href="{urllocation}" `;
-                case "div": htmlobjects.push(`<${objecttype} class="${classname}" ${insrtstyle} ${strhref} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
+                case "div": htmlobjects.push(`<${objecttype} class="${classname}" ${insrtstyle} ${insdata} ${strhref} title="${figdata.name}">${strtxt}\n`) //  ${figdata.type}
                             break;
         }
 
@@ -1070,7 +1204,7 @@ console.log(display);
         if (!globalcomponentsdocument) return ""
         var fo=FindObject(`${firstpart}${subselect}`,globalcomponentsdocument)
         if (!fo) return ""
-        var button=await recurse(fo,figmadocument,documentid,token,fgrid,fthisisabutton,fflextopass,undefined) // no bounding=> hidden &max width            
+        var button=await recurse(fo,figmadocument,globalcomponentsid,token,fgrid,fthisisabutton,fflextopass,undefined) // no bounding=> hidden &max width     // get from componentsid!!!       
         console.log("button info is:")
         console.log(button);
         return button;
@@ -1086,6 +1220,7 @@ console.log(display);
 
 document.getElementById("SaveOnIpfs").addEventListener("click", SaveAlsoOnIpfs)
 document.getElementById("AlsoInject").addEventListener("click", AlsoInject)
+document.getElementById("ClearCache").addEventListener("click", ClearCache)
 
 
 

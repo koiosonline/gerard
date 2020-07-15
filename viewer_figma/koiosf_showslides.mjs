@@ -12,6 +12,9 @@ subscribe("foundslides",FoundSlidesViaJson) // called when sheets are found via 
 function InitShowSlides() {
     console.log("In InitShowSlides");      
     GlobalPrepareSlidesList = new DomList("real-slides")
+    console.log("GlobalPrepareSlidesList")
+    console.log(GlobalPrepareSlidesList)
+    
     //GlobalSlideIndicatorList = new DomList("slideposition")  indicators on progress bar
     
     
@@ -36,7 +39,7 @@ function SlidesForVideo(vidinfo) {
     
 async function FoundSlidesViaJson(slidesarray) {
     console.log("In FoundSlidesViaJson");
- //   console.log(slidesarray);
+    console.log(slidesarray);
     
     GlobalPrepareSlidesList.EmptyList()
     
@@ -84,7 +87,7 @@ async function FoundSlidesViaJson(slidesarray) {
 
 function AddSlide(num,total,slidesinfo) {
     
-    //console.log(`In AddSlide ${num} ${slidesinfo.png} ${slidesinfo.title}`);
+    console.log(`In AddSlide ${num} ${slidesinfo.png} ${slidesinfo.title}`);
     
     var ipfsproviderindex=0;    
     function urlerrorhandling() {
@@ -97,6 +100,9 @@ function AddSlide(num,total,slidesinfo) {
     if (slidesinfo.png) {
         var url=GetCidViaIpfsProvider(slidesinfo.png,0);    
         var target = GlobalPrepareSlidesList.AddListItem()
+        console.log("GlobalPrepareSlidesList")
+        console.log(GlobalPrepareSlidesList)
+        console.log(target)
         if (target) {
             target.getElementsByTagName("img")[0].src=url;
             target.getElementsByTagName("img")[0].onerror=urlerrorhandling;

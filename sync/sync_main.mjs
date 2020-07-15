@@ -1,9 +1,16 @@
  
- import {getElement,loadScriptAsync} from '../lib/koios_util.mjs';
+ import {getElement,loadScriptAsync,ForAllElements,setElementVal,getElementVal,DomList} from '../lib/koiosf_util.mjs';
+ import {carrouselwait} from './sync_swipe.mjs';
+ 
+ 
+ 
  
 function log(logstr) {   
-    getElement("log").innerHTML +=logstr+"\n";
+    getElement("logboxcontent").innerHTML +=logstr+"\n";
 }
+
+console.error=log;
+
 
 var globaldb;
 var globalipfs;
@@ -19,8 +26,8 @@ async function GetChoiceItems(source) {
         
 async function main() {
         console.log("Main");           
-        await loadScriptAsync("https://unpkg.com/ipfs@0.41.0/dist/index.min.js");
-        await loadScriptAsync("https://www.unpkg.com/orbit-db@0.24.1/dist/orbitdb.min.js");
+        await loadScriptAsync("https://ipfs.io/ipfs/Qmeigun79nKUaxP6vqW88S3JhiLvGWt6eVv9MUTpiCnEpP");   // https://unpkg.com/ipfs@0.41.0/dist/index.min.js
+        await loadScriptAsync("https://ipfs.io/ipfs/QmQjf6j2zphmojaCZESZYHmNRrV16vX8FK3FHhHEt89oHD");   // https://www.unpkg.com/orbit-db@0.24.1/dist/orbitdb.min.js
         
         window.LOG='Verbose' // 'debug'
         //SetupField("question1")
@@ -30,56 +37,54 @@ async function main() {
 
 
 
-        var typeprovide=getElement("type-provide")
-            typeprovide.innerHTML=`
-        <select id="typeprovide" >
+        setElementVal("offering-type",`
+            <select id="idoffering-type">
                     <option value="none">--select--</option> 
                     <option value="Advies">Advies</option>
                     <option value="Handeling">Handeling</option>
                     <option value="Onderzoek">Onderzoek</option>
                     <option value="Ontwerp">Ontwerp</option>   
                     </select>
-        `
+            `)
 
-        var productprovide=getElement("product-provide")
-            productprovide.innerHTML=`
-        <select id="productprovide" >
+        setElementVal("offering-product",`
+        <select id="idoffering-product" >
                     <option value="none">--select--</option> 
                     <option value="Bedrijfswaardering">Bedrijfswaardering</option>
                     <option value="Adviesgesprek">Adviesgesprek</option>
                     <option value="Benchmarkonderzoek">Benchmarkonderzoek</option>
                     <option value="Dashboard">Dashboard</option>   
                     </select>
-        `
+        `)
 
 
-        var typesearch=getElement("type-search")
-            typesearch.innerHTML=`
-        <select id="typesearch" >
+        setElementVal("search-type",`
+        <select id="idsearch-type" >
                     <option value="none">--select--</option> 
                     <option value="Advies">Advies</option>
                     <option value="Handeling">Handeling</option>
                     <option value="Onderzoek">Onderzoek</option>
                     <option value="Ontwerp">Ontwerp</option>   
                     </select>
-        `
+        `)
 
-        var productsearch=getElement("product-search") // onchange=...
-            productsearch.innerHTML=`
-        <select id="productsearch" >
+        setElementVal("search-product",`
+        <select id="idsearch-product" >
                     <option value="none">--select--</option> 
                     <option value="Bedrijfswaardering">Bedrijfswaardering</option>
                     <option value="Adviesgesprek">Adviesgesprek</option>
                     <option value="Benchmarkonderzoek">Benchmarkonderzoek</option>
                     <option value="Dashboard">Dashboard</option>   
                     </select>
-        `
+        `)
 
-
-
+ getElement("offeringfreetext").contentEditable="true"; // make div editable
+ getElement("searchfreetext").contentEditable="true"; // make div editable
 
 
         getElement("send").addEventListener("click", Send);
+        getElement("search").addEventListener("click", ShowRecords);
+        getElement("swipe").addEventListener("click", Swipe);
         getElement("delete").addEventListener("click", Delete);
         getElement("peers").addEventListener("click", Peers);
         getElement("connect").addEventListener("click", Connect);
@@ -98,8 +103,8 @@ async function main() {
             
            
          
-            globalipfs.libp2p.on('peer:connect',   Peers)
-            globalipfs.libp2p.on('peer:disconnect', x=>{log(`disconnect ${JSON.stringify( x )}`)})
+          //  globalipfs.libp2p.on('peer:connect',   Peers)
+          //  globalipfs.libp2p.on('peer:disconnect', x=>{log(`disconnect ${JSON.stringify( x )}`)})
          
          //await Connect();
          
@@ -143,47 +148,109 @@ globaldb.events.on('replicated', ShowRecords)
          
         }
         
+var globalmymatches=[];        
+        
 async function ShowRecords() {
-        console.log("In ShowRecords");
-        var str=""
+   //     console.log("In ShowRecords");
+        globalmymatches=[];
+       
+        var name=getElementVal("name")
+        
+        var allofferings=""
+        var myofferings=""
+        var mymatches=""
+        
+        var searchfreetext=getElementVal("searchfreetext")
+       // console.log(searchfreetext);
         const result = await globaldb.query(() => true); // get all records
         //console.log(result);        
         getElement("entries").innerHTML=result.length;
         //log(`Number of entries: ${result.length}`)   
-        str=JSON.stringify(result)
-      //  for (var i=0;i<result.length;i++)
-        //    str += `Name: ${result[i].name} Question: ${result[i].question}<br>`;
+       // str=JSON.stringify(result)
+        
+        for (var i=0;i<result.length;i++) {
+            var line=""
+            ForAllElements(result[i],undefined,(id,val)=>{ 
+                if (id != "_id")
+                    line +=`${id}: ${val} `
+            } )
+            line +="<br>"
+            if (result[i].name==name) myofferings+=line;
+            allofferings+=line; 
+          
+            if (result[i].freetext && result[i].freetext.includes(searchfreetext) && (result[i].name!=name)) { // exclude my own offerings
+                mymatches+=line;
+                globalmymatches.push(result[i]);
+            }
+        }
 
-        getElement("records").innerHTML=str;
+        setElementVal("allofferings",allofferings);
+        setElementVal("myofferings",myofferings);
+        setElementVal("mymatches",mymatches);
+      //  console.log(globalmymatches)
 }          
+        
+        
+var cardlist=new DomList("card");    
+    
+        
+async function Swipe() {
+//console.log("In function Swipe");
+
+       let board = getElement('cardcontainer')
+       cardlist.EmptyList()
+        
+     //   console.log("domlist")
+        
+        for (var i=0;i<globalmymatches.length;i++) {        
+            var card=cardlist.AddListItem()
+            var item=globalmymatches[i]
+            setElementVal("Cardheader",`Card #${i+1}`,card)
+            
+            setElementVal("field1",item.name,card)
+            setElementVal("field2",item.freetext,card)
+            setElementVal("field3",item.productsearch,card)
+            setElementVal("field4",item.typesearch,card)
+        }
+        
+     //   card1.style.transform="translateX(-50%) translateY(-50%) scale(0.95)"
+     //   card2.style.transform="translateX(-50%) translateY(-50%) scale(0.95)"
+       
+       
+       await carrouselwait(board)
+       //console.log("After carrouselwait")
+       SwitchPage("close");//close the popup
+//let carousel = new Carousel(board)       
+        
+}
+        
+        
+        
         
         
 async function Send() {
     console.log("In function Send()");
-    var namefield=getElement("name")
-    var name=namefield.innerHTML.trim();
-    var questionfield=getElement("question")
+    var name=getElementVal("name")
     
-    var e1 = document.getElementById("typesearch");
+    
+    
+    var e1 = getElement("idoffering-type")
+    console.log(e1)
     console.log(e1.selectedIndex)
     console.log(e1.options)
     var typesearch = e1.options[e1.selectedIndex].value;
     console.log(typesearch);
     
     
-    var e2 = document.getElementById("productsearch");
+    var e2 = getElement("idoffering-product");
     console.log(e2.selectedIndex)
     console.log(e2.options)
     var productsearch = e2.options[e2.selectedIndex].value;
     console.log(productsearch);
     
-    
-    
-    //var question=questionfield.innerHTML.trim();
-  //  log(`Send ${name} ${question}`);
-  //  console.log(question);
-    
-     var h1=await globaldb.put({ _id: new Date().getTime(), name:name, typesearch:typesearch, productsearch:productsearch })   
+    var offeringfreetext=getElementVal("offeringfreetext");
+        
+    var h1=await globaldb.put({ _id: new Date().getTime(), name:name, typesearch:typesearch, productsearch:productsearch,freetext:offeringfreetext })   
     
 }        
         
@@ -212,7 +279,7 @@ async function Connect() {
     const con='/dns4/gpersoon.com/tcp/4004/wss/p2p/'+globalserverid;
     log(`Connect ${con}`)
     await globalipfs.swarm.connect(con); // put the address of the create_db.js here
-    await Peers();
+    //await Peers();
 }
 
 async function Disconnect() {
@@ -258,3 +325,4 @@ function SetupField(id) {
         
 window.onload=main()        
    //document.addEventListener("DOMContentLoaded", main)
+

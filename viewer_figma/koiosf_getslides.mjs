@@ -1,15 +1,15 @@
 
-import {loadScriptAsync,ipfsgetjson,subscribe,publish,GetCourseInfo} from '../lib/koiosf_util.mjs';
-
+import {loadScriptAsync,ipfsgetjson,subscribe,publish} from '../lib/koiosf_util.mjs';
+import {GetCourseInfo} from './koiosf_course.mjs';
 
 
 
 subscribe("loadvideo",GetSlidesFromVideo)
 
-function GetSourceCid() {    
+async function GetSourceCid() {    
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString); 
-    let cid = GetCourseInfo("slides")  ||  "QmNcvkvjyq4cDRB4CidU6EExfX5bYCsM9B9mMygwWVwXhi" // level3
+    let cid = await GetCourseInfo("slides")  ||  "QmNcvkvjyq4cDRB4CidU6EExfX5bYCsM9B9mMygwWVwXhi" // level3
     
     // "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E" //'QmXzRAXrFUou1FWHBMUvbb66bT8xfToQH3HJWqUNhTiXLX' // 'QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m'; urlParams.get('slides')
     console.log(`In GetSourceCid cid=${cid}`);
@@ -20,9 +20,9 @@ var oldcid;
 var slideindex;
 
 async function GetSlidesFromVideo(vidinfo) {    
-   // console.log("In GetSlidesFromVideo");
-  //  console.log(vidinfo);
-    var cid=GetSourceCid();
+    console.log("In GetSlidesFromVideo");
+    console.log(vidinfo);
+    var cid=await GetSourceCid();
     if (cid != oldcid)
         slideindex = await ipfsgetjson(cid);
     

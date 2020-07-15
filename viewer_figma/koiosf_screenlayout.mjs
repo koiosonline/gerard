@@ -1,23 +1,37 @@
-import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement} from '../lib/koiosf_util.mjs';
+import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,Toggle} from '../lib/koiosf_util.mjs';
 import {player} from './koiosf_viewer.mjs';
-
 
 console.log("In screenlayout");
 
-export async function qSetupSliders() {          // notes see move.mjs
-    var grid=getElement("mainscreen");    
-    var SetMiddleh=window.getComputedStyle(grid).getPropertyValue("grid-template-columns").split(" ")[1];       
-    var SetM=window.getComputedStyle(grid).getPropertyValue("grid-template-rows").split(" ")    
-    var SetMiddlev1=SetM[1];
+
+console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
+
+export async function SetupSliders() {
+    console.log("In SetupSliders");
+    var grid=getElement("mainscreen");   
+console.log(grid);
+    
+    //var SetMiddleh=window.getComputedStyle(grid).getPropertyValue("grid-template-columns").split(" ")[1];       
+    //var SetM=window.getComputedStyle(grid).getPropertyValue("grid-template-rows").split(" ")    
+    //var SetMiddlev1=SetM[1];
    // var SetMiddlev2=SetM[2];
    // var SetMiddlev3=SetM[3];
     
-    if (!SetMiddleh) SetMiddleh="7px";
+    //if (!SetMiddleh) SetMiddleh="7px";
     
+var SetMiddleh="10px"
 
-    function XYUpdate(percx,percy) {
+var SetMiddlev1="10px"
+
+XYUpdate(0.5,0.5);
+
+
+    async function XYUpdate(percx,percy) {
         //console.log(percx,percy)
         const snap = 0.01;
+        
+        var delta="5px" // to compensate for the 10 px in the middle
+        
         //var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
         //var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*2}fr`;
         //var top   = (percy      < snap) ? "0px":`${percy*2}fr`;
@@ -31,8 +45,8 @@ export async function qSetupSliders() {          // notes see move.mjs
 
         
         
-        var c=`${left} ${SetMiddleh} ${right}`;
-        var r=`${top} ${SetMiddlev1}  ${bot}`;
+        var c=`calc(${left} - ${delta}) ${SetMiddleh}  calc(${right} - ${delta})`; // extra spaces required
+        var r=`calc(${top}  - ${delta}) ${SetMiddlev1} calc(${bot}   - ${delta})`;
         grid.style["gridTemplateColumns"] = c;
         grid.style["gridTemplateRows"]    = r;
         //console.log(c)
@@ -44,11 +58,107 @@ export async function qSetupSliders() {          // notes see move.mjs
         var a=window.getComputedStyle(grid).getPropertyValue("grid-template-columns")
         var b=window.getComputedStyle(grid).getPropertyValue("grid-template-rows")
         //console.log(`${a} ///  ${b}`);
+        //await sleep(10)
         
-        
-    }      
+    }
+console.log("Before    DragItem"); 
     DragItem("move","mainscreen","mainscreen",XYUpdate,ToggleMainLayout);
+console.log("After    DragItem"); 
 }
+
+
+//var displaywinbuttons=new Toggle(false)
+function ToggleMainLayout() {
+    //var newval=displaywinbuttons.Toggle()?"show":"hide"
+    /*
+     getElement("selectliterature").style.display=newval
+     getElement("selectnotes").style.display=newval
+     getElement("selectvideo").style.display=newval
+     getElement("selectslides").style.display=newval
+    */
+    
+    
+    var ev = new CustomEvent("toggledisplay");
+        console.log(`Sending toggle`);
+    
+     getElement("selectliterature").dispatchEvent(ev);   
+     getElement("selectnotes").dispatchEvent(ev);   
+     getElement("selectvideo").dispatchEvent(ev);   
+     getElement("selectslides").dispatchEvent(ev);   
+    
+    
+}
+
+
+function ToggleLiterature(event) {
+  console.log("In ToggleLiterature");
+  var fOn=GetToggleState(this,"displayactive")
+  
+  if (fOn) {
+    getElement("9BottomRight").style.gridArea="1 /3 / span 3 / span 1"
+    getElement("3NotesArea").style.display="none"
+  }
+else {
+    getElement("9BottomRight").style.gridArea="3 /3 / span 1 / span 1"
+    getElement("3NotesArea").style.display="flex"
+    }
+  
+}    
+function ToggleNotes(event) {
+  console.log("In ToggleNotes");
+  
+  
+  var fOn=GetToggleState(this,"displayactive")
+  
+  if (fOn) {
+    getElement("3NotesArea").style.gridArea="1 /3 / span 3 / span 1"
+    getElement("9BottomRight").style.display="none"
+  }
+else {
+    getElement("3NotesArea").style.gridArea="1 /3 / span 1 / span 1"
+    getElement("9BottomRight").style.display="flex"
+    }
+
+  
+  
+}  
+function ToggleVideo(event) {
+  console.log("In ToggleVideo");
+  
+  var fOn=GetToggleState(this,"displayactive")
+  
+    
+  if (fOn) {
+    getElement("1VideoPlayerContainer").style.gridArea="1 /1 / span 1 / span 3"
+    getElement("3NotesArea").style.display="none"
+  }
+else {
+    getElement("1VideoPlayerContainer").style.gridArea="1 /1 / span 1 / span 1"
+    getElement("3NotesArea").style.display="flex"
+    }
+
+  
+}  
+function ToggleSlides(event) {   // row / column  / rowsspan / columnspan
+  console.log("In ToggleSlides");
+  
+  var fOn=GetToggleState(this,"displayactive")
+  
+    
+  if (fOn) {
+    getElement("7ContentArea").style.gridArea="3 /1 / span 1 / span 3"
+    getElement("9BottomRight").style.display="none"
+  }
+else {
+    getElement("7ContentArea").style.gridArea="3 /1 / span 1 / span 1"
+    getElement("9BottomRight").style.display="flex"
+    }
+
+  
+  
+}  
+
+//7ContentArea 3NotesArea 1VideoPlayerContainer 
 
 export async function SwitchIntroScreen(fOn) {
     console.log("In SwitchIntroScreen");
@@ -72,27 +182,6 @@ subscribe('playerloaded',   InitScreenlayout2);
 function InitScreenlayout1() { // when page is loaded
     SwitchIntroScreen(true);
     
-    let dotstyle = document.createElement("style"); // w-slider-dot  doesn't work from webflow
-    dotstyle.type = "text/css";    
-    dotstyle.innerHTML=`
-    .w-slider-dot           {   box-shadow: 1px 1px 3px 0  rgba(0,0,0,0.4); } 
-    
-     .w-active {   box-shadow: 1px 1px 3px 0  rgba(0,255,0,0.4); } 
-    
-    .video_field .w-slider-dot           {           
-        width: .2em;
-        height: .2em;
-        margin: 0 1px .5em;        
-        } 
-     .video_field .w-slider-nav {
-        padding-top: 0px;
-        height: 7px;
-    `
-    // #000
-    // .w-slider-dot.w-active { background-color: green; }     
-    //  .w-icon-slider-right    {   text-shadow:  1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue; } 
-    document.body.appendChild(dotstyle); 
-    
     
     async function ToggleMenuVisible() {
       //  await sleep(100);
@@ -108,54 +197,15 @@ function InitScreenlayout1() { // when page is loaded
 
 function InitScreenlayout2() { // after everything has been loaded
      //SwitchMainLayout(true);
-     
-     
-    //var slidewindow=getElement("move"); // connect to "move" circle    
-    //slidewindow.addEventListener("mouseenter",   MouseOverSlides);    
-    //slidewindow.addEventListener("mouseleave",   MouseOverSlides); 
-    //window.addEventListener("deviceorientation", handleOrientation, true);
-    //SwitchIntroScreen(false); 
-    //SwitchStartScreen(true);
+  
     
-    
-    SwitchPage("scr_start");
+    SwitchPage("scr_profile");
     
 }    
 
-/*
-function handleOrientation(event) {
-    if (event.beta && event.gamma) { // prevent triggering on a desktop
-        var x= event.beta
-        var y= event.gamma
-        var sum = Math.abs(x+y)
-        ShowTitles(sum < 3) // only show extra info when sum is small, e.g. phone is flat
-    }
-}
-
-export function ShowTitles(fOn) {
-    var videoinfo=getElement("videoinfo");
-    videoinfo.style.display=fOn?"flex":"none"
-      
-     var list = .getElement("slideinfo"); 
-     for (var i=0;i<list.length;i++) {
-         list[i].style.display=fOn?"block":"none"
-         
-    }    
-}
-
-function MouseOverSlides(ev) {
-    
-    console.log("In MouseOverSlides");
-    switch (ev.type) {       
-        case "mouseleave": ShowTitles(false);break; 
-        case "mouseenter": ShowTitles(true);break;
-    }
-}
-*/
-
-
+ 
 var fGlobalLargeNotes=true;
-function ToggleMainLayout() {
+function qToggleMainLayout() {
     fGlobalLargeNotes = !fGlobalLargeNotes;
     SwitchMainLayout(fGlobalLargeNotes)
 }
@@ -191,5 +241,29 @@ export async function SwitchMainLayout(fLargeNotes) {
     fGlobalLargeNotes = fLargeNotes
 }
     
+    
+    
+function loaded() {
+      console.log("load in koiosf_screenlayout.mjs");
+      SetupSliders()
+      
+
+    var ev = new CustomEvent("show"); // set initial state
+    getElement("selectliterature").dispatchEvent(ev);   
+    getElement("selectnotes").dispatchEvent(ev);   
+    getElement("selectvideo").dispatchEvent(ev);   
+    getElement("selectslides").dispatchEvent(ev);   
+
+
+
+    getElement("selectliterature").addEventListener('animatedtoggle',ToggleLiterature)
+    getElement("selectnotes").addEventListener('animatedtoggle',ToggleNotes)
+    getElement("selectvideo").addEventListener('animatedtoggle',ToggleVideo)
+    getElement("selectslides").addEventListener('animatedtoggle',ToggleSlides)
+
+}    
+
+document.addEventListener("DOMContentLoaded", loaded )
+      
 
 
