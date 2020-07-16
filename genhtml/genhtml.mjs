@@ -584,6 +584,7 @@ async function InjectPage(strinput,embed,globalfonts,globalmediastyles,firstpage
     }
     var event = new Event('DOMContentLoaded',{  bubbles: true,  cancelable: true});
     window.document.dispatchEvent(event);    
+    main();
 }   
         
 
