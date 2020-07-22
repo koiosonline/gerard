@@ -24,6 +24,8 @@ class CourseList {
         console.log("In GetCurrentCourseData");
         var listofcourses=await this.GetList(); 
         var ccid=this.GetCurrentCourse();
+        if (!ccid) return undefined;
+        if (!listofcourses) return undefined;
         console.log(listofcourses)
         console.log(ccid)
         return listofcourses[ccid];
@@ -75,6 +77,7 @@ export async function GetCourseInfo(key) {
     console.log("In GetCourseInfo");
     console.log(listofcourses)
     if (!courseid) return undefined;
+    if (!listofcourses) return undefined;
     
     return listofcourses[courseid][key];
 }
