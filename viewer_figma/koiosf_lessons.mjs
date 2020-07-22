@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 //import {GetYouTubePlaylists,GetYouTubePlayListItems}     from './koiosf_youtube.mjs';
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,ipfsgetjson, getElement,FitOneLine } from '../lib/koiosf_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,CanvasProgressInfo,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetJsonIPFS, getElement,FitOneLine } from '../lib/koiosf_util.mjs';
 import {player} from './koiosf_viewer.mjs';
 import {GetCourseInfo} from './koiosf_course.mjs';
 //import {getYtInfoIpfs} from './koiosf_ipfs.mjs';
@@ -65,7 +65,7 @@ var videoinfo=await GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeH
 
    console.log(videoinfo);
     
-    var items = await ipfsgetjson(videoinfo)
+    var items = await GetJsonIPFS(videoinfo)
   console.log(items)
   
     // var items=await getYtInfoIpfs(videoinfo)

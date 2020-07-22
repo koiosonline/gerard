@@ -667,6 +667,9 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
         var dest=GetAtParam(figdata,"@dest");
         var toggle=GetAtParam(figdata,"@toggle")
         
+        
+        
+        
         var fthisisabutton= click || toggle
         
         var gridcols=   GetAtParam(figdata,"@gridcols")
@@ -741,6 +744,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
             dimensions +=`position: ${(frelative || fpartofflex )?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
             if (!pb) {
                 strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values // 
+                // dimensions=""; // prevent minor scroll actions ==> messes up zindez
                 if (figdata.name != globalobjname)
                     display="none"; // initially hidden (relevant when there are more pages), except for the first one
                     
@@ -885,6 +889,11 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                         break;
                     }
                 }
+                
+                
+                if (GetAtParam(figdata,"@width")) width=GetAtParam(figdata,"@width") // allways override if present
+                if (GetAtParam(figdata,"@height")) height=GetAtParam(figdata,"@height")
+                
                 if (width)         dimensions +=`width:${width};`;
                 if (height)        dimensions +=`height:${height};`;    
                 if (left)          dimensions +=`left:${left};`;    
@@ -909,16 +918,17 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
         
   
         
-        if (figdata.clipsContent) {
-            switch (figdata.overflowDirection) {
-                case "VERTICAL_SCROLLING":   strstyle +="overflow-y: scroll;";break;
-                case "HORIZONTAL_SCROLLING": strstyle +="overflow-x: scroll;";break;
-                case "HORIZONTAL_AND_VERTICAL_SCROLLING": strstyle +="overflow: scroll;";break;
-             default: // includes figdata.overflowDirection == undefined
-                    strstyle +="overflow: hidden;"              
-            }
-        }    
-            
+        if (figdata.clipsContent==true) strstyle +="overflow: hidden;"
+        
+        switch (figdata.overflowDirection) {
+            case "VERTICAL_SCROLLING":   strstyle +="overflow-y: scroll;";break;
+            case "HORIZONTAL_SCROLLING": strstyle +="overflow-x: scroll;";break;
+            case "HORIZONTAL_AND_VERTICAL_SCROLLING": strstyle +="overflow: scroll;";break;
+       //  default: // includes figdata.overflowDirection == undefined
+       //         strstyle +="overflow: hidden;"
+        }
+
+console.log(`overflow: ${strstyle}`)            
         
         if (figdata.fills && figdata.fills[0] && figdata.fills[0].color && (figdata.fills[0].visible != false)) {               
             if (figdata.fills[0].type="SOLID") {
@@ -1123,11 +1133,14 @@ console.log(display);
             var insrtstyle2=strstyle2?`style="${strstyle2}"`:""
             htmlobjects.push( `<div class="${classname}" ${insrtstyle2} class="surround" ${insdata} style="${surroundingdiv};border-style:solid;border-width:1px;border-color:red;" ${eventhandlers}>` ); // width:100%;height:100%;
             dimensions=""; // dimensions are part of surroundingdiv
-            insdata="" // don't put it on buttons itself anymore
-            //classname="nested" // remove the previous classname to prevent confusion
             
-             classname = classname.replace("@click", ""); // remove the click from childbutton; its prevent in surroundingdiv
-             classname = classname.replace("@toggle", "");
+            dimensions ='position: absolute;width:100%;height:100%;' // set dimension to max in order to use of surroundingdiv
+            
+            insdata="" // don't put it on buttons itself anymore
+            
+            classname=classname.split(" ")[0]; // only keep the first part  to prevent confusion (when attaching eventlisteners)
+             //classname = classname.replace("@click", ""); // remove the click from childbutton; its prevent in surroundingdiv
+             //classname = classname.replace("@toggle", "");
             
         }
             
@@ -1135,7 +1148,7 @@ console.log(display);
         strstyle +=dimensions;
             
         var insrtstyle=strstyle?`style="${strstyle}"`:""
-            
+            console.log(`insrtstyle ${insrtstyle}`)
         switch (objecttype) {
             case "image":   
                 htmlobjects.push(`<${objecttype} src=`)

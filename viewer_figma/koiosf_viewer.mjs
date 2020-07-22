@@ -9,8 +9,8 @@
     import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koiosf_lessons.mjs';    
     import {GetSubTitlesAndSheets} from './koiosf_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koiosf_showtranscript.mjs';
-    import {} from './koiosf_getslides.mjs';
-    import {FoundSlides,UpdateSlide} from './koiosf_showslides.mjs';
+    //import {} from './koiosf_getslides.mjs';
+    import {/*FoundSlides,*/UpdateSlide} from './koiosf_slides.mjs';
    // import {} from './koiosf_chat.mjs';
     import {} from './koiosf_notes.mjs';
     import {/*SetupSliders /*,ShowTitles*/} from './koiosf_screenlayout.mjs';
@@ -28,6 +28,8 @@
    
   // import {} from './koiosf_move.mjs';
     import {} from './koiosf_browse.mjs';
+    
+    import {Login} from './koiosf_login.mjs';
 
 
 export var player=0;
@@ -436,9 +438,9 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     
   //  console.log(vidinfo)
    // GetSubTitlesAndSheets(vidinfo,FoundTranscript,FoundSlides);
-    for (var i=0;i< vidinfo.subtitles.length;i++) 
-       if (vidinfo.subtitles[i].lang == "vor")
-            FoundSlides(vidinfo.subtitles[i].subtitle,vidinfo);
+   // for (var i=0;i< vidinfo.subtitles.length;i++) 
+       //if (vidinfo.subtitles[i].lang == "vor")
+            //FoundSlides(vidinfo.subtitles[i].subtitle,vidinfo);
     //GetSetupLitAndAssInfo(vidinfo.txt);
     InitProgress(vidinfo);
     
@@ -503,6 +505,9 @@ videofield.addEventListener('click', x=>{console.log("videofield click");if (!Is
 // LinkToggleButton("fullscreen",false);subscribe("fullscreenon",ToggleFullScreen);subscribe("fullscreenoff",ToggleFullScreen);
      
      
+     LinkToggleButton("fullscreen",ToggleFullScreen)
+console.log("Init ready1");     
+     
  //    LinkClickButton("videospeed",false);subscribe("videospeedclick",RotateVideoSpeed);
        
     
@@ -510,30 +515,36 @@ videofield.addEventListener('click', x=>{console.log("videofield click");if (!Is
 //    CreateVideoSlider();  ff uitgezet
     // CreateSoundSlider();
     InitSpeak();
+console.log("Init ready2");    
     var chatlink="https://gitter.im/web3examples/test/~embed";    
     //SetupChat("chat",chatlink);
     //SetupLitAndAss();
     // CreateButton("closekeyboard",x=>document.blur(),getElement('notes'));
-    var metaDom = document.getElementsByName("viewport");
-    metaDom[0].content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
+    var metaDom = getElement("viewport");
+    if (metaDom) {
+        metaDom.content=metaDom[0].content+", user-scalable=no"; //maximum-scale=1.0, minimum-scale=1.0"; // fix zoom    
+    }
     var newmeta=document.createElement("meta");
     //newmeta.name="viewport";
 //    newmeta.content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0";   // not inserted??   
   //  newmeta=document.createElement("meta");
     newmeta.name="theme-color" 
     newmeta.content="#EBEBD3" //#20FFB1"
-    document.getElementsByTagName("head")[0].appendChild(newmeta);
-     
+    getElement("head").appendChild(newmeta);
+console.log("Init ready3");     
     //SetupSliders(); now done via move.mjs
     //NavigateLessons();   
     
     
     InitPopup();
+    console.log("Init ready4");
     player=await playerpromise;    
+    console.log("Init ready5");
     SetVideoTranscriptCallbacks(SetVideoSeconds,TranscriptShownCB);
+    console.log("Init ready6");
     SelectLanguage("nl");    
-    
-    
+console.log("Init ready7");    
+    getElement("login").addEventListener('animatedclick',Login)    
     console.log("Init ready");
 }
 

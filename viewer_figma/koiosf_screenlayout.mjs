@@ -19,9 +19,9 @@ console.log(grid);
     
     //if (!SetMiddleh) SetMiddleh="7px";
     
-var SetMiddleh="10px"
+var SetMiddleh="6px"
 
-var SetMiddlev1="10px"
+var SetMiddlev1="6px"
 
 XYUpdate(0.5,0.5);
 
@@ -30,7 +30,7 @@ XYUpdate(0.5,0.5);
         //console.log(percx,percy)
         const snap = 0.01;
         
-        var delta="5px" // to compensate for the 10 px in the middle
+        var delta="3px" // to compensate for the 10 px in the middle
         
         //var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
         //var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*2}fr`;
@@ -152,11 +152,29 @@ function ToggleSlides(event) {   // row / column  / rowsspan / columnspan
 else {
     getElement("7ContentArea").style.gridArea="3 /1 / span 1 / span 1"
     getElement("9BottomRight").style.display="flex"
-    }
-
-  
-  
+    }  
 }  
+
+function ToggleLeftMenu(event) {   // row / column  / rowsspan / columnspan
+  console.log("In ToggleLeftMenu");
+  
+  var fOn=GetToggleState(this,"displayactive")
+  getElement("Leftmenupane").style.display=fOn?"none":"block"
+
+}  
+
+
+function ToggleRightMenu(event) {   // row / column  / rowsspan / columnspan
+  console.log("In ToggleRightMenu");
+  
+  var fOn=GetToggleState(this,"displayactive")
+  
+  getElement("Rightmenupane").style.display=fOn?"none":"block"
+
+}  
+
+
+
 
 //7ContentArea 3NotesArea 1VideoPlayerContainer 
 
@@ -256,10 +274,16 @@ function loaded() {
 
 
 
-    getElement("selectliterature").addEventListener('animatedtoggle',ToggleLiterature)
-    getElement("selectnotes").addEventListener('animatedtoggle',ToggleNotes)
-    getElement("selectvideo").addEventListener('animatedtoggle',ToggleVideo)
-    getElement("selectslides").addEventListener('animatedtoggle',ToggleSlides)
+    LinkToggleButton("selectliterature",ToggleLiterature)
+    LinkToggleButton("selectnotes",ToggleNotes)
+    LinkToggleButton("selectvideo",ToggleVideo)
+    LinkToggleButton("selectslides",ToggleSlides)
+    
+    LinkToggleButton("btnleftmenu",ToggleLeftMenu)
+    LinkToggleButton("btnrightmenu",ToggleRightMenu)
+    
+    
+    
 
 }    
 

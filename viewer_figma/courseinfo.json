@@ -1,87 +1,98 @@
-[
-	{   "uniqid": "testing01",
-		"course": "Testing the viewer",
-		"courselevel": "Test level ",
-		"level": "introduction",
-		"videoinfo": "QmPDrKty83inbaxXJzhYqTsCvkhEYg7hWHV2VdkQtpFe8E",
-		"slides": "QmQXSwEvxsLt9MWCsgedYqsEeYKaFrBKhFfGUvRbpWb2Ue",
-		"contributer": "gerard",
-		"level": "introduction",
-		"subtitle": "this is only a test",
-		"description": "This course-level is to test all the possiblities of the viewer",
-		"goal": "testing",
-		"start": "now"
-	},
-	{   "uniqid": "howtouse01",
-		"course": "How to use the KOIOS platform",
-		"courselevel": "Introduction to KOIOS",
-		"level": "introduction",
-		"videoinfo": "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R",
-		"slides": "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E"
-	},
-	{   "uniqid": "tdfa01",
-		"course": "Trading Digital &amp; FInancial Assets",
-		"courselevel": "Trading Digital &amp; Financial Assets: Beginners",
-		"level": "introduction",
-		"contributer": "ricardo",
-		"level": "introduction",
-		"image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e942c8236c30b7dc3e8d270_TRADING%20ICON%20GREEN%20SVG.svg"
-	},
-	{   "uniqid": "money01",
-		"course": "All about money &amp; monetary systems",
-		"courselevel": "Money Dummy level",
-		"level": "introduction"
-	},
-	{   "uniqid": "bcintro01",
-		"course": "Blockchain Technology",
-		"courselevel": "Blockchain Technology 1: Introduction",
-		"level": "introduction",
-		"videoinfo": "QmP6GWUp4w61iukRfWWPRGVepDQgrJShjELUBiRcRDJTdu",
-		"slides": "QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m",
-		"contributer": "jordi",
-		"level": "introduction",
-		"subtitle": "An extensive introduction to Blockchain Technology.",
-		"description": "This introduction course will take you through the absolute basics of blockchain technology. After completion you will understand theimportance of blockchain technology and have a small grasp of how a blockchainworks. A course for everyone.",
-		"goal": "Ledger technology / Bitcoin / Smart contracts",
-		"start": "10-2-2020",
-		"Image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907618bc1f1241137f8345_Blockchain%20lvl1%20SVG.svg"
-	},	
-	{   "uniqid": "bcbeginner01",
-		"course": "Blockchain Technology",
-		"courselevel": "Blockchain Technology 2: Beginners",
-		"level": "beginners",
-		"videoinfo": "QmfUNeoDEgaEuWMgT4S8FTspznu4bGqRZPTqWRvLz86C6M",
-		"slides": "QmaqXjffU2TeZvtGPZ4WWo7NKmY15S1JKWtH8iSRoEZmwP",
-		"contributer": "jordi",
-		"level": "beginners",
-		"subtitle": "The second level. Let's dive in deeper.",
-		"description": "After completing the introduction course, you are ready todive a bit deeper into the technology. You'll learn about different blockchainsand what makes them different from one another. You'll also get a deeperunderstanding of the bitcoin protocol.",
-		"goal": "Bitcoin deep dive / Ethereum  Smart contracts",
-		"start": "10-2-2020",
-		"image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907624c9af5c89fff02255_Blockchain%20lvl2%20SVG.svg"
-	},    
-    {   "uniqid": "bcintermediate01",
-		"course": "Blockchain Technology",
-		"courselevel": "Blockchain Technology 3: Intermediate",
-		"level": "intermediate",
-		"videoinfo": "QmNYqXqdj6zVNup7iGnk9zC2crkaXEJihPpAqGLkgW2x14",
-		"slides": "QmNcvkvjyq4cDRB4CidU6EExfX5bYCsM9B9mMygwWVwXhi",
-		"contributer": "jordi",
-		"level": "intermediate",
-		"subtitle": "The intermediate level. This is where things get serious.",
-		"description": "Welcome to the third part of the KOIOS Blockchain Technology course. This is the so called 'economic deep dive', where we will focus on economics in relation to Blockchain Technology.",
-        "goal": "More advanced blockchain stuff"
-	},    
-	{   "uniqid": "bcadvanced01",
-		"course": "Blockchain Technology",
-		"courselevel": "Blockchain Technology 4: Advanced moved to test",
-		"level": "advanced",
-		"contributer": "jordi",
-		"level": "advanced",
-		"subtitle": "You are about to become a Blockchain specialist. Congrats.",
-		"description": "After completing the beginners course, your knowledge will be enlarged even further.",
-		"goal": "TBA",
-		"start": "Soon",
-		"image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907638c9af5c3d6cf02309_Blockchain%20lvl%204%20SVG.svg"
-	}
-]
+{
+"testing01": {   
+                "course": "Testing the viewer",
+                "courselevel": "Test level ",
+                "level": "introduction",
+                "videoinfo": "QmPDrKty83inbaxXJzhYqTsCvkhEYg7hWHV2VdkQtpFe8E",
+                "slides": "QmQXSwEvxsLt9MWCsgedYqsEeYKaFrBKhFfGUvRbpWb2Ue",
+                "contributer": "gerard",
+                "subtitle": "this is only a test",
+                "description": "This course-level is to test all the possiblities of the viewer",
+                "goal": "testing",
+                "start": "now"
+            },
+"howtouse01": {
+                "course": "How to use the KOIOS platform",
+                "courselevel": "Introduction to KOIOS",
+                "level": "introduction",
+                "videoinfo": "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R",
+                "slides": "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E"
+            },
+"tdfa01": {
+                "course": "Trading Digital &amp; FInancial Assets",
+                "courselevel": "Trading Digital &amp; Financial Assets: Beginners",
+                "level": "introduction",
+                "contributer": "ricardo",
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e942c8236c30b7dc3e8d270_TRADING%20ICON%20GREEN%20SVG.svg"
+            },
+"money01": {
+                "course": "All about money &amp; monetary systems",
+                "courselevel": "Money Dummy level",
+                "level": "introduction"
+            },
+"bcintro01": {
+                "course": "Blockchain Technology",
+                "courselevel": "Blockchain Technology 1: Introduction",
+                "level": "introduction",
+                "videoinfo": "QmP6GWUp4w61iukRfWWPRGVepDQgrJShjELUBiRcRDJTdu",
+                "slides": "QmRzsL6TgZcphVAHBSNaSzf9uJyqL24R945aLQocu5mT5m",
+                "contributer": "jordi",
+                "subtitle": "An extensive introduction to Blockchain Technology.",
+                "description": "This introduction course will take you through the absolute basics of blockchain technology. After completion you will understand theimportance of blockchain technology and have a small grasp of how a blockchainworks. A course for everyone.",
+                "goal": "Ledger technology / Bitcoin / Smart contracts",
+                "start": "10-2-2020",
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907618bc1f1241137f8345_Blockchain%20lvl1%20SVG.svg"
+            },	
+"bcbeginner01": {
+                "course": "Blockchain Technology",
+                "courselevel": "Blockchain Technology 2: Beginners",
+                "level": "beginners",
+                "videoinfo": "QmfUNeoDEgaEuWMgT4S8FTspznu4bGqRZPTqWRvLz86C6M",
+                "slides": "QmaqXjffU2TeZvtGPZ4WWo7NKmY15S1JKWtH8iSRoEZmwP",
+                "contributer": "jordi",
+                "subtitle": "The second level. Let's dive in deeper.",
+                "description": "After completing the introduction course, you are ready todive a bit deeper into the technology. You'll learn about different blockchainsand what makes them different from one another. You'll also get a deeperunderstanding of the bitcoin protocol.",
+                "goal": "Bitcoin deep dive / Ethereum  Smart contracts",
+                "start": "10-2-2020",
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907624c9af5c89fff02255_Blockchain%20lvl2%20SVG.svg"
+            },    
+"bcintermediate01": {
+                "course": "Blockchain Technology",
+                "courselevel": "Blockchain Technology 3: Intermediate",
+                "level": "intermediate",
+                "videoinfo": "QmNYqXqdj6zVNup7iGnk9zC2crkaXEJihPpAqGLkgW2x14",
+                "slides": "QmNcvkvjyq4cDRB4CidU6EExfX5bYCsM9B9mMygwWVwXhi",
+                "contributer": "jordi",
+                "subtitle": "The intermediate level. This is where things get serious.",
+                "description": "Welcome to the third part of the KOIOS Blockchain Technology course. This is the so called 'economic deep dive', where we will focus on economics in relation to Blockchain Technology.",
+                "goal": "More advanced blockchain stuff"
+            },    
+"bcadvanced01": {
+                "course": "Blockchain Technology",
+                "courselevel": "Blockchain Technology 4: Advanced moved to test",
+                "level": "advanced",
+                "contributer": "jordi",
+                "subtitle": "You are about to become a Blockchain specialist. Congrats.",
+                "description": "After completing the beginners course, your knowledge will be enlarged even further.",
+                "goal": "TBA",
+                "start": "Soon",
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907638c9af5c3d6cf02309_Blockchain%20lvl%204%20SVG.svg"
+            },
+"python01": {
+                "course": "Python",
+                "courselevel": "Python",
+                "level": "intermediate",
+                "contributer": "Leon",
+                "subtitle": "You are about to become a Python programmer.",
+                "description": "Once you know python you can start data analytics",
+                "goal": "TBA",
+                "start": "Soon",
+                "image": "",
+                "videoinfo": " https://www.youtube.com/watch?v=iPjVJoaT944&list=PL_tbH3aD86KtN40_30P9S_rPryycQPr9k",
+            }
+            
+            
+            
+            
+           
+}

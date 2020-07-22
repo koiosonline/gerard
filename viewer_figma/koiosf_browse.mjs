@@ -1,6 +1,6 @@
 // https://www.koios.online/browse-links?slides=QmQ9WwsBNSZGTAiFdDPn47PfMvN3nyfMrk93tkVXp6dvW7&match=BC-3.0
 
-import {loadScriptAsync,ipfsgetjson,subscribe,publish,DomList,GetCidViaIpfsProvider,getElement } from '../lib/koiosf_util.mjs';
+import {loadScriptAsync,GetJsonIPFS,subscribe,publish,DomList,GetCidViaIpfsProvider,getElement } from '../lib/koiosf_util.mjs';
 import {GetCourseInfo} from './koiosf_course.mjs';
 
 //import {} from './koios_getslides.mjs';
@@ -30,7 +30,7 @@ async function asyncloaded() {
     iframe.name="browse-window-frame"
     domid.appendChild(iframe);
    
-    var slideindex = await ipfsgetjson(cid);        
+    var slideindex = await GetJsonIPFS(cid);        
     var GlobalUrlList = new DomList("browser-url") // before real-slides (because is child)  
     var str=""    
     
