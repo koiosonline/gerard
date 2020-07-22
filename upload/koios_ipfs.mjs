@@ -44,15 +44,26 @@ export async function uploadYtDataToIpfs()        //Puts the object on ipfs
     for (var i=0;i<list.length;i++) { 
         console.log(`Storing ${list[i].id}`)
         var hash; //IPFS hash
-        for await (const result of ipfs.add(JSON.stringify(list[i])))
-        {
+        var tostore=JSON.stringify(list[i])
+        console.log(tostore);
+        console.log(ipfs.add);
+        const result =  await ipfs.add(tostore)
+        
             console.log(result);
             hash = result.path;
-        }
+        
         res.push({playlist:list[i].id,title:list[i].title,hash:hash});
     }      
     return {res:res,list:list} // GP 28-4 also export list
 }
+
+
+//const file = e.srcElement.files[0];
+//for await (const result of ipfs.add(file)) {
+    //console.log(result);
+//}
+
+
 
 
 export async function getYtInfoIpfs(hash)           //Gets the json string from ipfs and parses it into an object /// not used, see ipfsgetjson
