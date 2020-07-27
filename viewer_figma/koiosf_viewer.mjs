@@ -2,35 +2,26 @@
 // https://browserhow.com/how-to-clear-chrome-android-history-cookies-and-cache-data/
  // imports
  
-    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfo,SaveVideoSeen,LoadVideoSeen,ForceButton,getElement} from '../lib/koiosf_util.mjs';
-    import {SetupLogWindow} from '../lib/koiosf_log.mjs';
-    
+    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfoClass,SaveVideoSeen,LoadVideoSeen,ForceButton,getElement} from '../lib/koiosf_util.mjs';
+    import {SetupLogWindow} from '../lib/koiosf_log.mjs';    
     import {SetupVideoWindowYouTube,SetVideoTitle} from './koiosf_playvideo.mjs';
-    import {DisplayLessons, SelectLesson,CurrentLesson,LastLesson} from './koiosf_lessons.mjs';    
+    import {SelectLesson,CurrentLesson,LastLesson } from './koiosf_lessons.mjs';    
     import {GetSubTitlesAndSheets} from './koiosf_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koiosf_showtranscript.mjs';
-    //import {} from './koiosf_getslides.mjs';
     import {/*FoundSlides,*/UpdateSlide} from './koiosf_slides.mjs';
-   // import {} from './koiosf_chat.mjs';
     import {} from './koiosf_notes.mjs';
-    import {/*SetupSliders /*,ShowTitles*/} from './koiosf_screenlayout.mjs';
     import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koiosf_speech.mjs';
-    //import {SetupChat} from './koiosf_chat.mjs';
-    //import {GetSetupLitAndAssInfo,SetupLitAndAss} from './koiosf_drive.mjs';
     import {} from './koiosf_test.mjs';
     import {SelectPopup,InitPopup} from './koiosf_popup.mjs';
     import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koiosf_messages.mjs';
     import {} from './koiosf_music.mjs';
-    import {} from './koiosf_literature.mjs';
-   // import {} from './koiosf_about.mjs';
-    import {} from './koiosf_course.mjs';
-   
-   
-  // import {} from './koiosf_move.mjs';
-    import {} from './koiosf_browse.mjs';
     
+    import {} from './koiosf_course.mjs';
     import {Login} from './koiosf_login.mjs';
 
+    import {} from './koiosf_literature.mjs';
+    import {} from './koiosf_screenlayout.mjs';
+    import {} from './koiosf_comments.mjs';
 
 export var player=0;
 //export var currentduration;
@@ -71,10 +62,18 @@ function GetDuration() {
 
 var seeninfo;
 
+var GlobalCanvasProgressInfo;
+
 function InitProgress(vidinfo) {
     console.log("InitProgress");
     seeninfo=LoadVideoSeen(vidinfo);
-    //CanvasProgressInfo(getElement("videoprogressbar"),true,seeninfo)
+    
+    
+    
+    
+    
+    GlobalCanvasProgressInfo.Update(seeninfo)
+    
 }    
 
 async function VideoLocation() { 
@@ -101,10 +100,13 @@ async function VideoLocation() {
     if (!seeninfo.seensec[cursec]) {
         seeninfo.seensec[cursec]=1;
         seeninfo.seensum++;
+        GlobalCanvasProgressInfo.UpdateItem(seeninfo,cursec)
     }    
     SaveVideoSeen(seeninfo,currentvidinfo)
     
     //CanvasProgressInfo(getElement("videoprogressbar"),true,seeninfo)
+     
+    
 }  
  
  
@@ -283,7 +285,7 @@ export async function SetVideoSeconds(seconds) {
         
 }
 async function SetVideoProgressBar(perc) {
-    // console.log(`SetVideoProgressBar ${perc}`); 
+     console.log(`SetVideoProgressBar ${perc}`); 
     if (slider)    
         slider.style.left =  (perc*100)+"%";   
 
@@ -416,13 +418,17 @@ subscribe('popupdisplayblock',x=> { fVideoRunning=!IsVideoPaused();stopVideo();}
 subscribe('popupdisplaynone', x=> { if (fVideoRunning) startVideo(); } ); // if running before, start again
 
 
+
+subscribe("loadvideo",LoadVideo);
+
 async function LoadVideo(vidinfo) { // call when first video is loaded or a diffent video is selected
     
     //console.log(`Loading video ${vidinfo.videoid} ${vidinfo.txt}`);
     //console.log(vidinfo);
     
-    publish("loadvideo",vidinfo); // note: with parameter
+    //publish("loadvideo",vidinfo); // note: with parameter
     
+
     
     player=await playerpromise;
     if (player)
@@ -470,7 +476,7 @@ async function asyncloaded() {
     publish("playerstart");
    
     
-    var lessonspromise=DisplayLessons(LoadVideo);
+
     
     playerpromise =SetupVideoWindowYouTube("realvideoplayer");   
     //LinkButton("start",startVideo);
@@ -512,7 +518,10 @@ console.log("Init ready1");
        
     
     
-//    CreateVideoSlider();  ff uitgezet
+  CreateVideoSlider();  //ff uitgezet
+ GlobalCanvasProgressInfo=new CanvasProgressInfoClass(getElement("videoprogressbar"),true,"green")  
+  
+  
     // CreateSoundSlider();
     InitSpeak();
 console.log("Init ready2");    
@@ -544,7 +553,7 @@ console.log("Init ready3");
     console.log("Init ready6");
     SelectLanguage("nl");    
 console.log("Init ready7");    
-    getElement("login").addEventListener('animatedclick',Login)    
+    
     console.log("Init ready");
 }
 

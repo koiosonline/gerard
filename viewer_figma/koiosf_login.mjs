@@ -1,7 +1,7 @@
 
 
 
-import {loadScriptAsync,getElement,GetImageIPFS} from '../lib/koiosf_util.mjs';
+import {loadScriptAsync,getElement,GetImageIPFS,publish} from '../lib/koiosf_util.mjs';
 import { } from "../lib/3box.js"; // from "https://unpkg.com/3box/dist/3box.js"; // prevent rate errors
 
 /*
@@ -41,9 +41,31 @@ async function init() {
 
 if (window.ethereum)
     window.ethereum.autoRefreshOnNetworkChange=false; // prevent autoreload
+    else
+        window.ethereum=1; // so at least a box is shown
 
 
-export async function Login() {
+
+
+
+window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
+ 
+
+function ClearCachedProvider() {
+    web3Modal.clearCachedProvider();
+}
+
+
+
+async function asyncloaded() {  
+console.log("asyncloaded login")
+console.log(getElement("login"))
+console.log(getElement("login_comment"))
+
+    getElement("login").addEventListener('animatedclick',Login)    
+    getElement("clearcachedprovider").addEventListener('animatedclick',ClearCachedProvider)        
+
+
     console.log("login");
     await initpromise;
    
@@ -78,15 +100,45 @@ export async function Login() {
           }
         }
       };
+      
+      
+console.log("web3Modal");      
 
       web3Modal = new Web3Modal({
-        cacheProvider: false, // optional
+        cacheProvider: true, // remember previousely selected
         providerOptions, // required
       });
 
-onConnect();
+
+console.log(web3Modal);
+
+if (web3Modal.cachedProvider) { // continue directly to save time later
+  await onConnect();   
+}
+
 
 }
+
+
+export function getWeb3() {
+  return provider;
+}
+
+export function getUserAddress() {
+ return  selectedAccount;
+
+}
+
+
+
+
+export async function Login() {
+    await onConnect();    
+}
+
+export async function authorize() {
+    await onConnect();
+}    
 
 
 /**
@@ -123,11 +175,12 @@ const profile = await Box.getProfile(selectedAccount)
 console.log(profile)
 if (profile) {
     getElement("name").textContent = profile.name + " " + profile.emoji
-    var imagecid=profile.image[0].contentUrl
-    imagecid=imagecid[`\/`]
-//    .["/"]
-    console.log(imagecid);
-    getElement("userphoto ").src=await GetImageIPFS(imagecid)
+    if (profile.image) {
+        var imagecid=profile.image[0].contentUrl
+        imagecid=imagecid[`\/`]
+        console.log(imagecid);
+        getElement("userphoto ").src=await GetImageIPFS(imagecid)
+    }
 }    
 
   // Get a handl
@@ -195,12 +248,13 @@ async function onConnect() {
   console.log("Opening a dialog", web3Modal);
   try {
     provider = await web3Modal.connect();
+    
   } catch(e) {
     console.log("Could not get a wallet connection", e);
     return;
   }
-
-console.log(provider);
+  
+  
   // Subscribe to accounts change
   
   try {
@@ -223,6 +277,11 @@ console.log(provider);
   }
   
   await refreshAccountData();
+  console.log("web3providerfound");
+  publish("web3providerfound")
+
+console.log(provider);
+  
 }
 
 /**

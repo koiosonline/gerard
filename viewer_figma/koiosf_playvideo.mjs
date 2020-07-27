@@ -128,6 +128,8 @@ domid.id=id; // youtube player want to have in id
                 controls: "0", // misschien nodig voor niet fullscreen
                 autoplay: 0,
                 //origin:"https://koios.online",    //with this set to an wrong value, the onReady event isn't triggered
+                origin:"https://gpersoon.com",
+                
                 rel:0, 
                 cc_lang_pref:"nl",
                 cc_load_policy:1,

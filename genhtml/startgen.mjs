@@ -36,7 +36,7 @@ async function SwitchBack(domid,found) {
 */
 
 async function SwitchTo(domid,divtype) {
-     console.log(`SwitchTo ${divtype}`)    
+     //console.log(`SwitchTo ${divtype}`)    
    //  console.log(domid)
      var previous;
      var found;
@@ -140,7 +140,7 @@ function sleep(ms) {
 var globalprevpage;
 var currentoverlay
 
-function SwitchPage(newpage) {    
+function SwitchPage(newpage,callerthis) {    
     console.log(`SwitchPage to ${newpage} from ${globalprevpage}`) 	
     if (newpage) {
         var destdomid=document.getElementsByClassName(newpage)[0];            
@@ -153,11 +153,11 @@ function SwitchPage(newpage) {
         }    
         if (newpage=="close") return; // only close the overlay
         if (!destdomid) { console.error(`Page not found ${newpage}`);return; }
-        var ev = new CustomEvent("show");
+        var ev = new CustomEvent("show",{detail:callerthis});
         destdomid.dispatchEvent(ev); 
        
         if (destdomid.classList.contains("@overlay")) {
-            destdomid.style.zIndex="2"                
+            destdomid.style.zIndex="10"                
             currentoverlay=destdomid
         } else {
             if (globalprevpage) {
@@ -178,16 +178,16 @@ function GetToggleState(domid,key) {
 
 function SetToggleState(domid,key,bool) {
    domid.dataset[key]=bool;
-   console.log(`In SetToggleState ${key} ${domid.dataset[key]}`);
+   //console.log(`In SetToggleState ${key} ${domid.dataset[key]}`);
 }    
 
 function ToggleState(domid,key) {
    var current=GetToggleState(domid,key)
-   console.log(`In ToggleState1 ${key} ${current}`);
+   //console.log(`In ToggleState1 ${key} ${current}`);
    current=!current;
    SetToggleState(domid,key,current)
    current=GetToggleState(domid,key)
-   console.log(`In ToggleState2 ${key} ${current}`);
+   //console.log(`In ToggleState2 ${key} ${current}`);
    return current;
 }    
 
@@ -233,12 +233,12 @@ async function onmouseuphandler(event) {
         //await sleep(200)   
         var ev2 = new CustomEvent("displaydefault");
         this.dispatchEvent(ev2); 
-        var ev3 = new CustomEvent('animatedclick');
-        console.log("Sending animatedclick to");    
-        console.log(this)        
+        var ev3 = new CustomEvent('animatedclick',{detail:this});
+     //   console.log("Sending animatedclick to");    
+      //  console.log(this)        
         this.dispatchEvent(ev3);              
         if (this.dataset && this.dataset.dest)  // otherwise action is defined elsewhere
-        SwitchPage(this.dataset.dest)
+           SwitchPage(this.dataset.dest,this)
     }
     SetToggleState(this,"mousedown",false)
 }
@@ -247,21 +247,21 @@ async function onmouseuphandler(event) {
 
 
 async function onhidehandler(event) {
-    console.log("In onhidehandler");    
+    //console.log("In onhidehandler");    
     SetToggleState(this,"display",false);    
     this.style.display="none";
 }    
 
 async function onshowhandler(event) {
-    console.log("In onshowhandler");
+    //console.log("In onshowhandler");
     SetToggleState(this,"display",true);
     this.style.display="block"
-    var ev = new CustomEvent("madevisible");
+    var ev = new CustomEvent("madevisible",{detail:event});
     this.dispatchEvent(ev); 
 }    
 
 async function ontoggledisplayhandler(event) {
-    console.log("In ontoggledisplayhandler");            
+    //console.log("In ontoggledisplayhandler");            
     var ev = new CustomEvent(GetToggleState(this,"display") ?"hide":"show");
     this.dispatchEvent(ev);     
 }    
@@ -269,25 +269,25 @@ async function ontoggledisplayhandler(event) {
 
 
 async function ondisplaydefaulthandler(event) {
-    console.log("In ondisplaydefaulthandler");
+    //console.log("In ondisplaydefaulthandler");
     SetToggleState(this,"displayactive",false);    
     SwitchTo(this,"")
 }    
 
 async function ondisplayactivehandler(event) {
-    console.log("In ondisplayactivehandler");
+    //console.log("In ondisplayactivehandler");
     SetToggleState(this,"displayactive",true);    
     SwitchTo(this,"--active")
 }  
 
 
 async function onmouseenterhandler(event) { // hover
-    console.log("In onmouseenterhandler");        
+    //console.log("In onmouseenterhandler");        
     SwitchTo(this,"--hover")
 }    
 
 async function onmouseleavehandler(event) { // end of hover or end of mousedown; set to expected state
-    console.log("In onmouseleavehandler");        
+    //console.log("In onmouseleavehandler");        
     var fActive=GetToggleState(this,"displayactive")
     var fMousedown=GetToggleState(this,"mousedown")
     SetToggleState(this,"mousedown",false)
@@ -308,29 +308,29 @@ async function onmouseleavehandler(event) { // end of hover or end of mousedown;
 
 
 async function ontoggleactivehandler(event) {    
-console.log("In ontoggleactivehandler1");
+//console.log("In ontoggleactivehandler1");
     var newstate=ToggleState(this,"displayactive")
-    console.log(`In ontoggleactivehandler newstate=${newstate}`);
+ //   console.log(`In ontoggleactivehandler newstate=${newstate}`);
     var ev = new CustomEvent(newstate?"displayactive":"displaydefault");
     this.dispatchEvent(ev);  
     
      await sleep(200)
      var ev2 = new CustomEvent('animatedtoggle');
-     console.log("Sending animatedtoggle to");
-     console.log(this)
+   //  console.log("Sending animatedtoggle to");
+     //console.log(this)
      this.dispatchEvent(ev2);                    
 }    
 
 function SetAllEventHandlers(domid) {
-    console.log("In SetAllEventHandlers for")
-    console.log(domid);
+    //console.log("In SetAllEventHandlers for")
+    //console.log(domid);
     SetEventHandlers(domid,"@toggle",)
     SetEventHandlers(domid,"@click")
     SetEventHandlers(domid,"@page")
 }
 
 function SetEventHandlers(domid,tag) {
-    console.log(`SetEventHandlers ${tag}`)
+    //console.log(`SetEventHandlers ${tag}`)
     if (domid) {
         SetHandler(domid,tag)    
     } else domid=document
@@ -341,7 +341,7 @@ function SetEventHandlers(domid,tag) {
 }    
 
 function SetHandler(domid,tag) {
-    console.log("Setting handlers for:");
+    //console.log("Setting handlers for:");
     if (domid.className.includes(tag)) {
         console.log(domid)
         if (tag=="@toggle" || tag=="@click") {
@@ -364,7 +364,7 @@ function SetHandler(domid,tag) {
 document.addEventListener("DOMContentLoaded", main)
     
 async function main() {
-    console.log("DOMContentLoaded");
+    //console.log("DOMContentLoaded");
     SetAllEventHandlers()
 
     var firstlist=document.getElementsByClassName ("@first")

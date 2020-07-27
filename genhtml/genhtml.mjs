@@ -67,11 +67,11 @@ async function FigmaApiGet(url,token) { // cache to prevent rate limit errors by
 }
 
 async function FigmaGetImage(url) {
-        console.log(`FigmaApiGetImage Loading ${url}`);
+        //console.log(`FigmaApiGetImage Loading ${url}`);
         var p1=await fetch(url)
-        console.log(p1);
+        //console.log(p1);
         var blob=await (p1).blob()
-        console.log(blob)
+        //console.log(blob)
         
         //if (blob.type=="image/svg+xml") // then its text   // also stored by diskcache
         //    localStorage.setItem(url, await blob.text());
@@ -120,15 +120,15 @@ async function FigmaApiGetImageSrc(url,token) {
             document.getElementById("retry").innerHTML=retry;
         }
 
-console.log(`FigmaApiGetImageSrc check url ${url}`);
+//console.log(`FigmaApiGetImageSrc check url ${url}`);
         
         await sleep(Math.random() * sleeptimer); // some extra time to prevent rate limits
         var obj=await FigmaApiGet(url,token); 
                             
         if (!obj || obj.err || !obj.images) continue; // try again
 
-console.log(`FigmaApiGetImageSrc check url ${url}`);
-console.log(obj);
+//console.log(`FigmaApiGetImageSrc check url ${url}`);
+//console.log(obj);
 
         var keys = Object.keys(obj.images);
         var key=keys[0];
@@ -142,7 +142,7 @@ console.log(obj);
         document.getElementById("images").innerHTML=imagesloaded;
         //log(`Loaded ${str}`);
         var url2= URL.createObjectURL(blob)
-        console.log(`In FigmaApiGetImageSrc url=${url2}`);
+        //console.log(`In FigmaApiGetImageSrc url=${url2}`);
          
         //var picturedata=await fetch(str);
         //console.log(picturedata);
@@ -642,7 +642,7 @@ function GetAtParam(figdata,name) {
     //rest = rest.replace(/[^0-9\-]/g, ''); // only keep numbers (includeing - sign)
     rest = rest.replace(/[:]/g, ''); // remove :
     
-    console.log(`GetAtParam ${name} ${rest}`)
+    //console.log(`GetAtParam ${name} ${rest}`)
     return rest.length==0?true:rest;
 }
 
@@ -651,8 +651,8 @@ function GetAtParam(figdata,name) {
 
 async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fpartofbutton,fpartofflex,pb) { // pb is (optional) parent boundingbox
         var htmlobjects=[]                        
-        console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
-        console.log(figdata);
+       // console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
+      //  console.log(figdata);
         
         if (figdata.visible==false) return "";        
         
@@ -760,7 +760,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 var yoffset=b.y-pb.y	     
                 var yoffsetbottom=-(b.y+b.height-pb.y-pb.height); 
                 
-                console.log(`pb:${JSON.stringify(pb)} b:${JSON.stringify(b)} l:${xoffset} r:${xoffsetright} t:${yoffset} b:${yoffsetbottom}`);
+                //console.log(`pb:${JSON.stringify(pb)} b:${JSON.stringify(b)} l:${xoffset} r:${xoffsetright} t:${yoffset} b:${yoffsetbottom}`);
               /* if (!fpartofflex) */{
                     switch(figdata.constraints ? figdata.constraints.horizontal : "default") {
                         case "SCALE":
@@ -814,7 +814,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     }
                 }
                  if (fpartofflex) {
-                     console.log(width,height,left,right,bottom,top,paddingbottom)
+                    // console.log(width,height,left,right,bottom,top,paddingbottom)
                     if (figdata.type=="TEXT") {
                         width=undefined; 
                         height=undefined;
@@ -834,8 +834,8 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                    } 
                     
                     
-                    console.log("fpartofflex");
-                    console.log(width,height,left,right,bottom,top,paddingbottom)
+                   // console.log("fpartofflex");
+                   // console.log(width,height,left,right,bottom,top,paddingbottom)
                 }
                 if (fpartofgrid) {
                         ;//strstyle += "grid-area: auto;" // autolayout the childeren on the grid
@@ -857,7 +857,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 
                 
                 if (fpartofflex && (fpartofflex!==true)) {
-                    console.log(`Adding ${fpartofflex}`)
+                  //  console.log(`Adding ${fpartofflex}`)
                     dimensions +=fpartofflex; // contains the margin values                    
                 }
                 
@@ -902,7 +902,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 if (top)           dimensions +=`top:${top};`;  
                 if (paddingbottom) dimensions +=`padding-bottom:${paddingbottom};`;  
                 
-                console.log(dimensions);
+               // console.log(dimensions);
             }
         }    
                 
@@ -928,7 +928,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
        //         strstyle +="overflow: hidden;"
         }
 
-console.log(`overflow: ${strstyle}`)            
+//console.log(`overflow: ${strstyle}`)            
         
         if (figdata.fills && figdata.fills[0] && figdata.fills[0].color && (figdata.fills[0].visible != false)) {               
             if (figdata.fills[0].type="SOLID") {
@@ -940,7 +940,7 @@ console.log(`overflow: ${strstyle}`)
           }
           
         if (figdata.fills && figdata.fills[0] && figdata.fills[0].type == "IMAGE") {
-            console.log(figdata.fills);                
+           // console.log(figdata.fills);                
             if (figdata.id) {  // link to an image??
                 image = `https://api.figma.com/v1/images/${documentid}?ids=${figdata.id}&format=svg`
                 objecttype="image"
@@ -1084,7 +1084,7 @@ function ConvertColor(color) {
             display="none";
         if (display)        
             strstyle +=`display:${display};`;
-console.log(display);        
+//console.log(display);        
       
         
         
@@ -1101,7 +1101,7 @@ console.log(display);
         
         if (dest) {
             insdata=`data-dest="${dest}"`
-            console.log(`insdata : ${insdata}`);
+          //  console.log(`insdata : ${insdata}`);
         }
         
         if (onclick) {
@@ -1148,7 +1148,7 @@ console.log(display);
         strstyle +=dimensions;
             
         var insrtstyle=strstyle?`style="${strstyle}"`:""
-            console.log(`insrtstyle ${insrtstyle}`)
+           // console.log(`insrtstyle ${insrtstyle}`)
         switch (objecttype) {
             case "image":   
                 htmlobjects.push(`<${objecttype} src=`)
@@ -1214,13 +1214,13 @@ console.log(display);
 
     async function GetOtherButton(name,subselect) {    
         var firstpart=name.split(" ")[0]
-        console.log(firstpart);
+        //console.log(firstpart);
         if (!globalcomponentsdocument) return ""
         var fo=FindObject(`${firstpart}${subselect}`,globalcomponentsdocument)
         if (!fo) return ""
         var button=await recurse(fo,figmadocument,globalcomponentsid,token,fgrid,fthisisabutton,fflextopass,undefined) // no bounding=> hidden &max width     // get from componentsid!!!       
-        console.log("button info is:")
-        console.log(button);
+      //  console.log("button info is:")
+      //  console.log(button);
         return button;
     }
 

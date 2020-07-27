@@ -1,69 +1,35 @@
 import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,Toggle} from '../lib/koiosf_util.mjs';
-import {player} from './koiosf_viewer.mjs';
 
 console.log("In screenlayout");
-
-
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 export async function SetupSliders() {
     console.log("In SetupSliders");
     var grid=getElement("mainscreen");   
-console.log(grid);
-    
-    //var SetMiddleh=window.getComputedStyle(grid).getPropertyValue("grid-template-columns").split(" ")[1];       
-    //var SetM=window.getComputedStyle(grid).getPropertyValue("grid-template-rows").split(" ")    
-    //var SetMiddlev1=SetM[1];
-   // var SetMiddlev2=SetM[2];
-   // var SetMiddlev3=SetM[3];
-    
-    //if (!SetMiddleh) SetMiddleh="7px";
-    
-var SetMiddleh="6px"
-
-var SetMiddlev1="6px"
-
-XYUpdate(0.5,0.5);
-
+    console.log(grid);
+    var SetMiddleh="6px"
+    var SetMiddlev1="6px"
+    XYUpdate(0.5,0.5);
 
     async function XYUpdate(percx,percy) {
         //console.log(percx,percy)
-        const snap = 0.01;
-        
-        var delta="3px" // to compensate for the 10 px in the middle
-        
-        //var left  = (percx      < snap) ? "0px":`${percx*2}fr`;
-        //var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*2}fr`;
-        //var top   = (percy      < snap) ? "0px":`${percy*2}fr`;
-        //var bot   = ( (1-percy) < snap) ? "0px":`${(1-percy)*2}fr`;        
-        
+        const snap = 0.01;        
+        var delta="3px" // to compensate for the 6 px in the middle                
         var left  = (percx      < snap) ? "0px":`${percx*100}%`;
-        var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*100}%`;
-        
+        var right = ( (1-percx) < snap) ? "0px":`${(1-percx)*100}%`;        
         var top   = (percy      < snap) ? "0px":`${percy*100}%`;
         var bot   = ( (1-percy) < snap) ? "0px":`${(1-percy)*100}%`;        
-
-        
         
         var c=`calc(${left} - ${delta}) ${SetMiddleh}  calc(${right} - ${delta})`; // extra spaces required
         var r=`calc(${top}  - ${delta}) ${SetMiddlev1} calc(${bot}   - ${delta})`;
         grid.style["gridTemplateColumns"] = c;
         grid.style["gridTemplateRows"]    = r;
-        //console.log(c)
-        //console.log(r);
-        //console.log(player.g.g);
-        //console.log(`Player: ${player.g.g.width} ${player.g.g.height}`);
-        
-        
         var a=window.getComputedStyle(grid).getPropertyValue("grid-template-columns")
-        var b=window.getComputedStyle(grid).getPropertyValue("grid-template-rows")
-        //console.log(`${a} ///  ${b}`);
-        //await sleep(10)
-        
+        var b=window.getComputedStyle(grid).getPropertyValue("grid-template-rows")                
     }
-console.log("Before    DragItem"); 
+    console.log("Before    DragItem"); 
     DragItem("move","mainscreen","mainscreen",XYUpdate,ToggleMainLayout);
-console.log("After    DragItem"); 
+    console.log("After    DragItem"); 
 }
 
 

@@ -83,7 +83,7 @@ var videoinfo=GetCourseInfo("videoinfo") || "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr
     }    
     globalLessonslist = items;
     
-    Webflow.require('slider').redraw(); // create to dots
+    //Webflow.require('slider').redraw(); // create to dots
     
     
     var prevlesson=localStorage.getItem(`lesson-${CurrentCourseTitle}`);

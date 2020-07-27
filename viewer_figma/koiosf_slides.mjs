@@ -84,8 +84,10 @@ async function InitShowSlides() {
 }
 
 async function GetSlidesFromVideo(vidinfo) {    
+    
     console.log("In GetSlidesFromVideo");
     console.log(vidinfo);    
+    if (!vidinfo) return
     var match = vidinfo.txt.split(" ")[0];    
     var cid= await GetCourseInfo("slides")
     var slideindex = await GlobalSlideList.SwitchList(cid)   
