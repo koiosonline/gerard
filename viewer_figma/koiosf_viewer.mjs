@@ -22,6 +22,7 @@
     import {} from './koiosf_literature.mjs';
     import {} from './koiosf_screenlayout.mjs';
     import {} from './koiosf_comments.mjs';
+    import {} from './koiosf_quiz.mjs';
 
 export var player=0;
 //export var currentduration;

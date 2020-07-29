@@ -246,6 +246,9 @@ async function refreshAccountData() {
 async function onConnect() {
 
   console.log("Opening a dialog", web3Modal);
+  
+  getElement("WEB3_CONNECT_MODAL_ID").style.zIndex="20" // to make sure it's in front of everything
+  
   try {
     provider = await web3Modal.connect();
     

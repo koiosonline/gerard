@@ -157,7 +157,7 @@ function SwitchPage(newpage,callerthis) {
         destdomid.dispatchEvent(ev); 
        
         if (destdomid.classList.contains("@overlay")) {
-            destdomid.style.zIndex="10"                
+            destdomid.style.zIndex="2"                // note check web3modal is visible
             currentoverlay=destdomid
         } else {
             if (globalprevpage) {
@@ -206,6 +206,9 @@ async function onmousedownhandler(event) {
     var fclick=this.className.includes("@click")
     if (! (ftoggle || fclick) ) return; // can't find the type of click
         
+        
+    if (GetToggleState(this,"displaydisabled")) return; // can't use when disabled
+        
     SetToggleState(this,"mousedown",true)
     SetToggleState(this,"mousedowndisplayactive",GetToggleState(this,"displayactive"))
         
@@ -224,6 +227,8 @@ async function onmouseuphandler(event) {
     var ftoggle=this.className.includes("@toggle") 
     var fclick=this.className.includes("@click")
     if (! (ftoggle || fclick) ) return; // can't find the type of click
+    
+    if (GetToggleState(this,"displaydisabled")) return; // can't use when disabled
     
     if (ftoggle) {
         //var ev = new CustomEvent("toggleactive"); // already done
@@ -270,19 +275,29 @@ async function ontoggledisplayhandler(event) {
 
 async function ondisplaydefaulthandler(event) {
     //console.log("In ondisplaydefaulthandler");
+    SetToggleState(this,"displaydisabled",false);    
     SetToggleState(this,"displayactive",false);    
     SwitchTo(this,"")
 }    
 
 async function ondisplayactivehandler(event) {
     //console.log("In ondisplayactivehandler");
+    SetToggleState(this,"displaydisabled",false);
     SetToggleState(this,"displayactive",true);    
     SwitchTo(this,"--active")
+}  
+
+async function ondisplaydisabledhandler(event) {
+    //console.log("In ondisplaydisabledhandler");
+    SetToggleState(this,"displaydisabled",true);    
+    SetToggleState(this,"displayactive",false);    
+    SwitchTo(this,"--disabled")
 }  
 
 
 async function onmouseenterhandler(event) { // hover
     //console.log("In onmouseenterhandler");        
+    if (GetToggleState(this,"displaydisabled")) return; // can't use when disabled
     SwitchTo(this,"--hover")
 }    
 
@@ -292,7 +307,10 @@ async function onmouseleavehandler(event) { // end of hover or end of mousedown;
     var fMousedown=GetToggleState(this,"mousedown")
     SetToggleState(this,"mousedown",false)
     
-    
+    if (GetToggleState(this,"displaydisabled")) { // allways back to disabled
+        this.dispatchEvent(new CustomEvent("displaydisabled"));
+        return; 
+    }
     
     if (fMousedown) { // set back to initial state
         var startstate=GetToggleState(this,"mousedowndisplayactive")
@@ -355,6 +373,7 @@ function SetHandler(domid,tag) {
         domid.addEventListener("toggledisplay",ontoggledisplayhandler)
         domid.addEventListener("displaydefault",ondisplaydefaulthandler)
         domid.addEventListener("displayactive",ondisplayactivehandler)
+        domid.addEventListener("displaydisabled",ondisplaydisabledhandler)
         domid.addEventListener("toggleactive",ontoggleactivehandler)
     }
 }        

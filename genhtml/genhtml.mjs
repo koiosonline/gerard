@@ -651,8 +651,8 @@ function GetAtParam(figdata,name) {
 
 async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fpartofbutton,fpartofflex,pb) { // pb is (optional) parent boundingbox
         var htmlobjects=[]                        
-       // console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
-      //  console.log(figdata);
+        console.log(`Processing ${figdata.name} with ${figdata.children ? figdata.children.length : 0} children`);    //Type:${figdata.type}
+        console.log(figdata);
         
         if (figdata.visible==false) return "";        
         
@@ -780,6 +780,12 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                             right=`${xoffsetright}px`; // negative number
                             width=`${b.width}px`;
                             break;
+                            
+                        case "LEFT_RIGHT":
+                            //width="100%";
+                            left =`${xoffset}px`
+                            right=`${xoffsetright}px`; // negative number
+                            break;                            
                         default:
                             left =`${xoffset}px`
                             if (parseFloat(b.width) * 100 > 1) 
@@ -806,7 +812,13 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                         case "BOTTOM":
                             bottom =`${yoffsetbottom}px`; // negative number
                             height =`${b.height}px`;
-                            break;                                                                                
+                            break; 
+
+                        case "TOP_BOTTOM":
+                            //height="100%";
+                            top =`${yoffset}px`
+                            bottom =`${yoffsetbottom}px`; // negative number
+                            break;
                         default:
                             top =`${yoffset}px`
                             if (parseFloat(b.height) * 100 > 1) 

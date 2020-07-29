@@ -52,17 +52,13 @@ class LessonList {
         return this.chapters;        
     }
     
-    async GetLessonData() {
-        await ProcessList();
-        return 
-        
+    async GetCurrentLessonData() {       
+        var lesson=this.GetCurrentLesson()
+        var lessons=await this.GetLessonsList()
+        return lessons[lesson]
     }
-    
-    async GetCurrentLessonData() {
-        
-    }
-    
-    
+      
+
     UpdateMyList(courseid,fremove) {
         
     }

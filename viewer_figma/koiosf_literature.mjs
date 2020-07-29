@@ -38,11 +38,7 @@ subscribe("loadvideo",GetLiteratureForVideo);
 var GlobalUrlList 
 
 async function GetLiteratureForVideo() {   
-    var lesson=await GlobalLessonList.GetCurrentLesson()
-    var lessons=await GlobalLessonList.GetLessonsList()
-    var vidinfo=lessons[lesson]
-    console.log(lesson)
-    console.log(lessons)
+    var vidinfo=await GlobalLessonList.GetCurrentLessonData()
     
     console.log(vidinfo);
         
