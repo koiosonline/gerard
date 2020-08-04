@@ -1,7 +1,7 @@
 
 
 
-import {loadScriptAsync,getElement,GetImageIPFS,publish} from '../lib/koiosf_util.mjs';
+import {loadScriptAsync,getElement,GetImageIPFS,publish,setElementVal} from '../lib/koiosf_util.mjs';
 import { } from "../lib/3box.js"; // from "https://unpkg.com/3box/dist/3box.js"; // prevent rate errors
 
 /*
@@ -23,7 +23,7 @@ var providerOptions = {
 let web3Modal     // Web3modal instance
 var  provider;  // Chosen wallet provider given by the dialog window
 let selectedAccount;     // Address of the selected account
-
+var web3;
 
 var initpromise=init();
 
@@ -59,10 +59,11 @@ function ClearCachedProvider() {
 
 async function asyncloaded() {  
 console.log("asyncloaded login")
-console.log(getElement("login"))
-console.log(getElement("login_comment"))
+//console.log(getElement("login"))
+//console.log(getElement("login_comment"))
 
-    getElement("login").addEventListener('animatedclick',Login)    
+    getElement("login","scr_profile").addEventListener('animatedclick',Login)    
+    getElement("login","scr_comment").addEventListener('animatedclick',Login)    
     getElement("clearcachedprovider").addEventListener('animatedclick',ClearCachedProvider)        
 
 
@@ -120,9 +121,14 @@ if (web3Modal.cachedProvider) { // continue directly to save time later
 }
 
 
-export function getWeb3() {
+export function getWeb3Provider() {
   return provider;
 }
+
+export function getWeb3() {
+  return web3;
+}
+
 
 export function getUserAddress() {
  return  selectedAccount;
@@ -147,18 +153,22 @@ export async function authorize() {
 async function fetchAccountData() {
 
   // Get a Web3 instance for the wallet
-  const web3 = new Web3(provider);
-
-  console.log("Web3 instance is", web3);
-
+  
 
 
 
   // Get connected chain id from Ethereum node
   const chainId = await web3.eth.getChainId();
+  
+  console.log(`Chain id=${chainId}`)
   // Load chain information over an HTTP API
-  const chainData = await EvmChains.getChain(chainId);
-  getElement("chain").textContent = chainData.name;
+  var chainData=`Chain: ${chainId}`
+  try {
+     chainData = (await EvmChains.getChain(chainId)).name;    
+  } catch(err) { console.log(err); } // but still continue
+  
+  getElement("chain").textContent = chainData;
+  
 
   // Get list of accounts of the connected wallet
   const accounts = await web3.eth.getAccounts();
@@ -247,15 +257,25 @@ async function onConnect() {
 
   console.log("Opening a dialog", web3Modal);
   
-  getElement("WEB3_CONNECT_MODAL_ID").style.zIndex="20" // to make sure it's in front of everything
+  //getElement("WEB3_CONNECT_MODAL_ID").style.zIndex="20" // to make sure it's in front of everything
   
   try {
     provider = await web3Modal.connect();
     
   } catch(e) {
     console.log("Could not get a wallet connection", e);
+    setElementVal("status1","Not connected","scr_comment")
+    getElement("login","scr_comment").dispatchEvent(new CustomEvent("show"));
+    getElement("login","scr_profile").dispatchEvent(new CustomEvent("show"));
+    if (web3Modal)
+        web3Modal.clearCachedProvider(); // clear cached because this didn't work (try again later)
     return;
   }
+  setElementVal("status1","Connected","scr_comment")
+  getElement("login","scr_comment").dispatchEvent(new CustomEvent("hide"));
+  getElement("login","scr_profile").dispatchEvent(new CustomEvent("hide"));
+  
+  
   
   
   // Subscribe to accounts change
@@ -278,6 +298,11 @@ async function onConnect() {
     console.log("provider on error", e);
     return;
   }
+  
+ web3 = new Web3(provider);
+
+  console.log("Web3 instance is", web3);
+
   
   await refreshAccountData();
   console.log("web3providerfound");

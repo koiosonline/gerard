@@ -380,7 +380,7 @@ export async function SaveAlsoOnIpfs() {
     var html=await MakePage(completepage,globalembed,globalfonts,globalmediastyles,globalobjname,true)    
     var result=await SaveOnIpfs(html)
     var str2=""
-    str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`);
+    //str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`); // doesn't show the images (type is correct)
     str2 +="IPFS link 2: "+MakeUrl(`https://ipfs.io/ipfs/${result}`);
     str2 +="IPFS link 3: "+MakeUrl(`http://www.gpersoon.com:8080/ipfs/${result}`);
     document.getElementById("output").innerHTML += str2;
@@ -525,7 +525,7 @@ function MakeHeader(embed,globalfonts,globalmediastyles) {
     var strprefix=""    
     
     strprefix +='<head>'
-    strprefix +='<meta name="viewport" content="width=1440, initial-scale=1.0">'
+    strprefix +='<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">'
     strprefix +='<meta charset="utf-8" />'
     strprefix +=errorscript;
     strprefix += GetFonts(globalfonts);
@@ -678,6 +678,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
         
         var gridcol=   GetAtParam(figdata,"@gridcol")
         var gridrow=   GetAtParam(figdata,"@gridrow")
+        var scale=     GetAtParam(figdata,"@scale")
         
         
   
@@ -706,6 +707,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
         var strhref=""
         var urllocation=""
         var insdata=""
+        var transform=""
 
 
       if (dest) {
@@ -771,7 +773,9 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                             break;
                         case "CENTER":                              
                             //left =`${(parseFloat(xoffset)/parseFloat(pb.width)*100).toFixed(2)}%`;
-                            left =`calc(50% - ${b.width/2}px)`;  // There must be spaces surrounding the math operator. 
+//                            left =`calc(50% - ${b.width/2}px)`;  // There must be spaces surrounding the math operator. 
+                            left ="50%"
+                            transform += "translateX(-50%) " // note:seperated by spaces
                             width=`${b.width}px`;
                             //surroundingdiv +="display: flex; justify-content: center;";
                             //strstyle +=`left:1%;`
@@ -804,7 +808,9 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                             break;
                         case "CENTER":                            
                             // top =`${(parseFloat(yoffset)/parseFloat(pb.height)*100).toFixed(2)}%`;
-                            top =`calc(50% - ${b.height/2}px)`;  // There must be spaces surrounding the math operator. 
+                          //  top =`calc(50% - ${b.height/2}px)`;  // There must be spaces surrounding the math operator. 
+                          top="50%"
+                          transform += "translateY(-50%) " // note:seperated by spaces
                             height =`${b.height}px`;
                             //strstyle +=`top:1%`
                             //surroundingdiv +="display: flex;align-items: center; ";
@@ -836,6 +842,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     bottom=undefined
                     top=undefined
                     paddingbottom=undefined
+                    transform=undefined
                     
                     
                      switch(figdata.layoutAlign) {
@@ -861,6 +868,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     bottom=undefined
                     top=undefined
                     paddingbottom=undefined
+                    transform=undefined
                     
                     
                 }    
@@ -906,6 +914,8 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 if (GetAtParam(figdata,"@width")) width=GetAtParam(figdata,"@width") // allways override if present
                 if (GetAtParam(figdata,"@height")) height=GetAtParam(figdata,"@height")
                 
+                if (GetAtParam(figdata,"@max-width")) dimensions+=`max-width:${GetAtParam(figdata,"@max-width")};`;
+            
                 if (width)         dimensions +=`width:${width};`;
                 if (height)        dimensions +=`height:${height};`;    
                 if (left)          dimensions +=`left:${left};`;    
@@ -913,6 +923,8 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 if (bottom)        dimensions +=`bottom:${bottom};`;  
                 if (top)           dimensions +=`top:${top};`;  
                 if (paddingbottom) dimensions +=`padding-bottom:${paddingbottom};`;  
+                if (scale) dimensions +=`scale:${scale};`
+                if (transform) dimensions+=`transform: ${transform};`
                 
                // console.log(dimensions);
             }

@@ -9,26 +9,23 @@
                 "subtitle": "this is only a test",
                 "description": "This course-level is to test all the possiblities of the viewer",
                 "goal": "testing",
-                "start": "now"
+                "start": "now",
+                "image":"https://upload.wikimedia.org/wikipedia/commons/1/11/Test-Logo.svg"
             },
 "howtouse01": {
                 "course": "How to use the KOIOS platform",
                 "courselevel": "Introduction to KOIOS",
                 "level": "introduction",
                 "videoinfo": "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R",
-                "slides": "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E"
+                "slides": "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E",
+                "image":"https://cdn.pixabay.com/photo/2014/03/24/17/15/school-295210_1280.png"
             },
 "tdfa01": {
-                "course": "Trading Digital &amp; FInancial Assets",
+                "course": "Trading Digital &amp; Financial Assets",
                 "courselevel": "Trading Digital &amp; Financial Assets: Beginners",
                 "level": "introduction",
                 "contributer": "ricardo",
                 "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e942c8236c30b7dc3e8d270_TRADING%20ICON%20GREEN%20SVG.svg"
-            },
-"money01": {
-                "course": "All about money &amp; monetary systems",
-                "courselevel": "Money Dummy level",
-                "level": "introduction"
             },
 "bcintro01": {
                 "course": "Blockchain Technology",
@@ -66,11 +63,12 @@
                 "contributer": "jordi",
                 "subtitle": "The intermediate level. This is where things get serious.",
                 "description": "Welcome to the third part of the KOIOS Blockchain Technology course. This is the so called 'economic deep dive', where we will focus on economics in relation to Blockchain Technology.",
-                "goal": "More advanced blockchain stuff"
+                "goal": "More advanced blockchain stuff",
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e90762efc30d3b72957f562_Blockchain%20lvl3%20SVG.svg"
             },    
 "bcadvanced01": {
                 "course": "Blockchain Technology",
-                "courselevel": "Blockchain Technology 4: Advanced moved to test",
+                "courselevel": "Blockchain Technology 4: Advanced",
                 "level": "advanced",
                 "contributer": "jordi",
                 "subtitle": "You are about to become a Blockchain specialist. Congrats.",

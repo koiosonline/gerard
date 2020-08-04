@@ -139,8 +139,11 @@ async function CheckAnwer() {
         
         var rightanswer=(answers[i] == answerok)
         
-        btnlist2[i].style.borderColor=rightanswer?"green":"red";
-        btnlist2[i].style.borderStyle="solid";        
+        //btnlist2[i].style.borderColor=rightanswer?"green":"red";
+        //btnlist2[i].style.borderStyle="solid";        
+        btnlist2[i].style.outline=(rightanswer?"#4DFFC1 solid 5px":"#FF79A8 dashed 5px")
+        btnlist2[i].style.outlineOffset="2px"
+        console.log(btnlist2[i].style);
     }
     
         
@@ -202,7 +205,7 @@ async function NewVideoSelected() {
      var btn=getElement("btnquiz","scr_viewer")
      
      console.log(btn);
-     btn.dispatchEvent(new CustomEvent((nrquestions >0 )?"displaydefault":"displaydisabled"));
+     btn.dispatchEvent(new CustomEvent((nrquestions >0 )?"show":"hide"));
     
 }
 

@@ -2,7 +2,7 @@
 
 import { } from "../lib/3box.js"; // from "https://unpkg.com/3box/dist/3box.js"; // prevent rate errors
 
-import { getUserAddress, getWeb3,authorize } from "./koiosf_login.mjs";
+import { getUserAddress, getWeb3Provider,authorize } from "./koiosf_login.mjs";
 import {DomList,getElement,FitOneLine,LinkVisible,subscribe} from '../lib/koiosf_util.mjs';
 import {log} from '../lib/koiosf_log.mjs'; 
 
@@ -33,15 +33,15 @@ async function ScrCommentMadeVisible() {
     
     
     var titletext="test thread"
-    WriteThread(titletext);
-    getElement("titletext").innerHTML=titletext   
-    getElement("posttext").addEventListener('animatedclick',PostComment)    
-    var target=getElement("commenttext")    
-    target.contentEditable="true"; // make div editable
-    target.style.whiteSpace ="pre";  
     
-    
-    
+    if (space) { // else no connection to 3box
+        WriteThread(titletext);
+        getElement("titletext").innerHTML=titletext   
+        getElement("posttext").addEventListener('animatedclick',PostComment)    
+        var target=getElement("commenttext")    
+        target.contentEditable="true"; // make div editable
+        target.style.whiteSpace ="pre";  
+    }
 }    
 
 
@@ -57,11 +57,11 @@ async function NextStep() {
 async function Init3box() {
     console.log("Init3box");
     var ga=getUserAddress()
-    var pr=getWeb3()
+    var pr=getWeb3Provider()
     console.log(ga)
     console.log(pr);
     console.log("Start openbox")
-    box = await Box.openBox(ga,pr );    
+    box = await Box.openBox(ga,pr);    
     console.log("after openbox");
     await box.syncDone
     console.log("after syncdone");

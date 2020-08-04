@@ -23,6 +23,7 @@
     import {} from './koiosf_screenlayout.mjs';
     import {} from './koiosf_comments.mjs';
     import {} from './koiosf_quiz.mjs';
+    import {} from './koiosf_badges.mjs';
 
 export var player=0;
 //export var currentduration;
