@@ -923,8 +923,8 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 if (bottom)        dimensions +=`bottom:${bottom};`;  
                 if (top)           dimensions +=`top:${top};`;  
                 if (paddingbottom) dimensions +=`padding-bottom:${paddingbottom};`;  
-                if (scale) dimensions +=`scale:${scale};`
-                if (transform) dimensions+=`transform: ${transform};`
+                if (scale)         transform  +=`scale(${scale}) `  // scale:${scale} // scale doesn't work on mobile browser
+                if (transform)     dimensions +=`transform: ${transform};`
                 
                // console.log(dimensions);
             }

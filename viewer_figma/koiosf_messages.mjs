@@ -16,8 +16,9 @@ export async function DisplayMessage(text) {
 
 export async function SwitchDisplayMessageContinous(fOn) {
     console.log("In InitDisplayMessageContinous");
-  //  var msg=getElement("message");
-  //  msg.style.display=fOn?"flex":"none";    
+  
+    if (!fOn) 
+      SwitchPage("close") // close message overlay
     
     var msgtext=getElement("msg-text");
     msgtext.innerText = "";
