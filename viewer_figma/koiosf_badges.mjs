@@ -58,13 +58,15 @@ async function GetBadgeDetails(urltarget,i) { // put in function to be able to r
         console.log(uri)        
         var badgecontent=await GetJsonIPFS(uri)
         console.log(badgecontent);
+        if (badgecontent) {
         //getBadgeContent(uri, i);
-        if (badgecontent.image) {
-             var imageobject=await GetImageIPFS(badgecontent.image)
-             setElementVal("__icon",imageobject,urltarget)
-        }        
-        setElementVal("__label",badgecontent.name+" "+badgecontent.description,urltarget)
-        console.log(urltarget);
+            if (badgecontent.image) {
+                 var imageobject=await GetImageIPFS(badgecontent.image)
+                 setElementVal("__icon",imageobject,urltarget)
+            }        
+            setElementVal("__label",badgecontent.name+" "+badgecontent.description,urltarget)
+            console.log(urltarget);
+        }
 }        
 
 
