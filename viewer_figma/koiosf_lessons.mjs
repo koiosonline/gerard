@@ -128,7 +128,7 @@ function AddChapter(vidinfo) {
 
 
 function AddLessonsItem(vidinfo,index) { // txt,thumbnail,description,videoid,duration) {
-    console.log(`AddLessonsItem ${vidinfo.title}`);
+    //console.log(`AddLessonsItem ${vidinfo.title}`);
     vidinfo.txt=vidinfo.title; /// refactor
     var cln = PrepareLessonsList.AddListItem() //Template.cloneNode(true);
     getElement("lesson-name",cln).innerHTML=vidinfo.txt;    
@@ -143,23 +143,23 @@ function AddLessonsItem(vidinfo,index) { // txt,thumbnail,description,videoid,du
     cln.videoid=vidinfo.videoid; // to store & retrieve data about the video       
     SetClickPlay(getElement("playbuttonfromlist",cln),index)    
     var seeninfothisvideo=LoadVideoSeen(vidinfo)        
-    console.log("AddLessonsItem");
-    console.log(vidinfo.txt);
-    console.log(seeninfothisvideo);
+    //console.log("AddLessonsItem");
+    //console.log(vidinfo.txt);
+    //console.log(seeninfothisvideo);
     var disp=seeninfothisvideo.seenend?"displayactive":"displaydefault"
-    console.log(disp);
+    //console.log(disp);
     getElement("seenvideo",cln).dispatchEvent(new CustomEvent(disp))    
-    console.log(getElement("seenvideo",cln))
+    //console.log(getElement("seenvideo",cln))
 } 
 
 function SetClickPlay(domid,index) { // seperate function to remember state
-    console.log(`SetClickPlay ${index}`);
-    console.log(domid);
+    //console.log(`SetClickPlay ${index}`);
+    //console.log(domid);
     
     domid.addEventListener('click', e=> {
-        console.log("Click event in SetClickPlay");
-        console.log(e);    
-        console.log(index);       
+        //console.log("Click event in SetClickPlay");
+       // console.log(e);    
+       // console.log(index);       
           
         SelectLesson(index)
         }

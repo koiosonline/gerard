@@ -53,11 +53,11 @@ async function getBadges() {
 
 async function GetBadgeDetails(urltarget,i) { // put in function to be able to run in parallel
         var tokenid = await contract.methods.ownedTokens(accounts[0],i-1).call(); // should be tokenOfOwnerByIndex
-        console.log(`tokenid=${tokenid}`)
+      //  console.log(`tokenid=${tokenid}`)
         var uri = await contract.methods.tokenURI(tokenid).call();
-        console.log(uri)        
+     //   console.log(uri)        
         var badgecontent=await GetJsonIPFS(uri)
-        console.log(badgecontent);
+      //  console.log(badgecontent);
         if (badgecontent) {
         //getBadgeContent(uri, i);
             if (badgecontent.image) {
@@ -65,7 +65,7 @@ async function GetBadgeDetails(urltarget,i) { // put in function to be able to r
                  setElementVal("__icon",imageobject,urltarget)
             }        
             setElementVal("__label",badgecontent.name+" "+badgecontent.description,urltarget)
-            console.log(urltarget);
+           // console.log(urltarget);
         }
 }        
 

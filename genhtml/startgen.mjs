@@ -362,7 +362,7 @@ function SetEventHandlers(domid,tag) {
 function SetHandler(domid,tag) {
     //console.log("Setting handlers for:");
     if (domid.className.includes(tag)) {
-        console.log(domid)
+        //console.log(domid)
         if (tag=="@toggle" || tag=="@click") {
             domid.addEventListener("mousedown",onmousedownhandler)
             domid.addEventListener("mouseup",onmouseuphandler)
