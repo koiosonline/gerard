@@ -141,7 +141,8 @@ var globalprevpage;
 var currentoverlay
 
 function SwitchPage(newpage,callerthis) {    
-    console.log(`SwitchPage to ${newpage} from ${globalprevpage}`) 	
+    console.log(`SwitchPage to ${newpage} from `) 	
+    console.log(globalprevpage)
     if (newpage) {
         var destdomid=document.getElementsByClassName(newpage)[0];            
         if (globalprevpage==destdomid) // stays on same page

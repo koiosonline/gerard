@@ -1042,14 +1042,14 @@ function ConvertColor(color) {
            case "TEXT": strtxt +=figdata.characters;
            
                 switch(figdata.style.textAlignVertical) {
-                   case "TOP":    display="flex";strstyle +="align-items: flex-start;";break
+                   case "TOP":   break // is already default // display="flex";strstyle +="align-items: flex-start;";
                    case "CENTER": display="flex";strstyle +="align-items: center;";    break
                    case "BOTTOM": display="flex";strstyle +="align-items: flex-end;";  break                   
                 }                
                 switch(figdata.style.textAlignHorizontal) {
-                   case "LEFT":   display="flex";strstyle +="justify-content: flex-start;";break;
-                   case "CENTER": display="flex";strstyle +="justify-content: center;";    break;
-                   case "RIGHT":  display="flex";strstyle +="justify-content: flex-end;";  break;
+                   case "LEFT":   /*display="flex";*/strstyle +="text-align: left;"; break;   // "justify-content: flex-start;";break;
+                   case "CENTER": /*display="flex";*/strstyle +="text-align: center;"; break; // "justify-content: center;";    break;
+                   case "RIGHT":  /*display="flex";*/strstyle +="text-align: right;"; break;  // "justify-content: flex-end;";  break;
                 }    
                 // console.log(strstyle);
            break;

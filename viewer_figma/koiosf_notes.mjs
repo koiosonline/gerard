@@ -1,123 +1,68 @@
-import {LinkButton,LinkClickButton,subscribe,DomList,GetCidViaIpfsProvider,getElement} from '../lib/koiosf_util.mjs';   
+import {LinkButton,LinkClickButton,subscribe,DomList,GetCidViaIpfsProvider,getElement,setElementVal,FitOneLine} from '../lib/koiosf_util.mjs';   
 import {DisplayMessage} from './koiosf_messages.mjs';  
 import {CurrentCourseTitle} from './koiosf_lessons.mjs'
 
+console.log("Start notes");
 
 
-subscribe("playerloading",  InitNotes);
+subscribe("loadvideo",ShowVideoInfoInNotes) 
 
-var GlobalSlideNotesBlockList;
-function InitNotes() {
-    console.log("In InitNotes");      
-   // GlobalSlideNotesBlockList = new DomList("slide-notes-block")  
-    
-    
-    SetupNotes("notes");
-    
+
+window.addEventListener('DOMContentLoaded', asyncloaded);  // load  
+
+
+var GlobalNotesArea
+
+async function asyncloaded() {    
+     GlobalNotesArea=new NotesAreaClass(getElement("notes"))
+     FitOneLine(getElement("videotitle"))
+     LinkClickButton("share",ShareNotes);
 }
 
-// subscribe("foundslides",ShowSlidesInNotes) // called when sheets are found via json file
-
-var CleanprevSlides=[]
-
-function ShowSlidesInNotes(slidesarray) {
-    GlobalSlideNotesBlockList.EmptyList()
-  
-    for (var i=0;i<CleanprevSlides.length;i++) 
-        CleanprevSlides[i](); // call clean function for previous slides
+       
+function ShowVideoInfoInNotes(vidinfo) {
+    GlobalNotesArea.UpdateId(vidinfo.videoid);
+    setElementVal("videotitle","Notes for: "+vidinfo.txt);
+}  
+ 
     
-    CleanprevSlides=[]
-
-    for (var i=0;i<slidesarray.length;i++) {
-        if (slidesarray[i].png) {
-            var target = GlobalSlideNotesBlockList.AddListItem() 
-            if (target) {            
-                var t1=getElement("slide-notes-header",target)
-                SetupHeader(t1,`#${i+1}: ${slidesarray[i].title}`);
-                var t2=getElement("slide-notes-text",target)
-                CleanprevSlides.push(SetupTextArea(t2,slidesarray[i].png))
-                var t3=getElement("mini-slide",target)
-                t3.src=GetCidViaIpfsProvider(slidesarray[i].png,0);
-            }
-        }
+ 
+class NotesAreaClass {    
+    constructor (target) {
+        console.log("Constructor of NotesAreaClass");
+        this.target=target;        
+        this.target.contentEditable="true"; // make div editable
+        this.target.style.whiteSpace = "pre"; //werkt goed in combi met innerText                
+        this.target.innerHTML = "..."
+        this.target.addEventListener('input',this.SaveTxt , true); // save the notes    
+    }   // this.target.removeEventListener('input',this.SaveTxt , true); // save the notes       
+    
+    UpdateId(uniqueid) {
+        console.log(`Update id ${uniqueid}`)
+        this.uniqueid=uniqueid
+        this.target.innerHTML = "..."
+        var cached=localStorage.getItem("notes-"+this.uniqueid);     
+        if (cached) 
+            this.target.innerHTML = cached;        
+        console.log(this.uniqueid);        
+    }    
+    GetId() {
+        return this.uniqueid
+    }    
+    
+    GetText() {       
+        return this.target.innerText;
     }
-} // note combined witn breaking=pre in webflow for headings & pre-wrap for text
-
-
-//subscribe("loadvideo",ShowVideoInfoInNotes) 
-
-function SetupHeader(target,txt) {
-    target.innerHTML=txt
-    target.style.overflow="hidden"
-    target.style.textOverflow="ellipsis"  
-}    
-
-function SetupTextArea(target,uniqueid) {
-    target.contentEditable="true"; // make div editable
-    target.style.whiteSpace = "pre"; //werkt goed in combi met innerText
-    target.innerHTML=localStorage.getItem(uniqueid); 
-    if (!target.innerHTML) 
-            target.innerHTML = "..."
-        
-        
-   // console.log(`In SetupTextArea ${uniqueid}`);
     
-    target.addEventListener('input',SaveTxt , true); // save the notes    
-    
-     
-    function Clean() {
-  //      console.log(`removing listener for ${uniqueid}`);
-       target.removeEventListener('input',SaveTxt , true); // save the notes    
-    }
-
-    function SaveTxt(txt) { 
-        localStorage.setItem(uniqueid, txt.target.innerText);
+    SaveTxt(txt) { // this is different now(eventlistener related)
+        var uniqueid=GlobalNotesArea.GetId();
+        console.log(uniqueid);
+        localStorage.setItem("notes-"+uniqueid, txt.target.innerText);
         console.log("input");
         console.log(txt.target.innerText); 
     }
-    return Clean;
+
 }     
-    
-var CleanprevN;    
-var CleanprevQ;    
-function ShowVideoInfoInNotes(vidinfo) {
-    var target=getElement("video-notes")    
-    if (vidinfo)
-        SetupHeader(target,`${vidinfo.txt}`)    
-    var notes=getElement("notes")
-    if (CleanprevN)
-        CleanprevN();  
-    if (vidinfo)
-        CleanprevN=SetupTextArea(notes,vidinfo.videoid,true)    
-
-/*
-    target=getElement("video-questions")    
-    SetupHeader(target,"Repetition questions")    
-    var questions=getElement("questions")
-    if (CleanprevQ)
-        CleanprevQ();  
-    CleanprevQ=SetupTextArea(questions,`questions-${vidinfo.videoid}`,true)    
-*/
-
-    
-}    
-
-
-subscribe("slideselected",ShowNotesOfSelectedSlide);
-
-
-function ShowNotesOfSelectedSlide(n) { // n starts at 0   
-    console.log(`ShowNotesOfSelectedSlide ${n}`)
-    var target1=getElement("slide-notes-header")
-    var target2=getElement("slide-notes-text")    
-    for (var i=0;i<target1.length;i++) {
-        
-      //  target1[i].style.fontSize =i==n?"12px":"9px"
-      //  target2[i].style.fontSize =i==n?"12px":"9px"
-      
-        target1[i].style.color =i==n?"black":"gray"
-    }
-}
     
 
 
@@ -137,53 +82,45 @@ LinkButton("transcripttoclipboard",getVisibleTranscriptandCopyToClipboard);
     
     
 
-       
-async function SetupNotes(windowid) {
-//    LinkClickButton("share");subscribe("shareclick",ShareNotes);
-}
-
-
-/*
-    //var email=getElement('emailaddress')
-    //email.value=localStorage.getItem("emailaddress");       
-    //email.addEventListener('input', x => {localStorage.setItem("emailaddress", x.target.value);console.log(x);}, true); // save the emailaddress
-    //LinkButton("sendemail",sendMail);
-    //LinkButton("copytoclipboard",x => writeToClipboard(getElement("notesarea").value)  ); 
-    
-    //LinkButton("share",ShareNotes);
-
-    
-   // console.log("SetupNotes");
-   // console.log(NotesArea); 
-    //NotesArea.style.height=notesform.getBoundingClientRect().height+"px"; // hack to make field larger
-   // console.log(NotesArea); 
-*/  
-
-
 
 async function writeToClipboard(text) {
-
+    console.log(`writeToClipboard ${text}`)
+    
+       await navigator.permissions.request({name: 'clipboard-write'});
+    
+    var perm=await navigator.permissions.query({name:'clipboard-write'})
+    console.log(perm)
+    
     try {
         await navigator.clipboard.writeText(text);
         var msg=`Copied to clipboard (${text.length} characters)`;
         console.log(msg);
         DisplayMessage(msg);
     } catch (error) {
+        DisplayMessage(error.message);
         console.error(error);
     }
 }
+
 async function ShareNotes() {
     console.log("In ShareNotes");
-    NotesArea = getElement("notescontainer")
-    console.log(NotesArea);
-    var toShare=NotesArea.innerText    
+    
+    var toShare=GlobalNotesArea.GetText()
+    console.log(toShare)
     let err;
-    if (navigator && navigator.share) {
+    console.log(navigator)
+    console.log(navigator.share);
+    console.log(navigator.share.length);
+    
+    if (navigator && navigator.share && navigator.share.length > 0) {
+        console.log("Sharing");
         await navigator.share({ title: "Sharing notes", text: toShare }).catch( x=>err=x);
         if (err) writeToClipboard(toShare);
     }
      else 
          writeToClipboard(toShare);     
+     
+     
 } 
 
 

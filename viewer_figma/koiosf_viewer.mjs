@@ -4,7 +4,7 @@
  
     import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfoClass,SaveVideoSeen,LoadVideoSeen,ForceButton,getElement} from '../lib/koiosf_util.mjs';
     import {SetupLogWindow} from '../lib/koiosf_log.mjs';    
-    import {SetupVideoWindowYouTube,SetVideoTitle} from './koiosf_playvideo.mjs';
+    import {SetupVideoWindowYouTube} from './koiosf_playvideo.mjs';
     import {SelectLesson,CurrentLesson,LastLesson } from './koiosf_lessons.mjs';    
     import {GetSubTitlesAndSheets} from './koiosf_subtitles.mjs';
     import {currentlang,UpdateTranscript,FoundTranscript,SelectLanguage,SetVideoTranscriptCallbacks} from './koiosf_showtranscript.mjs';
@@ -441,7 +441,7 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     //currentduration = vidinfo.duration
     //currentvideoid = vidinfo.videoid;
     console.log(`In Loadvideo`);
-    SetVideoTitle(vidinfo.txt);
+    //
    SetVideoProgressBar(0)
     
   //  console.log(vidinfo)

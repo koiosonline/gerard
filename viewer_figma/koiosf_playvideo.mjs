@@ -55,16 +55,6 @@ player.setOption('captions', 'track', {});
 
 import {LinkButton,loadScriptAsync,publish,LinkClickButton,subscribe,getElement} from '../lib/koiosf_util.mjs';
 
-
-export async function SetVideoTitle(title) {
-
-    var el=getElement("videotitle")
-    if (el)
-            el.innerHTML = title;
-
-}
-
-
 async function onStateChange(event) {
     //console.log(`In onStateChange ${event.data}`);
   
