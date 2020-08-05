@@ -81,7 +81,7 @@ var prevurl=undefined
         if (url == prevurl) return "";  // filter out duplicates (already sorted)
         prevurl = url;
     
-        url = url.replace("http:","https:"); // to prevent error messages from browser
+        //url = url.replace("http:","https:"); // to prevent error messages from browser  (sometimes localhost http)
         var urltarget = GlobalUrlList.AddListItem()  
         
 //console.log(`In SetInfo ${url} ${txt}`)
