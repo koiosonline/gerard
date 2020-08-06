@@ -3,6 +3,14 @@
     var loadedimages=[]
     
     
+window.addEventListener("popstate", function(e) {
+	console.log("Location: " + document.location + ", state: " + JSON.stringify(e.state))
+    SwitchPage(e.state.page,undefined,true)
+});
+    
+    
+    
+    
     /*
     async function LoadImage(src) {
         console.log("Loading image "+src)
@@ -139,20 +147,34 @@ function sleep(ms) {
 
 var globalprevpage;
 var currentoverlay
+var mainurl=""
 
-function SwitchPage(newpage,callerthis) {    
+function SwitchPage(newpage,callerthis,fbackbutton) {    
     console.log(`SwitchPage to ${newpage} from `) 	
     console.log(globalprevpage)
+    
+    if (currentoverlay) { // close the overlay first
+            var ev = new CustomEvent("hide");
+            currentoverlay.dispatchEvent(ev); 
+            currentoverlay=undefined
+    }    
+    
+    if (!fbackbutton && !(newpage=="close")) {
+        try {
+            history.pushState({page: newpage},`newpage ${newpage}`, `${mainurl}?page=${newpage}`);
+        } catch(error) { console.log(error);}
+    }
+    console.log("history");
+    console.log(history);
     if (newpage) {
         var destdomid=document.getElementsByClassName(newpage)[0];            
         if (globalprevpage==destdomid) // stays on same page
             return
-        if (currentoverlay) { // close the overlay first
-            var ev = new CustomEvent("hide");
-            currentoverlay.dispatchEvent(ev); 
-            currentoverlay=undefined
-        }    
-        if (newpage=="close") return; // only close the overlay
+        
+        if (newpage=="close") {
+            history.back(); // pop previous
+            return; // only close the overlay
+        }
         if (!destdomid) { console.error(`Page not found ${newpage}`);return; }
         var ev = new CustomEvent("show",{detail:callerthis});
         destdomid.dispatchEvent(ev); 
@@ -383,14 +405,30 @@ function SetHandler(domid,tag) {
 
 document.addEventListener("DOMContentLoaded", main)
     
+function GetURLParam(id) {
+    let params = (new URL(document.location)).searchParams;
+    return params.get(id);     
+ }         
+    
 async function main() {
-    //console.log("DOMContentLoaded");
+    console.log("DOMContentLoaded in startgen");
     SetAllEventHandlers()
+    /* doesn't work
+    let url1 = new URL(document.location)
+    let url2 = new URL("https://koios.online/test/newviewer")
+        
+    if (url1.searchParams.get('orghostname')) url2.host=      url1.searchParams.get('orghostname')
+    if (url1.searchParams.get('orgpathname')) url2.pathname=  url1.searchParams.get('orgpathname')
+    mainurl = url2.toString();
+    console.log(mainurl)
+    */
 
-    var firstlist=document.getElementsByClassName ("@first")
-    if (firstlist && firstlist.length >0) {          
-        var firstname=firstlist[0].className.split(" ")[0]; // only take the first partt
-        SwitchPage(firstname)
-    }      
+    var firstname=GetURLParam("page")
+    if (!firstname) {
+        var firstlist=document.getElementsByClassName ("@first")
+        if (firstlist && firstlist.length >0)      
+            firstname=firstlist[0].className.split(" ")[0]; // only take the first partt        
+    }
+    SwitchPage(firstname)    
 }
 

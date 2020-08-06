@@ -292,8 +292,17 @@ async function GetComponents(componentsid,token) {
  var globalcomponentsdocument=undefined;
 var globalcompletepage;
 var globalcomponentsid;
+var orglocation
+
+
+async function Reload() {    
+   location.href=orglocation;
+}   
+
 
 async function start() {
+    
+    orglocation=location.href
     
     var token=document.getElementById("figmakey").innerHTML.trim();
     var documentid=document.getElementById("pageid").innerHTML.trim();    
@@ -565,6 +574,9 @@ async function MakePage(strinput,embed,globalfonts,globalmediastyles,firstpage,f
 
 async function InjectPage(strinput,embed,globalfonts,globalmediastyles,firstpage,fIPFS) {
     var head=MakeHeader(embed,globalfonts,globalmediastyles)       
+    
+    document.getElementsByTagName("head")[0].innerHTML += head; // append the head info
+    
     var body=""
     body += `<div class="firstpage" data-firstpage="${firstpage}">`
     body += "</div>"    
@@ -1259,6 +1271,7 @@ function ConvertColor(color) {
 document.getElementById("SaveOnIpfs").addEventListener("click", SaveAlsoOnIpfs)
 document.getElementById("AlsoInject").addEventListener("click", AlsoInject)
 document.getElementById("ClearCache").addEventListener("click", ClearCache)
+document.getElementById("Reload").addEventListener("click", Reload)
 
 
 

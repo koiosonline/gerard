@@ -9,8 +9,10 @@ async function NewCourseSelected (courseid) {
     let cid =  await GetCourseInfo("slides") 
     console.log(`In NewCourseSelected cid=${cid}`);
     globalslideindex = await GetJsonIPFS(cid);        
-    globalslideindex.sort(sortfunction);
-    await GetLiteratureForVideo()
+    if (globalslideindex) {
+        globalslideindex.sort(sortfunction);
+        await GetLiteratureForVideo()
+    }
 }    
    
 

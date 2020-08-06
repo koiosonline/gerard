@@ -10,7 +10,9 @@
                 "description": "This course-level is to test all the possiblities of the viewer",
                 "goal": "testing",
                 "start": "now",
-                "image":"https://upload.wikimedia.org/wikipedia/commons/1/11/Test-Logo.svg"
+                "image":"https://upload.wikimedia.org/wikipedia/commons/1/11/Test-Logo.svg",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"                
             },
 "howtouse01": {
                 "course": "How to use the KOIOS platform",
@@ -18,14 +20,18 @@
                 "level": "introduction",
                 "videoinfo": "QmUj3D5yMz5AMPBHVhFdUF2CpadeHDsEuyr1MSNjT5m31R",
                 "slides": "QmWUXkvhWoaULAA1TEPv98VUYv8VqsiuuhqjHHBAmkNw2E",
-                "image":"https://cdn.pixabay.com/photo/2014/03/24/17/15/school-295210_1280.png"
+                "image":"https://cdn.pixabay.com/photo/2014/03/24/17/15/school-295210_1280.png",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"
             },
 "tdfa01": {
                 "course": "Trading Digital &amp; Financial Assets",
                 "courselevel": "Trading Digital &amp; Financial Assets: Beginners",
                 "level": "introduction",
                 "contributer": "ricardo",
-                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e942c8236c30b7dc3e8d270_TRADING%20ICON%20GREEN%20SVG.svg"
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e942c8236c30b7dc3e8d270_TRADING%20ICON%20GREEN%20SVG.svg",
+                "community":"https://tdfaslack.slack.com",
+                "communityinvite":"https://join.slack.com/t/tdfaslack/shared_invite/zt-f8ghb2gg-e8bUiNK~T1zU6vNvfseIdA"
             },
 "bcintro01": {
                 "course": "Blockchain Technology",
@@ -39,7 +45,9 @@
                 "description": "This introduction course will take you through the absolute basics of blockchain technology. After completion you will understand theimportance of blockchain technology and have a small grasp of how a blockchainworks. A course for everyone.",
                 "goal": "Ledger technology / Bitcoin / Smart contracts",
                 "start": "10-2-2020",
-                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907618bc1f1241137f8345_Blockchain%20lvl1%20SVG.svg"
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907618bc1f1241137f8345_Blockchain%20lvl1%20SVG.svg",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"                
             },	
 "bcbeginner01": {
                 "course": "Blockchain Technology",
@@ -52,19 +60,23 @@
                 "description": "After completing the introduction course, you are ready todive a bit deeper into the technology. You'll learn about different blockchainsand what makes them different from one another. You'll also get a deeperunderstanding of the bitcoin protocol.",
                 "goal": "Bitcoin deep dive / Ethereum  Smart contracts",
                 "start": "10-2-2020",
-                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907624c9af5c89fff02255_Blockchain%20lvl2%20SVG.svg"
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907624c9af5c89fff02255_Blockchain%20lvl2%20SVG.svg",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"                
             },    
 "bcintermediate01": {
                 "course": "Blockchain Technology",
                 "courselevel": "Blockchain Technology 3: Intermediate",
                 "level": "intermediate",
-                "videoinfo": "QmNYqXqdj6zVNup7iGnk9zC2crkaXEJihPpAqGLkgW2x14",
+                "videoinfo": "QmQqwAbr1NNCk4PYb1gJqih1DkEyEiK5WpfwtXu6Q9bYso",
                 "slides": "QmNcvkvjyq4cDRB4CidU6EExfX5bYCsM9B9mMygwWVwXhi",
                 "contributer": "jordi",
                 "subtitle": "The intermediate level. This is where things get serious.",
                 "description": "Welcome to the third part of the KOIOS Blockchain Technology course. This is the so called 'economic deep dive', where we will focus on economics in relation to Blockchain Technology.",
                 "goal": "More advanced blockchain stuff",
-                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e90762efc30d3b72957f562_Blockchain%20lvl3%20SVG.svg"
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e90762efc30d3b72957f562_Blockchain%20lvl3%20SVG.svg",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"                
             },    
 "bcadvanced01": {
                 "course": "Blockchain Technology",
@@ -75,7 +87,9 @@
                 "description": "After completing the beginners course, your knowledge will be enlarged even further.",
                 "goal": "TBA",
                 "start": "Soon",
-                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907638c9af5c3d6cf02309_Blockchain%20lvl%204%20SVG.svg"
+                "image": "https://uploads-ssl.webflow.com/5d25da7a03e410dc1f3b7f36/5e907638c9af5c3d6cf02309_Blockchain%20lvl%204%20SVG.svg",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"                
             },
 "python01": {
                 "course": "Python",
@@ -87,6 +101,8 @@
                 "goal": "TBA",
                 "start": "Soon",
                 "image": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg",
-                "videoinfo": "Qmdita1ZCjSz1no1gDTRTVu7fm3KStsKwVBZdw3QahrePU"
+                "videoinfo": "QmTgarMuLFvLdyUJcKa2UDRLWD6tZWR7nHSEFVUotBCHUy",
+                "community":"https://koiosonline.slack.com",
+                "communityinvite":"https://join.slack.com/t/koiosonline/shared_invite/enQtNjE0MjAyNzMyODY4LTFlYWIzODRkNTI2ZWExOWM0NGNmMjFjNTU1YzFmZGExOWUzY2EzYTg4NDMwNDVhOTBkMGU0MTFkNzJkN2I5MWM"                
             }           
 }

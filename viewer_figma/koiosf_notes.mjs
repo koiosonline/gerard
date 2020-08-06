@@ -102,16 +102,19 @@ async function ShareNotes() {
     var toShare=GlobalNotesArea.GetText()
     console.log(toShare)
     let err;
-    console.log(navigator)
+    //console.log(JSON.stringify(navigator))
+    //console.log("test");
+    // console.log(navigator)
     
     try {
-        //if (navigator && navigator.share && navigator.share.length > 0) {
-        console.log("Sharing");
-        SwitchDisplayMessageContinous(true)
-        DisplayMessageContinous("Select destination");
-        await navigator.share({ title: "Sharing notes", text: toShare }).catch( x=>err=x);
-        SwitchDisplayMessageContinous(false)
-        return;
+        if (navigator && navigator.share && (typeof(navigator.share)=="function")) {
+            console.log("Sharing");
+            SwitchDisplayMessageContinous(true)
+            DisplayMessageContinous("Select destination");
+            await navigator.share({ title: "Sharing notes", text: toShare }).catch( x=>err=x);   // note crashes windows chrome Version 84.0.4147.105 
+            SwitchDisplayMessageContinous(false)
+            return;
+        }
     } catch(error) {
         DisplayMessage(error.message);
         console.error(error);

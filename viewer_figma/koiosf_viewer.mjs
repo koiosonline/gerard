@@ -2,7 +2,7 @@
 // https://browserhow.com/how-to-clear-chrome-android-history-cookies-and-cache-data/
  // imports
  
-    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfoClass,SaveVideoSeen,LoadVideoSeen,ForceButton,getElement} from '../lib/koiosf_util.mjs';
+    import {LinkButton,HideButton,DragItem,publish,subscribe,LinkClickButton,LinkToggleButton,CanvasProgressInfoClass,SaveVideoSeen,LoadVideoSeen,ForceButton,getElement,setElementVal,LinkVisible } from '../lib/koiosf_util.mjs';
     import {SetupLogWindow} from '../lib/koiosf_log.mjs';    
     import {SetupVideoWindowYouTube} from './koiosf_playvideo.mjs';
     import {SelectLesson,CurrentLesson,LastLesson } from './koiosf_lessons.mjs';    
@@ -16,7 +16,7 @@
     import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koiosf_messages.mjs';
     import {} from './koiosf_music.mjs';
     
-    import {} from './koiosf_course.mjs';
+    import {GetCourseInfo} from './koiosf_course.mjs';
     import {Login} from './koiosf_login.mjs';
 
     import {} from './koiosf_literature.mjs';
@@ -470,14 +470,40 @@ async function RotateVideoSpeed() {
         DisplayMessage(`Video speed set to ${player.getPlaybackRate()}x`);
 }
 
+
+
+subscribe("setcurrentcourse",SetCurrentCourse)
+var globalcommunity
+var globalcommunityinvite
+
+async function SetCurrentCourse() {
+    globalcommunity=await GetCourseInfo("community");
+    globalcommunityinvite=await GetCourseInfo("communityinvite");
+    console.log(`SetCurrentCourse globalcommunity is now ${globalcommunity} ${globalcommunityinvite}`)
+}    
+
+function ScrCommunityMadeVisible () {
     
+    console.log(`ScrCommunityMadeVisible Opening ${globalcommunity}`)
+    
+    getElement("communitylink").href=globalcommunity
+    getElement("communitylink").target="_blank"  
+    getElement("communitylink").textContent=globalcommunity;
+    
+    getElement("globalcommunityinvite").href=globalcommunityinvite
+    getElement("globalcommunityinvite").target="_blank"  
+    //getElement("globalcommunityinvite").textContent="Join "+globalcommunity;
+    
+    
+}
 
-
+ 
 async function asyncloaded() {    
     //console.log(`In asyncloaded of script: ${import.meta.url}`);   
     publish("playerstart");
    
     
+    LinkVisible("scr_community" ,ScrCommunityMadeVisible)    
 
     
     playerpromise =SetupVideoWindowYouTube("realvideoplayer");   

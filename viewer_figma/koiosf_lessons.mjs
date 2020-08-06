@@ -1,6 +1,6 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
-import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetJsonIPFS, getElement,FitOneLine,publish } from '../lib/koiosf_util.mjs';
+import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetJsonIPFS, getElement,FitOneLine,publish,setElementVal } from '../lib/koiosf_util.mjs';
 import {player} from './koiosf_viewer.mjs';
 import {GetCourseInfo,GlobalCourseList} from './koiosf_course.mjs';
 
@@ -28,21 +28,29 @@ class LessonList {
         console.log(`LessonList constructor ${source}`);
         this.chapters=[]
         this.lessons=[];
-        this.LessonListPromise=GetJsonIPFS(source).then(items=>{ // so we can wait for it later            
-            console.log(items)
-            this.CurrentCourseTitle=items.title;
-            for (var i=0;i<items.videos.length;i++) 
-                if (items.videos[i].chapter)
-                    this.chapters.push(items.videos[i]);
-                else
-                    this.lessons.push(items.videos[i]);
-            console.log(this.chapters)
-            console.log(this.lessons);                    
-        })
-        console.log(this.LessonListPromise);
+        if (source) {// otherwise no lessonlist yet
+            this.LessonListPromise=GetJsonIPFS(source).then(items=>{ // so we can wait for it later            
+                console.log(items)
+                this.CurrentCourseTitle=items.title;
+                var currentchapter=""
+                for (var i=0;i<items.videos.length;i++) 
+                    if (items.videos[i].chapter) {
+                        this.chapters.push(items.videos[i]);
+                        currentchapter=items.videos[i].title.split(" ")[0]
+                    }
+                    else {
+                        items.videos[i].chapter=currentchapter;
+                        this.lessons.push(items.videos[i]);
+                    }
+                console.log(this.chapters)
+                console.log(this.lessons);                    
+            })
+            console.log(this.LessonListPromise);
+        } else this.LessonListPromise=undefined;
     }
         
     async GetLessonsList() {
+        if (!this.LessonListPromise) return undefined;
         await this.LessonListPromise;
         return this.lessons;        
     }
@@ -107,28 +115,53 @@ async function NewCourseSelected() {
     console.log(videocid);        
     GlobalLessonList=new LessonList(videocid)    
     var lessons=await GlobalLessonList.GetLessonsList()
-    for (var i=0;i<lessons.length;i++)
-           AddLessonsItem(lessons[i],i)    
-    var chapters=await GlobalLessonList.GetChaptersList()   
-    if (chapters)    
-        for (var i=0;i<chapters.length;i++)
-            AddChapter(chapters[i])     
-    SelectLesson(await GlobalLessonList.GetCurrentLesson())    
+    if (lessons) {
+        for (var i=0;i<lessons.length;i++)
+               AddLessonsItem(lessons[i],i)    
+        var chapters=await GlobalLessonList.GetChaptersList()   
+        if (chapters)    
+            for (var i=0;i<chapters.length;i++)
+                AddChapter(chapters[i])     
+        SelectLesson(await GlobalLessonList.GetCurrentLesson())    
+    }
 }
 
 function AddChapter(vidinfo) {    
     var txt=vidinfo.title;    
     console.log(`AddChapter ${txt}`)
     var cln=PrepareChapterList.AddListItem()
-    cln.getElementsByClassName("chapter-name")[0].innerHTML=txt;
+    //cln.getElementsByClassName("chapter-name")[0].innerHTML=txt;
+    
+    var sp=txt.split(" ")
+    var chapter=sp[0]
+    
+    setElementVal("__label",chapter,cln)
+    
+    
+    txt=txt.replace(sp[0],"").trim()
+    setElementVal("chapter-name",txt,cln)
+    
+    SetClickFilter(getElement("chapterbutton",cln),chapter)    
+    
 } 
 
-
+function SetClickFilter(domid,mask) {
+    console.log(`SetClickFilter ${mask}`);
+     domid.addEventListener('click', e=> {
+        console.log("Click event in SetClickFilter");
+        console.log(e);    
+        console.log(mask);       
+        PrepareLessonsList.ShowDataset("chapter",mask,true)
+        }
+     );
+}    
 
 
 
 function AddLessonsItem(vidinfo,index) { // txt,thumbnail,description,videoid,duration) {
-    //console.log(`AddLessonsItem ${vidinfo.title}`);
+    console.log(`AddLessonsItem ${vidinfo.title} ${vidinfo.chapter}`);
+    
+    
     vidinfo.txt=vidinfo.title; /// refactor
     var cln = PrepareLessonsList.AddListItem() //Template.cloneNode(true);
     getElement("lesson-name",cln).innerHTML=vidinfo.txt;    
@@ -140,6 +173,8 @@ function AddLessonsItem(vidinfo,index) { // txt,thumbnail,description,videoid,du
     result=result.replace("T", "");
     getElement("videolength",cln).innerHTML=result        
     cln.id=`lesson-${index}`;    
+    
+    cln.dataset.chapter=vidinfo.chapter;
     cln.videoid=vidinfo.videoid; // to store & retrieve data about the video       
     SetClickPlay(getElement("playbuttonfromlist",cln),index)    
     var seeninfothisvideo=LoadVideoSeen(vidinfo)        

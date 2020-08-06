@@ -1,4 +1,4 @@
- import {GetJson,subscribe,DomList,setElementVal,GetJsonIPFS,GetImageIPFS} from '../lib/koiosf_util.mjs';
+ import {GetJson,subscribe,DomList,setElementVal,GetJsonIPFS,GetImageIPFS,GetURLParam} from '../lib/koiosf_util.mjs';
 import {getWeb3} from './koiosf_login.mjs'
  
  
@@ -75,13 +75,11 @@ async function GetBadgeDetails(urltarget,i) { // put in function to be able to r
 
 //https://gpersoon.com/koios/lib/smartcontracts/build/contracts/KOIOSNFT.json
 async function init() {
-    
-    let params = (new URL(document.location)).searchParams;
-    let idvalue= params.get("smartcontractinfo"); 
+    let smartcontractjson= GetURLParam("smartcontractinfo"); 
     
     var smartcontractinfo="https://koiosonline.github.io/lib/smartcontracts/build/contracts/KOIOSNFT.json"
-    if (idvalue)
-        smartcontractinfo=idvalue;
+    if (smartcontractjson)
+        smartcontractinfo=smartcontractjson;
     
     
     contractJson=await GetJson(smartcontractinfo)
@@ -108,7 +106,7 @@ async function NextStep() {
         return;
     }
     contract = await new web3.eth.Contract(contractJson.abi, contractJson.networks[nid].address);
-    console.log(contract);
+    //console.log(contract);
     getBadges();
       
 }    
