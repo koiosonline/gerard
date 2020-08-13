@@ -36,7 +36,7 @@ export async function LoadGapi() {
 
 
 
-
+// https://www.koios.online/test/upload?playlistId=PL_tbH3aD86KvzJPzAQp6TomZetpBpApZB
 
 export async function GetYouTubePlaylists() {
     
@@ -46,47 +46,63 @@ export async function GetYouTubePlaylists() {
       "maxResults": 50,
       "channelId": "UCMyWjw6D7eq6swaOljtwJdw" // koios online channel
     });
-    console.log(list);
+    //console.log(list);
     var resultlist=[]
-    for (var i=0;i<list.result.items.length;i++) {
-        var result={};
-        result.id    = list.result.items[i].id;
-        result.title = list.result.items[i].snippet.title;
-        result.description = list.result.items[i].snippet.description;
-        result.thumbnail = list.result.items[i].snippet.thumbnails.high.url; // default.url;
+	
+	const queryString = window.location.search;       // add an extra playlistid for hidden playlists
+    const urlParams = new URLSearchParams(queryString);	
+	let playlistId = urlParams.get('playlistId') 
+	if (playlistId) {
+		var result={};
+		result.id    = playlistId
+        result.title = playlistId
+        result.description = playlistId
+        result.thumbnail = ""
         resultlist.push(result)
-    }
-    console.log(`In GetYouTubePlaylists ${resultlist.length}`);
-    console.log(resultlist);
+	}
+	else 	
+		for (var i=0;i<list.result.items.length;i++) {
+			var result={};
+			result.id    = list.result.items[i].id;
+			result.title = list.result.items[i].snippet.title;
+			result.description = list.result.items[i].snippet.description;
+			result.thumbnail = list.result.items[i].snippet.thumbnails.high.url; // default.url;
+			resultlist.push(result)
+		}
+    //console.log(`In GetYouTubePlaylists ${resultlist.length}`);
+    //console.log(resultlist);
     return resultlist;
+	
+	
+	
+	
+	
+	
 }
 
 export async function GetYouTubePlayListItems(_playlistId) {
 console.log("In GetYouTubePlayListItems");
-    const queryString = window.location.search;
-    //console.log(`In GetYouTubePlayListItems queryString=${queryString}`);
-
-    const urlParams = new URLSearchParams(queryString);
-    //console.log(urlParams);
-
-if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
     
-    let playlistId = urlParams.get('playlistId') ||_playlistId // "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD";
+
+//if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
+    
+    
     // koios intro PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD
     // level 2 "PL_tbH3aD86Kt7mITDw67sJMI6M0fRF2Zx";
     // level 1 "PL_tbH3aD86Kt-vJy4Q-rvZtXDmrLMG1Ef";
     
 
-    console.log(`playlistId=${playlistId}`);
+    console.log(`playlistId=${_playlistId}`);
 
 
     var nextPageToken="";
     var resultlist=[]
+	var literaturelist=[]
     await LoadGapi();
     do {
         var list=await gapi.client.youtube.playlistItems.list({ 
           "part": "snippet", // contentDetails
-          "playlistId": playlistId,
+          "playlistId": _playlistId,
           "maxResults": 50,
           "pageToken" : nextPageToken
         });
@@ -105,11 +121,31 @@ if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
             
             var result={};            
             var deslines = snippet.description.split("\n"); // find ___ChapterTitles___
+			//console.log(deslines)
             if (deslines[0] && deslines[0].includes("___")) {  
                result.title   = deslines[0].replace(/_/g,"");
                result.chapter = true;
                resultlist.push(result)
             }
+			for (var j=0;j<deslines.length;j++) {
+				var str=deslines[j]
+				// str=str.toLowerCase() ==> this interferes with the youtube name
+				str=str.replace("http://","https://") // don't want http anyway
+				var start=str.indexOf("https://");
+				if (start > 0) {
+					str=str.substring(start)
+					console.log(`Found ${str}`);
+					var lit={}
+					lit.chapter=snippet.title.split(" ")[0] // take first part
+					lit.title=str;
+					lit.url=str;
+					literaturelist.push(lit)
+					console.log(lit);
+				}
+					
+			}
+			
+			
                     
             result={};
             idlist +=(idlist?",":"")+snippet.resourceId.videoId;
@@ -117,10 +153,10 @@ if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
             result.title        = snippet.title;
             result.description  = snippet.description;
             
-            console.log(i);
-            console.log(list.result.items[i])
+            //console.log(i);
+            //console.log(list.result.items[i])
             
-            console.log(snippet.thumbnails);
+            //console.log(snippet.thumbnails);
             
             result.thumbnail    = snippet.thumbnails.maxres? snippet.thumbnails.maxres.url : snippet.thumbnails.high.url; // default.url;
             result.videoid      = snippet.resourceId.videoId
@@ -143,7 +179,7 @@ if (!_playlistId) _playlistId = "PL_tbH3aD86KvXkp5y0eB85_GEze1gBsKD"
         }        
     } while (nextPageToken);
     //console.log(resultlist);
-    return resultlist;    
+    return {resultlist:resultlist,literaturelist:literaturelist};    
 }
 
 
@@ -151,9 +187,11 @@ export async function forIPFSexport()     //creates an array of objects in the r
 {
   var totalYoutubeInfo = await GetYouTubePlaylists();
   for(var i=0;i<totalYoutubeInfo.length;i++)
-  {
-    totalYoutubeInfo[i].videos = await GetYouTubePlayListItems(totalYoutubeInfo[i].id);
+  { var result=await GetYouTubePlayListItems(totalYoutubeInfo[i].id);
+    totalYoutubeInfo[i].videos = result.resultlist
+	totalYoutubeInfo[i].literature = result.literaturelist
   }
+  console.log(totalYoutubeInfo);
   return totalYoutubeInfo;
 }
 

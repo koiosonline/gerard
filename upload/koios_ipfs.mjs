@@ -45,8 +45,8 @@ export async function uploadYtDataToIpfs()        //Puts the object on ipfs
         console.log(`Storing ${list[i].id}`)
         var hash; //IPFS hash
         var tostore=JSON.stringify(list[i])
-        console.log(tostore);
-        console.log(ipfs.add);
+       // console.log(tostore);
+        //console.log(ipfs.add);
         const result =  await ipfs.add(tostore)
         
             console.log(result);
@@ -96,11 +96,11 @@ export async function includeSubtitlesforIpfsExport()   //Adds the subtitle obje
       
       var lan=data[i].videos[x].subtitles.length;
       var subs=lan?data[i].videos[x].subtitles[0].subtitle.length:0
-    console.log(`Video: ${data[i].videos[x].videoid} languages: ${lan} subtitles: ${subs} `);
-    console.log(data[i].videos[x].subtitles);
+    //console.log(`Video: ${data[i].videos[x].videoid} languages: ${lan} subtitles: ${subs} `);
+    //console.log(data[i].videos[x].subtitles);
     }
   }
-  console.log(data);
+  //console.log(data);
   return data;
 }
 

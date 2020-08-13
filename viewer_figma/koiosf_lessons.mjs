@@ -44,6 +44,9 @@ class LessonList {
                     }
                 console.log(this.chapters)
                 console.log(this.lessons);                    
+				this.literature=items.literature; // literature combined with videoinfo (e.g. from youtube)
+				console.log("literature from youtube");
+				console.log(this.literature);
             })
             console.log(this.LessonListPromise);
         } else this.LessonListPromise=undefined;
@@ -55,6 +58,12 @@ class LessonList {
         return this.lessons;        
     }
     
+	async GetLiterature() {
+        if (!this.LessonListPromise) return undefined;
+        await this.LessonListPromise;
+        return this.literature;        
+    }
+	
     async GetChaptersList() {
         await this.LessonListPromise;
         return this.chapters;        
@@ -141,7 +150,7 @@ function AddChapter(vidinfo) {
     txt=txt.replace(sp[0],"").trim()
     setElementVal("chapter-name",txt,cln)
     
-    SetClickFilter(getElement("chapterbutton",cln),chapter)    
+    SetClickFilter(getElement("chapter",cln),chapter)    
     
 } 
 

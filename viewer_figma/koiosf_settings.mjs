@@ -88,7 +88,10 @@ function FullScreenOnOff(event) {
     console.log("In FullScreenOnOff");
  
     
-    fFullScreen = !fFullScreen
+	var fOn=GetToggleState(this,"displayactive")    
+	
+	
+    fFullScreen =  fOn; // !fFullScreen
  
     
     console.log(`Making fullscreen ${fFullScreen}`);

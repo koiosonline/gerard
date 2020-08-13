@@ -68,6 +68,12 @@ var GlobalUrlList
 async function GetLiteratureForVideo() {   
     var vidinfo=await GlobalLessonList.GetCurrentLessonData()
     
+	
+	
+	var lit=await GlobalLessonList.GetLiterature()
+	console.log("Literature from youtube in GetLiteratureForVideo")
+	console.log(lit)
+	
     console.log(vidinfo);
         
     if (!vidinfo) return;
@@ -79,6 +85,12 @@ async function GetLiteratureForVideo() {
     if (!globalslideindex) return; // not loaded yet
     var slideindex=globalslideindex
 
+	SearchArray(slideindex,match)
+	SearchArray(lit,match)
+ 
+}
+
+function SearchArray(slideindex,match) {
     var str="";
        for (var i=0;i<slideindex.length;i++) {
         if (match && slideindex[i].chapter !== match) 
@@ -103,10 +115,10 @@ async function GetLiteratureForVideo() {
         if (url) {            
             str +=SetInfo(url,slideindex[i].title,"browse-window-frame",slideindex[i].url?false:true,type)+"<br>"
         }
+		
     }          
-    
- //   SetExtLink(str)  don't show the entire external tab
 }
+
     
 
 var prevurl=undefined
