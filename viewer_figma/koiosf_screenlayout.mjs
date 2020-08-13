@@ -1,4 +1,4 @@
-import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,Toggle} from '../lib/koiosf_util.mjs';
+import {DragItem,subscribe,LinkToggleButton,MonitorVisible,sleep,getElement,ForceButton} from '../lib/koiosf_util.mjs';
 
 console.log("In screenlayout");
 console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
@@ -47,7 +47,8 @@ function ToggleMainLayout() {
     var ev = new CustomEvent("toggledisplay");
         console.log(`Sending toggle`);
     
-     getElement("selectliterature").dispatchEvent(ev);   
+     getElement("selectliterature1").dispatchEvent(ev);   
+     getElement("selectliterature2").dispatchEvent(ev);   
      getElement("selectnotes").dispatchEvent(ev);   
      getElement("selectvideo").dispatchEvent(ev);   
      getElement("selectslides").dispatchEvent(ev);   
@@ -56,20 +57,44 @@ function ToggleMainLayout() {
 }
 
 
-function ToggleLiterature(event) {
-  console.log("In ToggleLiterature");
+function ToggleLiterature2(event) {
+  console.log("In ToggleLiterature2");
   var fOn=GetToggleState(this,"displayactive")
   
   if (fOn) {
     getElement("9BottomRight").style.gridArea="1 /3 / span 3 / span 1"
     getElement("3NotesArea").style.display="none"
+    getElement("7ContentArea").style.display="flex"
   }
 else {
     getElement("9BottomRight").style.gridArea="3 /3 / span 1 / span 1"
+    getElement("7ContentArea").style.display="flex"
     getElement("3NotesArea").style.display="flex"
     }
-  
+  ForceButton("selectliterature1",false);
+  //getElement().dispatchEvent(new CustomEvent("displaydefault"));  // set the other button to standard value
 }    
+
+
+function ToggleLiterature1(event) {
+  console.log("In ToggleLiterature1");
+  var fOn=GetToggleState(this,"displayactive")
+  
+  if (fOn) {
+    getElement("9BottomRight").style.gridArea="3 /1 / span 1 / span 3"
+    getElement("7ContentArea").style.display="none"
+    getElement("3NotesArea").style.display="flex"
+  }
+else {
+    getElement("9BottomRight").style.gridArea="3 /3 / span 1 / span 1"
+    getElement("7ContentArea").style.display="flex"
+    getElement("3NotesArea").style.display="flex"
+    }
+    ForceButton("selectliterature2",false);
+  //getElement("selectliterature2").dispatchEvent(new CustomEvent("displaydefault"));  // set the other button to standard value
+}  
+
+
 function ToggleNotes(event) {
   console.log("In ToggleNotes");
   
@@ -78,7 +103,9 @@ function ToggleNotes(event) {
   
   if (fOn) {
     getElement("3NotesArea").style.gridArea="1 /3 / span 3 / span 1"
+    getElement("3NotesArea").style.display="flex"
     getElement("9BottomRight").style.display="none"
+    
   }
 else {
     getElement("3NotesArea").style.gridArea="1 /3 / span 1 / span 1"
@@ -113,6 +140,7 @@ function ToggleSlides(event) {   // row / column  / rowsspan / columnspan
     
   if (fOn) {
     getElement("7ContentArea").style.gridArea="3 /1 / span 1 / span 3"
+    getElement("7ContentArea").style.display="flex"
     getElement("9BottomRight").style.display="none"
   }
 else {
@@ -233,14 +261,16 @@ function loaded() {
       
 
     var ev = new CustomEvent("show"); // set initial state
-    getElement("selectliterature").dispatchEvent(ev);   
+    getElement("selectliterature1").dispatchEvent(ev);   
+    getElement("selectliterature2").dispatchEvent(ev);   
     getElement("selectnotes").dispatchEvent(ev);   
     getElement("selectvideo").dispatchEvent(ev);   
     getElement("selectslides").dispatchEvent(ev);   
 
 
 
-    LinkToggleButton("selectliterature",ToggleLiterature)
+    LinkToggleButton("selectliterature1",ToggleLiterature1)
+    LinkToggleButton("selectliterature2",ToggleLiterature2)
     LinkToggleButton("selectnotes",ToggleNotes)
     LinkToggleButton("selectvideo",ToggleVideo)
     LinkToggleButton("selectslides",ToggleSlides)

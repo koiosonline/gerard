@@ -89,19 +89,6 @@ var domid=getElement(id)
 domid.id=id; // youtube player want to have in id
 
 
-    var font=0;
-    
-    function FontResize() {
-        //player.setOption('captions', 'track', {'languageCode': 'es'});
-        //player.setOption('captions', 'track', {});
-
-        font++;
-        if (font > 3) font= -1;
-        console.log(`Setting font to: ${font}`);
-        player.setOption('captions', 'fontSize', font);
-    }
-   
-
 
     var player;
     await new Promise(async function(resolve, reject) {        // promise to be able to wait until ready
@@ -137,8 +124,6 @@ domid.id=id; // youtube player want to have in id
    console.log("In SetupVideoWindowYouTube, video is loaded");  
    
    
-  // LinkButton("font_resize",FontResize);
- LinkClickButton("font_resize");subscribe("font_resizeclick",FontResize);
 
    
    
@@ -279,7 +264,12 @@ SetVideoSeconds
     
 */ 
   
+  async function asyncloaded() {    
+    console.log(`In asyncloaded of script: ${import.meta.url}`); 
+    var player = await SetupVideoWindowYouTube("realvideoplayer");   
+    publish("videoplayerready",player)
+}
   
   
-  
-    
+    window.addEventListener('DOMContentLoaded', asyncloaded);  // load      
+

@@ -44,8 +44,9 @@ async function SwitchBack(domid,found) {
 */
 
 async function SwitchTo(domid,divtype) {
-     //console.log(`SwitchTo ${divtype}`)    
-   //  console.log(domid)
+    // console.log(`SwitchTo ${divtype}`)    
+    // console.log(domid)
+    // console.log(new Error().stack); dumps a stack trace to see from where this function is called
      var previous;
      var found;
     
@@ -159,7 +160,7 @@ function SwitchPage(newpage,callerthis,fbackbutton) {
             currentoverlay=undefined
     }    
     
-    if (!fbackbutton && !(newpage=="close")) {
+    if (!fbackbutton && (newpage!="close") && (newpage!="scr_intro")) { // don't store intro, to be able to get back to page from which we started
         try {
             history.pushState({page: newpage},`newpage ${newpage}`, `${mainurl}?page=${newpage}`);
         } catch(error) { console.log(error);}
@@ -189,6 +190,17 @@ function SwitchPage(newpage,callerthis,fbackbutton) {
             }
             globalprevpage=destdomid
             currentoverlay=undefined
+			
+						
+			destdomid.width="100%"
+			destdomid.height="100%"
+			destdomid.style.height="100%"
+			destdomid.style.minHeight="100%" 
+			destdomid.style.position="fixed";
+			destdomid.style.top="0";
+			destdomid.style.left="0";
+			
+			
         }         
     }
 }    
@@ -426,8 +438,11 @@ async function main() {
     var firstname=GetURLParam("page")
     if (!firstname) {
         var firstlist=document.getElementsByClassName ("@first")
-        if (firstlist && firstlist.length >0)      
+        if (firstlist && firstlist.length >0)   {   
             firstname=firstlist[0].className.split(" ")[0]; // only take the first partt        
+
+			
+		}	
     }
     SwitchPage(firstname)    
 }

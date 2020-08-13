@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 import {LinkButton,HideButton,LinkClickButton,subscribe,LoadVideoSeen,MonitorDomid,DomList,sleep,SelectTabBasedOnNumber,GetJsonIPFS, getElement,FitOneLine,publish,setElementVal } from '../lib/koiosf_util.mjs';
-import {player} from './koiosf_viewer.mjs';
+//import {player} from './koiosf_viewer.mjs';
 import {GetCourseInfo,GlobalCourseList} from './koiosf_course.mjs';
 
 export var CurrentLesson=0;

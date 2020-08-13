@@ -94,6 +94,7 @@ async function NewCourseSelected() {
 LinkClickButton("checkanswer",CheckAnwer)
 async function CheckAnwer() {
     console.log("In CheckAnwer");
+	setElementVal("quizresult","");
     
     var answers=[]
     answers.push(GetToggleState(getElement("answera","scr_quiz"),"displayactive"))
@@ -121,7 +122,7 @@ async function CheckAnwer() {
     
     var question=GlobalQuizList.GetCurrent();
     console.log(`In CheckAnwer`);
-    console.log(question[2]);
+    console.log(question[2]); // that's the column with the answers
     
     
     var btnlist2=[];
@@ -131,23 +132,34 @@ async function CheckAnwer() {
     btnlist2.push(getElement("answerc","scr_quiz"))
     btnlist2.push(getElement("answerd","scr_quiz"))  
     
-    
+    var countok=0
     for (var i=0;i<btnlist2.length;i++) {    
         var letter=String.fromCharCode(65+i);
-        var answerok=question[2].includes(letter)
+		
+        var answerok=question[2].includes(letter) // check answer column
+		
+		
+		
         btnlist2[i].dispatchEvent(new CustomEvent(answerok?"displayactive":"displaydefault"));
         
         var rightanswer=(answers[i] == answerok)
+		
+		if (rightanswer)
+			 countok++
         
+		console.log(`answer: ${letter} should be selected:${answerok} done right: ${rightanswer} countok:${countok}`)
+		
         //btnlist2[i].style.borderColor=rightanswer?"green":"red";
         //btnlist2[i].style.borderStyle="solid";        
         btnlist2[i].style.outline=(rightanswer?"#4DFFC1 solid 5px":"#FF79A8 dashed 5px")
         btnlist2[i].style.outlineOffset="2px"
-        console.log(btnlist2[i].style);
+        //console.log(btnlist2[i].style);
     }
     
         
-       
+       var str=(countok==4)?"Well done":`${countok*25}% right, try again`
+	   console.log(str)
+	   setElementVal("quizresult",str);
     
     
 }    
@@ -160,7 +172,7 @@ LinkVisible("scr_quiz" ,ScrQuizMadeVisible)
 
 async function ScrQuizMadeVisible() {
     console.log("In ScrQuizMadeVisible");
-    
+    setElementVal("quizresult","");
     
     console.log(`In ScrQuizMadeVisible`);
     console.log(question);

@@ -8,7 +8,10 @@ let box;
 let space;
 let currentThread;
 var GlobalCommentList = new DomList("commententry");
-const Moderator="0xe88cAc4e10C4D316E0d52B82dd54f26ade3f0Bb2";
+const FirstModerator="0xe88cAc4e10C4D316E0d52B82dd54f26ade3f0Bb2"; //For making the initial thread 
+const Moderators = [
+    "0x8e2A89fF2F45ed7f8C8506f846200D671e2f176f"
+]
 const KoiosSpace = "koiostestspace2";
 
 window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
@@ -82,8 +85,11 @@ async function WriteThread(vidinfo) {
     
    // remove previous onUpdate & onNewCapabilities ??   
     currentThread = await space.joinThread(vidinfo.videoid, {
-        firstModerator: Moderator
+        firstModerator: FirstModerator
     });
+    for(var i = 0; i < Moderators.length; i++) {
+        currentThread.addModerator(Moderators[i]);
+    }
     
     console.log("currentThread");
     console.log(currentThread);
@@ -102,6 +108,7 @@ async function WriteThread(vidinfo) {
  * Show the posts in the interface
  */
 async function ShowPosts(posts) {
+
     for (var i=0;i<posts.length;i++) {        
         if (!document.getElementById(posts[i].postId) ){ // check if post is already shown
             console.log(posts[i]);
@@ -124,21 +131,27 @@ async function ShowPosts(posts) {
                 votecounter.innerHTML = 0
             }  
             var upvotebutton=target.getElementsByClassName("commentupvote")[0]
-            SetUpVoteButton(upvotebutton,posts[i].postId,votecounter.innerHTML);
+            SetUpVoteButton(upvotebutton,posts[i],votecounter.innerHTML);
             var downvotebutton=target.getElementsByClassName("commentdownvote")[0]
-            SetDownVoteButton(downvotebutton,posts[i].postId,votecounter.innerHTML);
+            SetDownVoteButton(downvotebutton,posts[i],votecounter.innerHTML);
         }
     }
     
     var postdomids=document.getElementsByClassName("commententry");
-    //console.log(postdomids);
+    console.log("domids: ", postdomids)
     for (var i=0;i<postdomids.length;i++) {
+        
+        console.log("domid: ", postdomids[i])
         
         var checkpostid=postdomids[i].id;
         console.log(`checkpostid=${checkpostid}`);
         var found=false;
         for (var j=0;j<posts.length;j++) {
-            if (posts[j].postId == checkpostid) { found=true;break; }
+            if (posts[j].postId == checkpostid) 
+            {
+                postdomids[i].children.commentupvotecounter.innerHTML=await space.public.get(posts[j].postId) 
+                found=true;break; 
+            }
         }
         if (!found)
             postdomids[i].style.textDecoration="line-through";   
@@ -179,28 +192,30 @@ async function PostComment() {
       }
 }  
 
-async function SetUpVoteButton(domid,postid,votecounter) { 
+async function SetUpVoteButton(domid,post,votecounter) { 
     domid.addEventListener('animatedclick',UpVoteMessage)
     console.log("before: ", votecounter)
     async function UpVoteMessage() {
         try {
             votecounter = parseInt(votecounter) + 1
             console.log("after: ", votecounter)
-            await space.public.set(postid, votecounter)
+            await space.public.set(post.postId, votecounter)
+            ShowPosts(post);
         } catch (error) {
             console.log(error);
         }
     }
 }
 
-async function SetDownVoteButton(domid,postid,votecounter) { 
+async function SetDownVoteButton(domid,post,votecounter) { 
     domid.addEventListener('animatedclick',DownVoteMessage)
     console.log("before: ", votecounter)
     async function DownVoteMessage() {
         try {
             votecounter = parseInt(votecounter) - 1
             console.log("after: ", votecounter)
-            await space.public.set(postid, votecounter)
+            await space.public.set(post.postId, votecounter)
+            ShowPosts(post);
         } catch (error) {
             console.log(error);
         }

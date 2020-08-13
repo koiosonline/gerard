@@ -1,7 +1,7 @@
 //console.log(`In ${window.location.href} starting script: ${import.meta.url}`);
 
 
-import {loadScriptAsync,DomList,LinkToggleButton,subscribe,getElement,MonitorVisible,ForAllElements,setElementVal,publish,GetJson,LinkClickButton,LinkVisible} from '../lib/koiosf_util.mjs';
+import {loadScriptAsync,DomList,LinkToggleButton,subscribe,getElement,MonitorVisible,ForAllElements,setElementVal,publish,GetJson,LinkClickButton,LinkVisible,GetURLParam} from '../lib/koiosf_util.mjs';
 import {} from './koiosf_literature.mjs'// must be initialised to be able to follow up on setcurrentcourse
 import {} from './koiosf_lessons.mjs'// must be initialised to be able to follow up on setcurrentcourse
 
@@ -83,14 +83,22 @@ class CourseList {
     GetCurrentCourse() {
         var cid=localStorage.getItem("courseid"); 
         console.log(cid);
-        if (cid=="null") cid=undefined;
-        if (cid=="undefined") cid=undefined;
+		if (!cid) cid="howtouse01"        
         return cid;
     }
-    LoadCurrentCourse() {
-        var courseid=this.GetCurrentCourse()
-        
-        publish("setcurrentcourse",courseid) //courseid could be undefined
+    async LoadCurrentCourse() {
+        console.log("In LoadCurrentCourse")
+        var list=await this.GetList()
+        var courseid=GetURLParam("course")
+        console.log(courseid)
+        console.log(list)
+        if (list[courseid]) // then a valid courseid      
+            this.SetCurrentCourse(courseid)         // also does publish
+        else {
+            courseid=this.GetCurrentCourse()         
+            publish("setcurrentcourse",courseid) //courseid could be undefined        
+        }
+        console.log(courseid)        
     }
 
 }    
@@ -142,7 +150,7 @@ async function asyncloaded() {
     console.log(globaldomlistcoursesmy);
     
     
-    GlobalCourseList.LoadCurrentCourse()
+    await GlobalCourseList.LoadCurrentCourse()
 }    
 
 async function ScrOtherMadeVisible() {
@@ -189,15 +197,19 @@ async function ScrMyMadeVisible() {
 function UnSetCurrentCourseOnScreen(prevcourse) {
    console.log(`In UnSetCurrentCourseOnScreen ${prevcourse}`)
    var domid=getElement(prevcourse,"scr_my")    
-   var domidclick=getElement("@click",domid)    
-   domidclick.dispatchEvent(new CustomEvent("displaydefault")); 
+   if (domid) {  
+       var domidclick=getElement("@click",domid)    
+        domidclick.dispatchEvent(new CustomEvent("displaydefault")); 
+   }
 }    
 
 function SetCurrentCourseOnScreen(newcourse) {
     console.log(`In SetCurrentCourseOnScreen ${newcourse}`)
-   var domid=getElement(newcourse,"scr_my")    
-   var domidclick=getElement("@click",domid)    
-   domidclick.dispatchEvent(new CustomEvent("displayactive")); 
+   var domid=getElement(newcourse,"scr_my")   
+   if (domid) {   
+        var domidclick=getElement("@click",domid)    
+        domidclick.dispatchEvent(new CustomEvent("displayactive")); 
+   }
 }
     
 

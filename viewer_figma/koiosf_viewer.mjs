@@ -11,7 +11,7 @@
     import {/*FoundSlides,*/UpdateSlide} from './koiosf_slides.mjs';
     import {} from './koiosf_notes.mjs';
     import {InitSpeak,StopSpeak,StartSpeak,EnableSpeech,IsSpeechOn} from './koiosf_speech.mjs';
-    import {} from './koiosf_test.mjs';
+    //import {} from './koiosf_test.mjs';
     import {SelectPopup,InitPopup} from './koiosf_popup.mjs';
     import {DisplayMessageContinous,SwitchDisplayMessageContinous,DisplayMessage} from './koiosf_messages.mjs';
     import {} from './koiosf_music.mjs';
@@ -24,8 +24,9 @@
     import {} from './koiosf_comments.mjs';
     import {} from './koiosf_quiz.mjs';
     import {} from './koiosf_badges.mjs';
+    import {} from './koiosf_settings.mjs';
 
-export var player=0;
+var globalplayer=0;
 //export var currentduration;
 export var currentvidinfo;
 
@@ -47,20 +48,30 @@ var previous_colour=""
 var previous_row=-1;
 var table
 var tablediv
-var fTriedFullScreen=false;
-var fFullScreen=false;
+
+
 var defaultvolume=100;
 var vidproginput=0;
 var vidprogress=0;
 var slider=0; // global
-var playerpromise;
+
 var fSoundOn=true;
 }    
 function GetDuration() {
     if (video) return video.duration;
-    if (player && player.getDuration) return  player.getDuration();
+    if (globalplayer && globalplayer.getDuration) return  globalplayer.getDuration();
     return 0;
 }  
+
+
+subscribe("videoplayerready",VideoPlayerReady);
+function VideoPlayerReady(playerobject) {
+    globalplayer = playerobject;
+    
+    if (currentvidinfo)
+        LoadVideo(currentvidinfo) 
+}    
+
 
 var seeninfo;
 
@@ -88,10 +99,10 @@ async function VideoLocation() {
     if (IsVideoPaused())
         return;  // probably just ended, don't update any more
     
-    if (player) {
-        if (player.getCurrentTime) {
-            CurrentPos=player.getCurrentTime();
-            PlaybackRate=player.getPlaybackRate()
+    if (globalplayer) {
+        if (globalplayer.getCurrentTime) {
+            CurrentPos=globalplayer.getCurrentTime();
+            PlaybackRate=globalplayer.getPlaybackRate()
         }
     }
     UpdateTranscript(CurrentPos);
@@ -144,8 +155,9 @@ async function NextVideo() {
 
 async function tcallback() {
     
-   // console.log("In tcallback");
+    //console.log("In tcallback");
     VideoLocation();
+    
    if (!IsVideoPaused())
         setTimeout( tcallback, 400); // 400
 }    
@@ -189,47 +201,14 @@ function CreateButton(name,funct,place) {
     buttonback.addEventListener("click", funct);
     place.appendChild(buttonback);
 }      
-function SetFullScreen(fSetFullScreen) {
-    console.log(`Making fullscreen ${fSetFullScreen}`);
-    let elem = document.body; // let elem = document.documentElement;
-    if (fSetFullScreen) {                
-        if (elem.requestFullScreen)       console.log("elem.requestFullScreen")  
-        if (elem.mozRequestFullScreen)    console.log("elem.mozRequestFullScreen") 
-        if (elem.webkitRequestFullScreen) console.log("elem.webkitRequestFullScreen")
-        
-        if (elem.requestFullScreen) {
-            elem.requestFullScreen({ navigationUI: "hide" });
-        } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen({ navigationUI: "hide" });
-        } else if (elem.webkitRequestFullScreen) {
-            elem.webkitRequestFullScreen({ navigationUI: "hide" });
-        }   
-    } else {
-        if (document.exitFullscreen)       console.log("document.exitFullscreen")  
-        if (document.mozExitFullscreen)    console.log("document.mozExitFullscreen") 
-        if (document.webkitExitFullscreen) console.log("document.webkitExitFullscreen")
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozExitFullscreen) {
-            document.mozExitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-    }          
-   fFullScreen = fSetFullScreen;
-   console.log(`Making fullscreen at end ${fSetFullScreen}`);
-}    
-function ToggleFullScreen() {
-    console.log(`In ToggleFullScreen current value=${fFullScreen}`);
-    SetFullScreen(!fFullScreen);
-}    
+ 
 
-//subscribe("shaking",x=>{if (fFullScreen) SetFullScreen(false)});
+ 
 //document.addEventListener("keydown", x=>{publish(`keypressed${x.key}`)}); // connect actions to keypresses, not implemented yet
 
 function GetVolume() {
     if (video) return video.volume;
-    if (player && player.getVolume) return player.getVolume();
+    if (globalplayer && globalplayer.getVolume) return globalplayer.getVolume();
     return 0;
 }    
 function SetVolume(newvol) {
@@ -238,7 +217,7 @@ function SetVolume(newvol) {
         const newvolint=parseFloat( newvol/ 100);
         video.volume = newvolint;            
     }
-    if (player && player.setVolume) player.setVolume(newvol);
+    if (globalplayer && globalplayer.setVolume) globalplayer.setVolume(newvol);
     console.log(`New volume=${GetVolume()}`);
 }
 function CreateSoundSlider() {
@@ -253,30 +232,12 @@ function CreateSoundSlider() {
     divsoundslider.appendChild(input);
     SetVolume(defaultvolume);
 }   
-function ToggleSound() {
-   fSoundOn = !fSoundOn;
-   EnableSound(fSoundOn);
 
-    
- //  getElement("audio").style.color=fSoundOn?"red":"white"
-}
-function EnableSound(fOn) {
-    fSoundOn = fOn;// store state
-       if (video)
-        video.muted= !fOn;
-    
-    if (player)
-        if (fOn) 
-            player.unMute(); 
-        else 
-            player.mute();
-    
-}   
 export async function SetVideoSeconds(seconds) {
     //console.log(`In SetVideoSeconds, moving to ${seconds}`);
 
-    if (player)
-        player.seekTo(seconds, true);
+    if (globalplayer)
+        globalplayer.seekTo(seconds, true);
     
     
     UpdateTranscript(seconds)
@@ -287,7 +248,7 @@ export async function SetVideoSeconds(seconds) {
         
 }
 async function SetVideoProgressBar(perc) {
-     console.log(`SetVideoProgressBar ${perc}`); 
+    // console.log(`SetVideoProgressBar ${perc}`); 
     if (slider)    
         slider.style.left =  (perc*100)+"%";   
 
@@ -304,11 +265,11 @@ export async function CreateVideoSlider() {
     SetVideoProgressBar(0);
     DragItem("videodrag","videoprogressbar","mainscreen",XYUpdate);
 }
-function IsVideoPaused(){
-    var fpaused=true;
-    if (video)  fpaused=video.paused
-    if (player && player.getPlayerState) 
-        fpaused=( player.getPlayerState() !== 1); // 1 – playing 
+function IsVideoPaused(){    
+    var fpaused=false;
+    //if (video)  fpaused=video.paused
+    if (globalplayer && globalplayer.getPlayerState) 
+        fpaused=( globalplayer.getPlayerState() !== 1); // 1 – playing     
     return fpaused;
 }
 //async function UpdateVideoIndicator(fpaused) { 
@@ -317,11 +278,11 @@ function IsVideoPaused(){
 //}
 export async function startVideo() {
     console.log("In startVideo");
-   //         console.log(player.getDebugText());
-   //     console.log(player.getVideoData());
+   //         console.log(globalplayer.getDebugText());
+   //     console.log(globalplayer.getVideoData());
     
-    var ev = new CustomEvent("hide");
-    getElement("StartButton").dispatchEvent(ev);
+    
+    HideButton("StartButton",true);
     
       
     
@@ -334,9 +295,9 @@ export async function startVideo() {
         video.play();
         video.autoplay=true; // so after location change the video continues to play
     }
-    if (player) {  
+    if (globalplayer) {  
         if (IsVideoPaused()) // maybe already started via youtube interface
-            player.playVideo();
+            globalplayer.playVideo();
     }
  //   UpdateVideoIndicator(false);
 
@@ -351,11 +312,12 @@ function TranscriptShownCB(txt) {
 }
 function stopVideo() {
     console.log("In stopVideo");
-    ForceButton("start",false);
-    HideButton("largestart",false)
+    //ForceButton("start",false);
+    //HideButton("largestart",false)
+      HideButton("StartButton",false);
     //ShowTitles(true);
     if (video) video.pause();
-    if (player) player.pauseVideo();
+    if (globalplayer) globalplayer.pauseVideo();
    // UpdateVideoIndicator(true);
     StopSpeak();
     publish("videostopped"); 
@@ -366,10 +328,10 @@ function TogglePauseVideo() {
     var fpaused=IsVideoPaused()
     if (fpaused) {
         if (video)  video.play(); 
-        if (player) player.playVideo();
+        if (globalplayer) globalplayer.playVideo();
     } else {
         if (video) video.pause();
-        if (player)  player.pauseVideo();
+        if (globalplayer)  globalplayer.pauseVideo();
     }
     UpdateVideoIndicator(!fpaused);
     StopSpeak();    
@@ -382,12 +344,12 @@ export async function ToggleSpeech(){
     EnableSpeech(fspeechon);
     EnableSound(!fspeechon); // disable video sound when speech is on        
 } 
-function SetPlayerSubtitle(lang) {
-   if (player &&  player.setOption) 
-        player.setOption('captions', 'track', lang==""?{}:{'languageCode': lang}); 
+function SetglobalplayerSubtitle(lang) {
+   if (globalplayer &&  globalplayer.setOption) 
+        globalplayer.setOption('captions', 'track', lang==""?{}:{'languageCode': lang}); 
 }
 function CueVisible(lang) { // if lang="" then cue invisible
-    if (player)
+    if (globalplayer)
         SetPlayerSubtitle(lang)
 }  
 function ToggleCueVisibility() { 
@@ -432,9 +394,9 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     
 
     
-    player=await playerpromise;
-    if (player)
-        player.cueVideoById(vidinfo.videoid,0); // start at beginning   
+    
+    if (globalplayer)
+        globalplayer.cueVideoById(vidinfo.videoid,0); // start at beginning   
     
     
     currentvidinfo = vidinfo;
@@ -454,21 +416,6 @@ async function LoadVideo(vidinfo) { // call when first video is loaded or a diff
     
 }
 
-
-var globalVideospeed=0;
-async function RotateVideoSpeed() {
-        globalVideospeed++
-        if (globalVideospeed >=3) globalVideospeed=0;
-
-  switch (globalVideospeed) {
-      case 0: player.setPlaybackRate(1);console.log("Speed 1");break;
-      case 1: player.setPlaybackRate(1.5);console.log("Speed 1.5");break;
-      case 2: player.setPlaybackRate(2);console.log("Speed 2");break;
-  }
-      
-  await sleep(100); // wait until speed is processed      
-        DisplayMessage(`Video speed set to ${player.getPlaybackRate()}x`);
-}
 
 
 
@@ -506,7 +453,7 @@ async function asyncloaded() {
     LinkVisible("scr_community" ,ScrCommunityMadeVisible)    
 
     
-    playerpromise =SetupVideoWindowYouTube("realvideoplayer");   
+    
     //LinkButton("start",startVideo);
     
     
@@ -514,7 +461,7 @@ getElement("StartButton").addEventListener('animatedclick',startVideo)
     
     
 //    LinkClickButton("largestart");subscribe("largestartclick",startVideo);
-    subscribe('videocued', x=>{HideButton("largestart",false);})
+    subscribe('videocued', x=>{HideButton("StartButton",false);})
     
     var videofield=getElement("videofield");
 videofield.addEventListener('click', x=>{console.log("videofield click");if (!IsVideoPaused()) stopVideo();}); 
@@ -535,15 +482,12 @@ videofield.addEventListener('click', x=>{console.log("videofield click");if (!Is
     //LinkButton("subtitle",ToggleCueVisibility);     
  // LinkToggleButton("subtitle",false);subscribe("subtitleon",ToggleCueVisibility);subscribe("subtitleoff",ToggleCueVisibility);
     
- //   LinkButton("fullscreen",ToggleFullScreen);        
-// LinkToggleButton("fullscreen",false);subscribe("fullscreenon",ToggleFullScreen);subscribe("fullscreenoff",ToggleFullScreen);
+ 
      
-     
-     LinkToggleButton("fullscreen",ToggleFullScreen)
+
 console.log("Init ready1");     
      
- //    LinkClickButton("videospeed",false);subscribe("videospeedclick",RotateVideoSpeed);
-       
+
     
     
   CreateVideoSlider();  //ff uitgezet
@@ -575,7 +519,7 @@ console.log("Init ready3");
     
     InitPopup();
     console.log("Init ready4");
-    player=await playerpromise;    
+    
     console.log("Init ready5");
     SetVideoTranscriptCallbacks(SetVideoSeconds,TranscriptShownCB);
     console.log("Init ready6");

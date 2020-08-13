@@ -164,17 +164,72 @@ async function FigmaApiGetImageSrc(url,token) {
 }
 
 
+var ipfscounter=0
 
 
-async function SaveToIPFS(data,pinlocation) {        
-    const ipfs = window.IpfsHttpClient(pinlocation); // 'https://ipfs.infura.io:5001'
-    //const ipfs = window.IpfsHttpClient('http://diskstation:5002'); 
+
+
+async function SaveToIPFS(data) {            
     console.log("SaveToIPFS");
-    console.log(ipfs);
-    
-    for await (const result of ipfs.add(data) )
-        return result.path;
+	ipfscounter++;
+	var result;
+	var cid;
+	var hashHex;
+	document.getElementById("ipfs").innerHTML=ipfscounter;	
+
+	if ( typeof(data)!= "string") { // don't do this for strings (most usefull for the images anyway)
+		var buffer = await data.arrayBuffer();
+		var hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+		
+		const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+	var hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+		hashHex="hash-"+hashHex.toString();
+		
+		
+		console.log(hashHex);
+		var hashcid=localStorage.getItem(hashHex)
+		if (hashcid) return hashcid; // already uploaded
+	}
+	
+	console.log(`Storing on infura ${data.size} bytes `)
+	for (var i=0;i<8;i++) {
+        if (i > 0) {
+            console.log(`Retry ${i} for ${data.size} bytes`); 
+            //sleeptimer +=200; 
+            retry++;
+            document.getElementById("retry").innerHTML=retry;
+        }
+		try {
+			result = await ipfs.add(data,{timeout:2000}) 	
+		} catch(error) { console.log(error); continue; } // try again
+		console.log(result);
+		if (hashHex)
+			localStorage.setItem(hashHex, result.path);
+		if (result.path) return result.path;
+	}	
+    return result.path;    
 }
+	
+	
+	
+	/*
+	
+	if (ipfs2) {
+
+		if (result) {
+			
+			for await (const file of ipfs1.get(cid)) {				
+				console.log(file.content);
+				if (file.content) ;
+			       return cid; // already present, no need to upload
+		    }
+		}
+	}
+	console.log("saving on infura");
+    result = await ipfs1.add(data) 	
+	*/
+	
+
 
 // http://www.gpersoon.com:8080/ipfs/QmRDDFeTUve2Lxq77t5MqjNNQrGVMYoD5Nje9ai3YPug3U
 
@@ -189,17 +244,20 @@ var globalpinlocation;
 let globalconnectto=[]
 let imagelist=[]
 
+var ipfs;
 
 
 
 async function SaveOnIpfs(data) {
 console.log(`in SaveOnIpfs ${globalpinlocation}`);
 console.log(data);
+
+
 document.getElementById("SaveOnIpfs").innerHTML=""
-    var result=await SaveToIPFS(data,globalpinlocation)
+    var result=await SaveToIPFS(data)
     console.log("saved SaveOnIpfs");
     console.log(result);
-    return result;
+    return "../ipfs/"+result; // fix to get it to work also on ipns
 
     //document.getElementById("output").innerHTML += str2;
     //return `http://www.gpersoon.com:8080/ipfs/${result}`;
@@ -320,6 +378,13 @@ async function start() {
     log("Pass 1");
     globalpinlocation=document.getElementById("pin").innerHTML.trim();
     console.log(`Start ${token} ${documentid}`);
+	ipfs = window.IpfsHttpClient(globalpinlocation); // 'https://ipfs.infura.io:5001'
+//ipfs2 = window.IpfsHttpClient('http://diskstation:5002'); 
+console.log(ipfs);
+
+
+	
+	
     
     //globalbuttons=await GetComponents(componentsid,token)
     if (globalcomponentsid) {
@@ -389,9 +454,11 @@ export async function SaveAlsoOnIpfs() {
     var html=await MakePage(completepage,globalembed,globalfonts,globalmediastyles,globalobjname,true)    
     var result=await SaveOnIpfs(html)
     var str2=""
-    //str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`); // doesn't show the images (type is correct)
-    str2 +="IPFS link 2: "+MakeUrl(`https://ipfs.io/ipfs/${result}`);
-    str2 +="IPFS link 3: "+MakeUrl(`http://www.gpersoon.com:8080/ipfs/${result}`);
+    result=result.replace("../ipfs/","")
+    str2 +="IPFS link 1: "+MakeUrl(`https://ipfs.io/ipfs/${result}`);
+    str2 +="IPFS link 2: "+MakeUrl(`http://www.gpersoon.com:8080/ipfs/${result}`);
+	str2 +="IPFS link 3 (no images): "+MakeUrl(`https://ipfs.infura.io/ipfs/${result}`); // doesn't show the images (type is correct)
+	str2 +="Koios site link:"+MakeUrl(`https://www.koios.online/newviewer?ipfs=${result}`);
     document.getElementById("output").innerHTML += str2;
 }
  
@@ -723,7 +790,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
 
 
       if (dest) {
-        log(`Connect: ${dest}`);
+        //log(`Connect: ${dest}`);
         if (!globalconnectto[dest]) {
             globalconnectto[dest]=true; // prevent recursing too fast
             globalconnectto[dest]=ConvertToHTML(dest,figmadocument,documentid,token,embed) // = promise, so executed in parallel
@@ -755,7 +822,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
 
        
         if (b) { //|| figdata.layoutMode
-            dimensions +=`position: ${(frelative || fpartofflex )?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
+            dimensions +=`position: ${figdata.isFixed?"fixed":(frelative || fpartofflex )?"relative":"absolute"};`;      // for grid with auto layout, relative position is neccesary          
             if (!pb) {
                 strstyle +=`width:100%;height:100%;`; // no parent => so give it all the space, left & top default values // 
                 // dimensions=""; // prevent minor scroll actions ==> messes up zindez
@@ -854,7 +921,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     bottom=undefined
                     top=undefined
                     paddingbottom=undefined
-                    transform=undefined
+                    transform=""
                     
                     
                      switch(figdata.layoutAlign) {
@@ -880,7 +947,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                     bottom=undefined
                     top=undefined
                     paddingbottom=undefined
-                    transform=undefined
+                    transform=""
                     
                     
                 }    
@@ -935,7 +1002,7 @@ async function recurse(figdata,figmadocument,documentid,token,fpartofgrid,fparto
                 if (bottom)        dimensions +=`bottom:${bottom};`;  
                 if (top)           dimensions +=`top:${top};`;  
                 if (paddingbottom) dimensions +=`padding-bottom:${paddingbottom};`;  
-                if (scale)         transform  +=`scale(${scale}) `  // scale:${scale} // scale doesn't work on mobile browser
+                if (scale)         transform  +=` scale(${scale}) `  // scale:${scale} // scale doesn't work on mobile browser
                 if (transform)     dimensions +=`transform: ${transform};`
                 
                // console.log(dimensions);

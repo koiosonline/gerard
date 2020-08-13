@@ -56,9 +56,15 @@
 	},
 	{
 		"chapter": "8K",
-		"title": "Data analytics",
+		"title": "Jupyter notebook",
 		"url": "http://localhost:8888/tree"
 	},
+    {
+		"chapter": "8K",
+		"title": "NBViewer",
+		"url": " https://nbviewer.jupyter.org/"
+	},
+
 	{
 		"chapter": "8K",
 		"title": "Fin",
@@ -69,4 +75,7 @@
 		"title": "Tradingview widget",
 		"url": "https://ipfs.io/ipfs/QmVYAGk7X8mPLHwUhGjR8ruRmcq7UUEqm1T9FUs8PaAHnM"
 	}
+    
+   
+    
 ]
