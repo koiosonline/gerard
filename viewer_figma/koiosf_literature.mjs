@@ -91,6 +91,7 @@ async function GetLiteratureForVideo() {
 }
 
 function SearchArray(slideindex,match) {
+	if (!slideindex) return;
     var str="";
        for (var i=0;i<slideindex.length;i++) {
         if (match && slideindex[i].chapter !== match) 

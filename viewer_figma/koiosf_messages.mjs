@@ -21,6 +21,9 @@ export async function DisplayMessage(text) {
 export async function SwitchDisplayMessageContinous(fOn) {
     console.log("In InitDisplayMessageContinous");
   
+  
+  getElement("ov_message").dispatchEvent(new CustomEvent(fOn?"show":"hide"));  
+  
     if (!fOn) 
       SwitchPage("close") // close message overlay
     

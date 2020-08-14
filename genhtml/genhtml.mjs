@@ -192,15 +192,17 @@ async function SaveToIPFS(data) {
 	}
 	
 	console.log(`Storing on infura ${data.size} bytes `)
-	for (var i=0;i<8;i++) {
+	var timeout=2000;
+	
+	for (var i=0;i<15;i++) {
         if (i > 0) {
             console.log(`Retry ${i} for ${data.size} bytes`); 
-            //sleeptimer +=200; 
+            timeout +=2000; 
             retry++;
             document.getElementById("retry").innerHTML=retry;
         }
 		try {
-			result = await ipfs.add(data,{timeout:2000}) 	
+			result = await ipfs.add(data,{timeout:timeout}) 	
 		} catch(error) { console.log(error); continue; } // try again
 		console.log(result);
 		if (hashHex)

@@ -19,7 +19,7 @@ export async function setupIPFS()
   //var ipfs = await window.Ipfs.create(); //await??
   
   
-   var ipfs = await window.IpfsHttpClient('https://ipfs.infura.io:5001'); //for infura node
+   var ipfs = await window.IpfsHttpClient('http://diskstation:5002'); // https://ipfs.infura.io:5001'); //for infura node
   console.log(ipfs);
   return ipfs;
 }

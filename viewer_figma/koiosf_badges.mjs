@@ -1,4 +1,5 @@
  import {GetJson,subscribe,DomList,setElementVal,GetJsonIPFS,GetImageIPFS,GetURLParam,GetResolvableIPFS,getElement,LinkClickButton} from '../lib/koiosf_util.mjs';
+ import {SwitchDisplayMessageContinous,DisplayMessageContinous,DisplayMessage} from './koiosf_messages.mjs'
 import {getWeb3,getWeb3Provider} from './koiosf_login.mjs'
  
  
@@ -50,6 +51,14 @@ async function getBadges() {
 }
  // images are loaded from https://cloudflare-ipfs.com/ipfs/..  (svg doesn't allways work)
 
+
+ async function CheckCourses() {
+	var nrTemplates=await contract.methods.nrTemplates()
+	console.log(`nrTemplates=${nrTemplates}`);
+	
+	
+	
+}	
 
 async function GetBadgeDetails(urltarget,i) { // put in function to be able to run in parallel
         var tokenid = await contract.methods.ownedTokens(accounts[0],i-1).call(); // should be tokenOfOwnerByIndex
@@ -139,7 +148,17 @@ async function GetTokenDetails(urltarget,contracttoken,balance) {
 }        
 
 
-
+async function Joincourse() {
+	
+	//await DisplayMessage("test")
+	
+	  await SwitchDisplayMessageContinous(true)
+	  await DisplayMessageContinous("Joining course, getting badge");
+	  await CheckCourses();
+	  
+	  await sleep(10000)
+      await SwitchDisplayMessageContinous(false)
+}
  
   var contractJson
   var tokenfactoryJson
@@ -148,6 +167,10 @@ async function GetTokenDetails(urltarget,contracttoken,balance) {
 
 //https://gpersoon.com/koios/lib/smartcontracts/build/contracts/KOIOSNFT.json
 async function init() {
+	LinkClickButton("joincourse",Joincourse);
+	console.log("Init in badges");
+	console.log(getElement("joincourse"))
+	
     let smartcontractjson= GetURLParam("smartcontractinfo"); 
     
     var smartcontractinfo="https://koiosonline.github.io/lib/smartcontracts/build/contracts/KOIOSNFT.json"

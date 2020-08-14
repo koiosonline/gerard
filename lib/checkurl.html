@@ -1,0 +1,50 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check urls</title>
+  <script>
+window.onerror = async function(message, source, lineno, colno, error) {   // especially for ios
+console.log("In onerror");
+    var str=`Error: ${message} ${source}, ${lineno}, ${colno}  `;
+    if (error && error.stack) str = str.concat('\n').concat(error.stack);    
+    log(str)
+    
+} 
+function log(str) {
+  document.getElementById("log").innerHTML += '<p>' + str + '</p>';
+}
+</script>
+</head>
+
+<body>
+	<h4>Check URL</h4> 
+	<p>
+		<label>Enter a url:
+			<input type="text" id="url" />
+			<button onclick="Check()">Check</button>
+		</label>
+	</p>
+	
+	 <div id="log" style="width: 100%; height: 200px;"></div>
+	 <iframe id="iframe" style="width: 100%; height: 200px;" onerror="Log('error')"></iframe>
+
+<script>
+async function Check() {
+	let url = document.getElementById('url').value;
+	url=url.replace("http://","")
+	url=url.replace("https://","")
+	url="https://"+url;
+	console.log=log
+	console.error=log
+	console.debug=log
+	console.info=log
+	console.log(`Checking ${url} (check developer log to see errors)`)	
+	var iframe=document.getElementById("iframe")
+	try {
+		iframe.src=url;
+	} catch (error) { log(`Error ${JSON.stringify(error)}`) }   
+}
+</script>
+</body>
+</html>

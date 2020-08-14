@@ -1,0 +1,123 @@
+body {
+    margin: 0;
+    background-color: #f6f9fc;
+}
+
+.header {
+    background-color: #ffffff;
+    width: calc(100% - 40px);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+}
+
+.header-title {
+    margin: 0;
+    padding: 10px;
+    color: #525f7f;
+    font-size: 20px;
+    flex: 1;
+}
+
+.header-info {
+    margin: 0;
+    padding: 10px;
+    color: #525f7f;
+    font-size: 14px;
+    float: right;
+    font-weight: 400;
+}
+
+.content {
+    padding: 10px 12px;
+}
+
+.list-header {
+    color: #525f7f;
+    font-size: 20px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.logs {
+    background-color: #ffffff;
+    border: solid 1px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 40px);
+    padding: 12px 20px;
+}
+
+#badgeList {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.badge-item {
+    width: 150px;
+    background-color: white;
+    margin: 4px 10px;
+    padding: 10px 12px;
+    text-align: center;
+    box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+    cursor: pointer;
+}
+
+.badge-selected {
+    border: solid 1px #17264a;
+}
+
+.badge-header {
+    color: #525f7f;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.badge-image {
+    height: 100px;
+    width: 100px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: inline-block;
+}
+
+.badge-balance {
+    color: #525f7f;
+    font-size: 12px;
+}
+
+.badge-description {
+    color: #525f7f;
+    font-size: 14px;
+}
+
+.create-badge-header {
+    color: #525f7f;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.refresh-btn {
+    cursor: pointer;
+    outline: none;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    background-color: rgba(19, 196, 163, 0.9);
+    box-shadow: 1px 8px 6px -7px #838383;
+    font-family: 'Open Sans', sans-serif;
+    color: #fff;
+    font-size: 14px;
+    line-height: 18px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    transition: 200ms;
+
+}
+
+.refresh-btn:hover {
+    background-color: #23826E;
+}

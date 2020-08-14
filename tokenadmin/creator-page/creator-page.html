@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../KoiosBadges.js"></script>
+    <script src="../web3browserify.js"></script>
+    <script src="creator-page.js"></script>
+<!--    <script src="https://unpkg.com/ipfs/dist/index.min.js"></script>-->
+    <link rel="stylesheet" type="text/css" href="creator-page.css">
+</head>
+<body>
+<div class="header">
+    <h1 class="header-title">Koios Badge Creator Tool</h1>
+    <h1 class="header-info" id="headerInfo">... Loading</h1>
+</div>
+<div class="content">
+    <h4 class="list-header">My Created Badges</h4>
+    <div id="badgeList"></div>
+    <form id="sendBadgeForm" class="send-badge-form">
+        <hr>
+        <textarea id="addressInput" class="input-field send-badge-input-field" type="text" placeholder="addressess" autofocus></textarea>
+        <button type="button" onclick="sendBadge()" class="send-badge-btn">SEND</button>
+    </form>
+    <div id="createBadge">
+        <h4 class="create-badge-header">Create new badge</h4>
+        <form id="createBadgeForm">
+            <input class="input-field" type="text" id="name" placeholder="Name">
+            <input class="input-field" type="text" id="description" placeholder="Description">
+            <input class="input-field" type="text" id="image" placeholder="image src">
+            <button class="create-badge-btn" onclick="createBadge()" type="button">create</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

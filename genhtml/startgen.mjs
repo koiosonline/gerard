@@ -187,18 +187,21 @@ function SwitchPage(newpage,callerthis,fbackbutton) {
             if (globalprevpage) {
                 var ev = new CustomEvent("hide");
                 globalprevpage.dispatchEvent(ev); 
+				
+				destdomid.width="100%"  // don't do this for overlays
+				destdomid.height="100%"
+				destdomid.style.height="100%"
+				destdomid.style.minHeight="100%" 
+				destdomid.style.position="fixed";
+				destdomid.style.top="0";
+				destdomid.style.left="0";
+				
             }
             globalprevpage=destdomid
             currentoverlay=undefined
 			
 						
-			destdomid.width="100%"
-			destdomid.height="100%"
-			destdomid.style.height="100%"
-			destdomid.style.minHeight="100%" 
-			destdomid.style.position="fixed";
-			destdomid.style.top="0";
-			destdomid.style.left="0";
+			
 			
 			
         }         

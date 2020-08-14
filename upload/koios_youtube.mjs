@@ -37,6 +37,8 @@ export async function LoadGapi() {
 
 
 // https://www.koios.online/test/upload?playlistId=PL_tbH3aD86KvzJPzAQp6TomZetpBpApZB
+// http://gpersoon.com/koios/gerard/upload/upload.html?playlistId=PL_tbH3aD86KvzJPzAQp6TomZetpBpApZB
+
 
 export async function GetYouTubePlaylists() {
     
